@@ -1,0 +1,10 @@
+{
+  "enabledMcpjsonServers": [
+    "shadcn"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)"
+    ]
+  }
+}
