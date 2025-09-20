@@ -1,54 +1,25 @@
 import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import { registerSchema } from "@/lib/validations/auth"
+import { ZodError } from "zod"
+import { createRequestLogger } from "@/lib/logger"
 
 export async function POST(request: NextRequest) {
+  const requestLogger = createRequestLogger(request)
+  const endTimer = requestLogger.time('user_registration')
+
   try {
-    const { name, email, password, role } = await request.json()
+    requestLogger.logRequest(request)
+    requestLogger.info("Starting user registration process")
 
-    // Validate input
-    if (!name || !email || !password ||
-        name.trim() === '' || email.trim() === '' || password.trim() === '') {
-      return NextResponse.json(
-        { message: "Missing required fields" },
-        { status: 400 }
-      )
-    }
+    const body = await request.json()
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { message: "Invalid email format" },
-        { status: 400 }
-      )
-    }
+    // Validate input using Zod schema
+    const validatedData = registerSchema.parse(body)
+    requestLogger.debug("Input validation successful")
 
-    // Validate field lengths
-    if (name.length > 100 || email.length > 255 || password.length > 255) {
-      return NextResponse.json(
-        { message: "Input fields are too long" },
-        { status: 400 }
-      )
-    }
-
-    // Enhanced password validation
-    if (password.length < 8) {
-      return NextResponse.json(
-        { message: "Password must be at least 8 characters" },
-        { status: 400 }
-      )
-    }
-
-    // Validate role if provided
-    const allowedRoles = ['STUDENT', 'INSTRUCTOR', 'ADMIN']
-    const userRole = role || 'STUDENT'
-    if (!allowedRoles.includes(userRole)) {
-      return NextResponse.json(
-        { message: "Invalid role specified" },
-        { status: 400 }
-      )
-    }
+    const { name, email, password, role } = validatedData
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -56,36 +27,102 @@ export async function POST(request: NextRequest) {
     })
 
     if (existingUser) {
+      requestLogger.warn("Registration attempt with existing email", {
+        email: email.replace(/(.{2}).*(@.*)/, '$1***$2') // Mask email for privacy
+      })
+
+      endTimer()
       return NextResponse.json(
-        { message: "User already exists with this email" },
+        {
+          success: false,
+          error: { message: "User already exists with this email" }
+        },
         { status: 400 }
       )
     }
 
+    requestLogger.debug("No existing user found, proceeding with registration")
+
     // Hash password
+    const hashStart = Date.now()
     const hashedPassword = await bcrypt.hash(password, 12)
+    const hashDuration = Date.now() - hashStart
+
+    requestLogger.debug("Password hashed successfully", {
+      hashDuration
+    })
 
     // Create user
+    const dbStart = Date.now()
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        role: userRole,
+        role,
       },
+    })
+    const dbDuration = Date.now() - dbStart
+
+    requestLogger.logDatabaseOperation('CREATE', 'user', dbDuration, {
+      userId: user.id,
+      role: user.role
     })
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user
 
+    requestLogger.logBusinessEvent('user_registered', {
+      userId: user.id,
+      email: email.replace(/(.{2}).*(@.*)/, '$1***$2'),
+      role: user.role
+    })
+
+    requestLogger.info("User registration completed successfully", {
+      userId: user.id
+    })
+
+    endTimer()
     return NextResponse.json(
-      { message: "User created successfully", user: userWithoutPassword },
+      {
+        success: true,
+        data: { user: userWithoutPassword },
+        meta: {
+          correlationId: request.headers.get("x-correlation-id") || undefined,
+          timestamp: new Date().toISOString()
+        }
+      },
       { status: 201 }
     )
   } catch (error) {
-    console.error("Registration error:", error)
+    if (error instanceof ZodError) {
+      requestLogger.warn("Registration validation failed", {
+        validationErrors: error.errors
+      })
+
+      endTimer()
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            message: "Validation failed",
+            details: error.errors
+          }
+        },
+        { status: 400 }
+      )
+    }
+
+    requestLogger.error("Registration process failed", error as Error, {
+      operation: 'user_registration'
+    })
+
+    endTimer()
     return NextResponse.json(
-      { message: "Internal server error" },
+      {
+        success: false,
+        error: { message: "Internal server error" }
+      },
       { status: 500 }
     )
   }

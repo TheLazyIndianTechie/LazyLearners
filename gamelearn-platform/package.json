@@ -26,6 +26,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
     "@types/bcryptjs": "^2.4.6",
+    "@types/redis": "^4.0.10",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -37,8 +38,10 @@
     "react-dom": "19.1.0",
     "react-player": "^3.3.3",
     "react-resizable-panels": "^3.0.6",
+    "redis": "^5.8.2",
     "tailwind-merge": "^3.3.1",
-    "tsx": "^4.20.5"
+    "tsx": "^4.20.5",
+    "zod": "^4.1.9"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

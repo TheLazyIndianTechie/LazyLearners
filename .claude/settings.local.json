@@ -9,9 +9,15 @@
       "Bash(npm run dev:*)",
       "Bash(npm install:*)",
       "Bash(npm run:*)",
-      "Bash(coderabbit review:*)"
+      "Bash(coderabbit review:*)",
+      "Bash(find . -name:*)",
+      "Bash(awk -f scripts/:*)",
+      "Bash(xargs kill -TERM:*)",
+      "Bash(lsof:*)",
+      "Bash(git rm:*)"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "shadcn"
   ]

@@ -2,43 +2,66 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { updateLessonProgress, getLessonProgress, getCourseProgress } from "@/lib/progress"
+import { progressUpdateSchema, uuidSchema } from "@/lib/validations/common"
+import { ZodError } from "zod"
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: "Unauthorized" }
+        },
+        { status: 401 }
+      )
     }
 
-    const { lessonId, progress, timeSpent } = await request.json()
+    const body = await request.json()
 
-    if (!lessonId || progress === undefined) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
-
-    // Validate progress is a number between 0 and 100
-    if (typeof progress !== 'number' || progress < 0 || progress > 100) {
-      return NextResponse.json({ error: "Progress must be a number between 0 and 100" }, { status: 400 })
-    }
-
-    // Validate timeSpent is a non-negative number
-    const validTimeSpent = timeSpent ?? 0
-    if (typeof validTimeSpent !== 'number' || validTimeSpent < 0) {
-      return NextResponse.json({ error: "Time spent must be a non-negative number" }, { status: 400 })
-    }
+    // Validate input using Zod schema
+    const validatedData = progressUpdateSchema.parse(body)
+    const { lessonId, progress, timeSpent } = validatedData
 
     const updatedProgress = await updateLessonProgress(
       session.user.id,
       lessonId,
       progress,
-      validTimeSpent
+      timeSpent
     )
 
-    return NextResponse.json(updatedProgress)
+    return NextResponse.json({
+      success: true,
+      data: updatedProgress,
+      meta: {
+        correlationId: request.headers.get("x-correlation-id") || undefined,
+        timestamp: new Date().toISOString()
+      }
+    })
   } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            message: "Validation failed",
+            details: error.errors
+          }
+        },
+        { status: 400 }
+      )
+    }
+
     console.error("Error updating progress:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: { message: "Internal server error" }
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -47,7 +70,13 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: "Unauthorized" }
+        },
+        { status: 401 }
+      )
     }
 
     const { searchParams } = new URL(request.url)
@@ -55,18 +84,61 @@ export async function GET(request: NextRequest) {
     const courseId = searchParams.get("courseId")
 
     if (lessonId) {
-      const progress = await getLessonProgress(session.user.id, lessonId)
-      return NextResponse.json(progress)
+      // Validate lessonId format
+      const validatedLessonId = uuidSchema.parse(lessonId)
+      const progress = await getLessonProgress(session.user.id, validatedLessonId)
+      return NextResponse.json({
+        success: true,
+        data: progress,
+        meta: {
+          correlationId: request.headers.get("x-correlation-id") || undefined,
+          timestamp: new Date().toISOString()
+        }
+      })
     }
 
     if (courseId) {
-      const progress = await getCourseProgress(session.user.id, courseId)
-      return NextResponse.json(progress)
+      // Validate courseId format
+      const validatedCourseId = uuidSchema.parse(courseId)
+      const progress = await getCourseProgress(session.user.id, validatedCourseId)
+      return NextResponse.json({
+        success: true,
+        data: progress,
+        meta: {
+          correlationId: request.headers.get("x-correlation-id") || undefined,
+          timestamp: new Date().toISOString()
+        }
+      })
     }
 
-    return NextResponse.json({ error: "Missing lessonId or courseId" }, { status: 400 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: { message: "Missing lessonId or courseId parameter" }
+      },
+      { status: 400 }
+    )
   } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            message: "Invalid ID format",
+            details: error.errors
+          }
+        },
+        { status: 400 }
+      )
+    }
+
     console.error("Error fetching progress:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: { message: "Internal server error" }
+      },
+      { status: 500 }
+    )
   }
 }
