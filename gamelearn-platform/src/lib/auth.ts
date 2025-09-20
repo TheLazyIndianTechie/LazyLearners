@@ -6,6 +6,24 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
+// Validate required environment variables
+function validateEnvironment() {
+  const requiredVars = [
+    'GITHUB_CLIENT_ID',
+    'GITHUB_CLIENT_SECRET',
+    'GOOGLE_CLIENT_ID',
+    'GOOGLE_CLIENT_SECRET'
+  ]
+
+  const missing = requiredVars.filter(key => !process.env[key])
+
+  if (missing.length > 0) {
+    console.warn(`Missing OAuth environment variables: ${missing.join(', ')}. OAuth providers will not work.`)
+  }
+}
+
+validateEnvironment()
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
@@ -16,14 +34,20 @@ export const authOptions: NextAuthOptions = {
     signUp: "/auth/signup",
   },
   providers: [
-    GithubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
+    ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
+      ? [GithubProvider({
+          clientId: process.env.GITHUB_CLIENT_ID,
+          clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        })]
+      : []
+    ),
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [GoogleProvider({
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        })]
+      : []
+    ),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -41,7 +65,7 @@ export const authOptions: NextAuthOptions = {
           }
         })
 
-        if (!user) {
+        if (!user || !user.password) {
           return null
         }
 
@@ -49,7 +73,7 @@ export const authOptions: NextAuthOptions = {
         // In real app, you'd store hashed passwords
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.password || ""
+          user.password
         )
 
         if (!isPasswordValid) {

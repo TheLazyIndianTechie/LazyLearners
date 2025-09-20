@@ -17,11 +17,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
+    // Validate progress is a number between 0 and 100
+    if (typeof progress !== 'number' || progress < 0 || progress > 100) {
+      return NextResponse.json({ error: "Progress must be a number between 0 and 100" }, { status: 400 })
+    }
+
+    // Validate timeSpent is a non-negative number
+    const validTimeSpent = timeSpent ?? 0
+    if (typeof validTimeSpent !== 'number' || validTimeSpent < 0) {
+      return NextResponse.json({ error: "Time spent must be a non-negative number" }, { status: 400 })
+    }
+
     const updatedProgress = await updateLessonProgress(
       session.user.id,
       lessonId,
       progress,
-      timeSpent || 0
+      validTimeSpent
     )
 
     return NextResponse.json(updatedProgress)
