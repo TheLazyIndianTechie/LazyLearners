@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**LazyLearners** is a Game Development Learning Management System (LMS) called "GameLearn Platform" - a specialized educational platform combining Udemy's marketplace model with advanced technical capabilities for game development education. The platform emphasizes light, clean, elegant design while providing robust infrastructure for large asset management, real-time collaboration, and integrated development environments.
+**LazyGameDevs** presents the "GameLearn Platform" - a Game Development Learning Management System (LMS) designed for efficient, practical game development education. As a specialized educational platform, it combines Udemy's marketplace model with advanced technical capabilities tailored specifically for game development education.
+
+The LazyGameDevs brand emphasizes working smarter, not harder - providing clean, efficient tools and learning experiences that respect developers' time while delivering serious educational outcomes. The platform focuses on practical skills, real-world applications, and streamlined learning paths that get developers building games faster.
 
 ## Key Features & Architecture
 

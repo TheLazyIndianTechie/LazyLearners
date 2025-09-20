@@ -1,6 +1,14 @@
 {
-  "name": "gamelearn-platform",
-  "version": "0.1.0",
+  "name": "lazygamedevs-gamelearn-platform",
+  "version": "1.0.0",
+  "description": "GameLearn Platform by LazyGameDevs - A comprehensive game development learning management system",
+  "author": "LazyGameDevs <hello@lazygamedevs.com>",
+  "homepage": "https://lazygamedevs.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LazyGameDevs/gamelearn-platform"
+  },
+  "keywords": ["game-development", "education", "lms", "unity", "unreal", "godot", "programming", "learning"],
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",

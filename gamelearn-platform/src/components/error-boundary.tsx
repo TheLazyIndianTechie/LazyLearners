@@ -418,10 +418,10 @@ function ErrorFallback({
           <p className="text-xs text-gray-500">
             If this problem persists, please{' '}
             <a
-              href="mailto:support@gamelearn.com"
+              href="mailto:support@lazygamedevs.com"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
-              contact support
+              contact LazyGameDevs Support
             </a>{' '}
             with the error ID above.
           </p>

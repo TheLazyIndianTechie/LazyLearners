@@ -82,11 +82,15 @@ const securitySchema = z.object({
 const appSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
   PORT: z.coerce.number().min(1000).max(65535).default(3000),
-  APP_NAME: z.string().default('GameLearn Platform'),
+  APP_NAME: z.string().default('GameLearn Platform by LazyGameDevs'),
   APP_VERSION: z.string().default('1.0.0'),
   APP_URL: z.string().url('Invalid APP_URL'),
   API_BASE_URL: z.string().url('Invalid API_BASE_URL').optional(),
   CDN_URL: z.string().url('Invalid CDN_URL').optional(),
+  COMPANY_NAME: z.string().default('LazyGameDevs'),
+  COMPANY_EMAIL: z.string().email().default('hello@lazygamedevs.com'),
+  SUPPORT_EMAIL: z.string().email().default('support@lazygamedevs.com'),
+  COMPANY_URL: z.string().url().default('https://lazygamedevs.com'),
 })
 
 const featureFlagsSchema = z.object({

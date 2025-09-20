@@ -93,10 +93,10 @@ export default function NotFound() {
           <p className="text-xs text-gray-500">
             Still can't find what you're looking for?{' '}
             <a
-              href="mailto:support@gamelearn.com"
+              href="mailto:support@lazygamedevs.com"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
-              Contact support
+              Contact LazyGameDevs Support
             </a>
           </p>
         </div>

@@ -129,16 +129,16 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               </p>
               <div className="space-y-1">
                 <a
-                  href="mailto:emergency@gamelearn.com"
+                  href="mailto:emergency@lazygamedevs.com"
                   className="block text-sm font-medium text-red-600 hover:text-red-500"
                 >
-                  emergency@gamelearn.com
+                  emergency@lazygamedevs.com
                 </a>
                 <a
-                  href="tel:+1-555-GAMELEARN"
+                  href="tel:+1-555-LAZYGAME"
                   className="block text-sm font-medium text-red-600 hover:text-red-500"
                 >
-                  +1 (555) GAME-LEARN
+                  +1 (555) LAZY-GAME
                 </a>
               </div>
             </div>
@@ -148,7 +148,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               <p className="text-xs text-red-500">
                 Check our{' '}
                 <a
-                  href="https://status.gamelearn.com"
+                  href="https://status.lazygamedevs.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium text-red-600 hover:text-red-500 underline"

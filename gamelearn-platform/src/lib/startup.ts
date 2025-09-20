@@ -15,11 +15,12 @@ export async function initializeApplication(): Promise<void> {
   }
 
   const startTime = Date.now()
-  logger.info('Starting GameLearn Platform initialization...', {
+  logger.info('Starting LazyGameDevs GameLearn Platform initialization...', {
     environment: env.NODE_ENV,
     version: env.APP_VERSION,
     nodeVersion: process.version,
-    platform: process.platform
+    platform: process.platform,
+    company: env.COMPANY_NAME
   })
 
   try {
@@ -60,10 +61,11 @@ export async function initializeApplication(): Promise<void> {
     }
 
     const initTime = Date.now() - startTime
-    logger.info('GameLearn Platform initialization completed', {
+    logger.info('LazyGameDevs GameLearn Platform initialization completed', {
       initializationTime: initTime,
       environment: env.NODE_ENV,
-      status: 'ready'
+      status: 'ready',
+      company: env.COMPANY_NAME
     })
 
     initialized = true

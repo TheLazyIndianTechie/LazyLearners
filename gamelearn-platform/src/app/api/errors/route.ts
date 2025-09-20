@@ -263,7 +263,7 @@ async function reportToWebhook(errorReport: any, logger: any): Promise<void> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': `GameLearn-Platform/${env.APP_VERSION}`
+        'User-Agent': `LazyGameDevs-GameLearn-Platform/${env.APP_VERSION}`
       },
       body: JSON.stringify({
         type: 'client_error',

@@ -98,10 +98,10 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
           <p className="text-xs text-gray-500">
             If this problem persists, please{' '}
             <a
-              href="mailto:support@gamelearn.com"
+              href="mailto:support@lazygamedevs.com"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
-              contact our support team
+              contact LazyGameDevs Support
             </a>
             {error.digest && (
               <>
