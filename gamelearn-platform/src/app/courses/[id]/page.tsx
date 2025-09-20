@@ -7,6 +7,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { SiteLayout } from "@/components/layout/site-layout"
 import { VideoPlayer } from "@/components/video/video-player"
+import { QuizCard } from "@/components/quiz/quiz-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -27,6 +28,7 @@ import {
   Award,
   Target
 } from "lucide-react"
+import { Quiz } from "@/lib/types/quiz"
 
 // Mock course data - replace with real API call
 const mockCourse = {
@@ -146,6 +148,101 @@ const mockCourse = {
   createdAt: new Date(),
   updatedAt: new Date()
 }
+
+// Mock quiz data - replace with real API call
+const mockQuizzes: Quiz[] = [
+  {
+    id: "quiz-1",
+    title: "Unity Fundamentals Quiz",
+    description: "Test your knowledge of Unity basics and interface",
+    lessonId: "lesson-3",
+    passingScore: 70,
+    timeLimit: 15,
+    attempts: 3,
+    isPublished: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    questions: [
+      {
+        id: "q1",
+        type: "MULTIPLE_CHOICE",
+        question: "What is the main camera used for in Unity?",
+        options: [
+          "Lighting the scene",
+          "Rendering what the player sees",
+          "Managing audio",
+          "Controlling physics"
+        ],
+        correctAnswer: 1,
+        explanation: "The main camera renders what the player sees in the game world.",
+        points: 10,
+        order: 1
+      },
+      {
+        id: "q2",
+        type: "TRUE_FALSE",
+        question: "GameObjects are the fundamental objects in Unity scenes.",
+        correctAnswer: true,
+        explanation: "GameObjects are indeed the fundamental building blocks of Unity scenes.",
+        points: 10,
+        order: 2
+      },
+      {
+        id: "q3",
+        type: "MULTIPLE_CHOICE",
+        question: "Which window shows the hierarchical structure of objects in a scene?",
+        options: [
+          "Inspector",
+          "Project",
+          "Hierarchy",
+          "Scene"
+        ],
+        correctAnswer: 2,
+        explanation: "The Hierarchy window shows the hierarchical structure of GameObjects in the current scene.",
+        points: 10,
+        order: 3
+      }
+    ]
+  },
+  {
+    id: "quiz-2",
+    title: "C# Programming Basics Quiz",
+    description: "Assess your understanding of C# fundamentals for Unity",
+    lessonId: "lesson-5",
+    passingScore: 75,
+    timeLimit: 20,
+    attempts: 2,
+    isPublished: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    questions: [
+      {
+        id: "q4",
+        type: "MULTIPLE_CHOICE",
+        question: "Which keyword is used to declare a variable in C#?",
+        options: [
+          "var",
+          "let",
+          "int",
+          "All of the above"
+        ],
+        correctAnswer: 3,
+        explanation: "In C#, you can use 'var' for type inference, or specific type keywords like 'int', 'string', etc.",
+        points: 15,
+        order: 1
+      },
+      {
+        id: "q5",
+        type: "SHORT_ANSWER",
+        question: "What does 'public' mean when used before a variable or method in C#?",
+        correctAnswer: "accessible from other classes",
+        explanation: "The 'public' access modifier makes members accessible from other classes and assemblies.",
+        points: 15,
+        order: 2
+      }
+    ]
+  }
+]
 
 interface CoursePageProps {
   params: { id: string }
@@ -276,6 +373,9 @@ export default function CoursePage({ params }: CoursePageProps) {
                   <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500">
                     Reviews
                   </TabsTrigger>
+                  <TabsTrigger value="assessments" className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500">
+                    Assessments
+                  </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="curriculum" className="p-6">
@@ -396,6 +496,49 @@ export default function CoursePage({ params }: CoursePageProps) {
                   <div className="text-center py-8 text-gray-500">
                     <Star className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     <p>Reviews section coming soon!</p>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="assessments" className="p-6">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Target className="w-5 h-5 text-blue-600" />
+                      <h3 className="text-lg font-semibold">Course Assessments</h3>
+                    </div>
+
+                    {mockQuizzes.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <Award className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p>No assessments available for this course yet.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-4">
+                        {mockQuizzes.map((quiz) => (
+                          <QuizCard
+                            key={quiz.id}
+                            quiz={quiz}
+                            canTake={isEnrolled}
+                            reason={!isEnrolled ? "Please enroll to take assessments" : undefined}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {!isEnrolled && (
+                      <div className="text-center p-6 bg-blue-50 rounded-lg border border-blue-200">
+                        <Award className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                        <p className="text-blue-800 font-medium mb-2">Unlock Course Assessments</p>
+                        <p className="text-blue-600 text-sm mb-4">
+                          Enroll in this course to access quizzes, assignments, and earn certificates.
+                        </p>
+                        <Button
+                          onClick={handleEnroll}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Enroll Now
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>
