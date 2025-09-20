@@ -6,7 +6,9 @@
       "Bash(npx create-next-app:*)",
       "Bash(npx:*)",
       "Bash(tree:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)"
     ]
   },
   "enabledMcpjsonServers": [

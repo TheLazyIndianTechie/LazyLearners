@@ -1,0 +1,173 @@
+"use client"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { CheckCircle, Play, Lock, ArrowLeft, ArrowRight } from "lucide-react"
+import { useProgress } from "@/hooks/use-progress"
+
+interface Lesson {
+  id: string
+  title: string
+  description: string
+  type: "VIDEO" | "QUIZ" | "ASSIGNMENT"
+  order: number
+  duration: number
+  videoUrl?: string
+  isCompleted?: boolean
+  isFree?: boolean
+}
+
+interface LessonNavigationProps {
+  lessons: Lesson[]
+  currentLessonId: string
+  onLessonChange: (lessonId: string) => void
+  isEnrolled: boolean
+}
+
+export function LessonNavigation({
+  lessons,
+  currentLessonId,
+  onLessonChange,
+  isEnrolled
+}: LessonNavigationProps) {
+  const { markCompleted } = useProgress()
+
+  const currentIndex = lessons.findIndex(lesson => lesson.id === currentLessonId)
+  const hasPrevious = currentIndex > 0
+  const hasNext = currentIndex < lessons.length - 1
+
+  const handlePrevious = () => {
+    if (hasPrevious) {
+      onLessonChange(lessons[currentIndex - 1].id)
+    }
+  }
+
+  const handleNext = () => {
+    if (hasNext) {
+      onLessonChange(lessons[currentIndex + 1].id)
+    }
+  }
+
+  const handleMarkCompleted = async () => {
+    if (currentLessonId) {
+      try {
+        await markCompleted(currentLessonId)
+      } catch (error) {
+        console.error("Failed to mark lesson as completed:", error)
+      }
+    }
+  }
+
+  const canAccessLesson = (lesson: Lesson) => {
+    return lesson.isFree || isEnrolled
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Navigation Buttons */}
+      <div className="flex justify-between items-center">
+        <Button
+          variant="outline"
+          onClick={handlePrevious}
+          disabled={!hasPrevious}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Previous Lesson
+        </Button>
+
+        <Button
+          onClick={handleMarkCompleted}
+          className="bg-green-600 hover:bg-green-700 text-white"
+        >
+          <CheckCircle className="w-4 h-4 mr-2" />
+          Mark as Complete
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={handleNext}
+          disabled={!hasNext}
+          className="flex items-center gap-2"
+        >
+          Next Lesson
+          <ArrowRight className="w-4 h-4" />
+        </Button>
+      </div>
+
+      {/* Lesson List */}
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Course Lessons</h3>
+          <div className="space-y-3">
+            {lessons.map((lesson, index) => {
+              const isActive = lesson.id === currentLessonId
+              const canAccess = canAccessLesson(lesson)
+
+              return (
+                <div
+                  key={lesson.id}
+                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                    isActive
+                      ? "border-blue-200 bg-blue-50"
+                      : canAccess
+                      ? "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                      : "border-gray-100 bg-gray-50 cursor-not-allowed opacity-60"
+                  }`}
+                  onClick={() => canAccess && onLessonChange(lesson.id)}
+                >
+                  {/* Lesson Number */}
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium">
+                    {lesson.isCompleted ? (
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    ) : canAccess ? (
+                      isActive ? (
+                        <Play className="w-4 h-4 text-blue-600" />
+                      ) : (
+                        index + 1
+                      )
+                    ) : (
+                      <Lock className="w-4 h-4 text-gray-400" />
+                    )}
+                  </div>
+
+                  {/* Lesson Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className={`font-medium truncate ${
+                        isActive ? "text-blue-900" : canAccess ? "text-gray-900" : "text-gray-500"
+                      }`}>
+                        {lesson.title}
+                      </h4>
+                      {lesson.isFree && (
+                        <Badge variant="secondary" className="text-xs">
+                          Free
+                        </Badge>
+                      )}
+                      {lesson.type === "QUIZ" && (
+                        <Badge variant="outline" className="text-xs">
+                          Quiz
+                        </Badge>
+                      )}
+                    </div>
+                    <p className={`text-sm truncate ${
+                      isActive ? "text-blue-700" : canAccess ? "text-gray-600" : "text-gray-400"
+                    }`}>
+                      {lesson.description}
+                    </p>
+                  </div>
+
+                  {/* Duration */}
+                  <div className="flex-shrink-0 text-sm text-gray-500">
+                    {Math.floor(lesson.duration / 60)}:{(lesson.duration % 60).toString().padStart(2, '0')}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

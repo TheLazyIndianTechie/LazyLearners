@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { SiteLayout } from "@/components/layout/site-layout"
-import { CourseCard } from "@/components/course/course-card"
+import { EnhancedCourseCard } from "@/components/course/enhanced-course-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -233,7 +233,7 @@ export default function CoursesPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+              <EnhancedCourseCard key={course.id} course={course} />
             ))}
           </div>
 

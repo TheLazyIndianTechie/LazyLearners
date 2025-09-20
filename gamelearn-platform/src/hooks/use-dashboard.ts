@@ -1,0 +1,102 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+
+export interface DashboardStats {
+  totalCourses: number
+  completedCourses: number
+  averageProgress: number
+  totalTimeSpent: number
+}
+
+export interface EnrolledCourse {
+  id: string
+  title: string
+  description: string
+  thumbnail: string
+  instructor: {
+    name: string
+    avatar: string
+  }
+  category: string
+  engine: string
+  difficulty: string
+  duration: number
+  price: number
+  rating: number
+  reviewCount: number
+  tags: string[]
+  progress: number
+  completedLessons: number
+  totalLessons: number
+}
+
+export interface DashboardData {
+  enrolledCourses: EnrolledCourse[]
+  stats: DashboardStats
+}
+
+export function useDashboard() {
+  const { data: session, status } = useSession()
+  const [data, setData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchDashboardData() {
+      if (!session?.user?.id) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        setLoading(true)
+        const response = await fetch("/api/dashboard")
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch dashboard data")
+        }
+
+        const dashboardData = await response.json()
+        setData(dashboardData)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch dashboard data")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (status !== "loading") {
+      fetchDashboardData()
+    }
+  }, [session?.user?.id, status])
+
+  const refetch = async () => {
+    if (!session?.user?.id) return
+
+    try {
+      setLoading(true)
+      const response = await fetch("/api/dashboard")
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch dashboard data")
+      }
+
+      const dashboardData = await response.json()
+      setData(dashboardData)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch dashboard data")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return {
+    data,
+    loading,
+    error,
+    refetch
+  }
+}
