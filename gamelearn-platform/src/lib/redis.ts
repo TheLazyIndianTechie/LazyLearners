@@ -1,8 +1,14 @@
 import { createClient, RedisClientType } from 'redis'
+import { redisConfig as envRedisConfig, isTest } from '@/lib/config/env'
 
-// Redis client configuration
+// Redis client configuration using environment config
 const redisConfig = {
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
+  url: envRedisConfig.url || (envRedisConfig.host ?
+    `redis://${envRedisConfig.host}:${envRedisConfig.port || 6379}` :
+    'redis://localhost:6379'
+  ),
+  password: envRedisConfig.password,
+  database: envRedisConfig.db,
   socket: {
     reconnectStrategy: (retries: number) => {
       if (retries > 20) {
@@ -11,10 +17,9 @@ const redisConfig = {
       }
       return Math.min(retries * 50, 2000) // Exponential backoff up to 2 seconds
     },
-    connectTimeout: 10000, // 10 seconds
-    commandTimeout: 5000,  // 5 seconds
+    connectTimeout: envRedisConfig.connectTimeout,
+    commandTimeout: envRedisConfig.commandTimeout,
   },
-  database: 0,
 }
 
 class RedisService {
@@ -24,7 +29,7 @@ class RedisService {
 
   constructor() {
     // Don't connect immediately in test environment
-    if (process.env.NODE_ENV !== 'test') {
+    if (!isTest) {
       this.connect()
     }
   }

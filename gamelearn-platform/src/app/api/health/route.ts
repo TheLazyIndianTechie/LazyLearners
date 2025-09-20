@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { redis } from "@/lib/redis"
+import { getEnvironmentHealth } from "@/lib/config/validate"
+import { env } from "@/lib/config/env"
 
 interface HealthCheckResult {
-  status: "healthy" | "unhealthy"
+  status: "healthy" | "degraded" | "unhealthy"
   timestamp: string
   version: string
   uptime: number
@@ -14,7 +16,7 @@ interface HealthCheckResult {
       error?: string
     }
     redis: {
-      status: "pass" | "fail"
+      status: "pass" | "fail" | "warn"
       responseTime?: number
       error?: string
       stats?: {
@@ -32,12 +34,21 @@ interface HealthCheckResult {
         percentage: number
       }
     }
+    environment: {
+      status: "pass" | "warn" | "fail"
+      message?: string
+    }
     disk?: {
       status: "pass" | "warn" | "fail"
       available?: number
     }
   }
   environment: string
+  configuration: {
+    nodeEnv: string
+    features: Record<string, boolean>
+    services: Record<string, boolean>
+  }
   correlationId: string
 }
 
@@ -127,7 +138,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const timestamp = new Date().toISOString()
 
   try {
-    // Run health checks
+    // Get comprehensive environment health
+    const envHealth = await getEnvironmentHealth()
+
+    // Run additional checks
     const [databaseCheck, redisCheck, memoryCheck] = await Promise.all([
       checkDatabase(),
       checkRedis(),
@@ -135,25 +149,56 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     ])
 
     // Determine overall health status
-    const isHealthy = databaseCheck.status === "pass" &&
-                     redisCheck.status === "pass" &&
-                     memoryCheck.status !== "fail"
+    const hasFailures = databaseCheck.status === "fail" ||
+                       redisCheck.status === "fail" ||
+                       memoryCheck.status === "fail" ||
+                       envHealth.checks.environment?.status === "fail"
+
+    const hasWarnings = redisCheck.status === "warn" ||
+                       memoryCheck.status === "warn" ||
+                       envHealth.checks.environment?.status === "warn"
+
+    let overallStatus: "healthy" | "degraded" | "unhealthy"
+    if (hasFailures) {
+      overallStatus = "unhealthy"
+    } else if (hasWarnings) {
+      overallStatus = "degraded"
+    } else {
+      overallStatus = "healthy"
+    }
 
     const healthResult: HealthCheckResult = {
-      status: isHealthy ? "healthy" : "unhealthy",
+      status: overallStatus,
       timestamp,
-      version: process.env.npm_package_version || "0.1.0",
+      version: env.APP_VERSION,
       uptime: process.uptime(),
       checks: {
         database: databaseCheck,
         redis: redisCheck,
-        memory: memoryCheck
+        memory: memoryCheck,
+        environment: {
+          status: envHealth.checks.environment?.status || "pass",
+          message: envHealth.checks.environment?.message
+        }
       },
-      environment: process.env.NODE_ENV || "development",
+      environment: env.NODE_ENV,
+      configuration: {
+        nodeEnv: env.NODE_ENV,
+        features: {
+          caching: env.ENABLE_CACHING,
+          payments: env.ENABLE_PAYMENTS,
+          email: env.ENABLE_EMAIL,
+          analytics: env.ENABLE_ANALYTICS,
+          collaboration: env.ENABLE_COLLABORATION,
+          websockets: env.ENABLE_WEBSOCKETS,
+        },
+        services: envHealth.summary.services || {}
+      },
       correlationId
     }
 
-    const statusCode = isHealthy ? 200 : 503
+    const statusCode = overallStatus === "healthy" ? 200 :
+                      overallStatus === "degraded" ? 200 : 503
 
     return NextResponse.json(healthResult, {
       status: statusCode,
