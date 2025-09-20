@@ -5,7 +5,6 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { Course } from "@/lib/types"
 
@@ -136,7 +135,6 @@ export function EnhancedCourseCard({ course, showProgress = false, progress = 0 
           <div className="pt-2">
             <Button
               className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2.5 rounded-lg transition-all duration-200"
-              onClick={(e) => e.stopPropagation()}
             >
               {showProgress ? "Continue Learning" : "View Course"}
             </Button>

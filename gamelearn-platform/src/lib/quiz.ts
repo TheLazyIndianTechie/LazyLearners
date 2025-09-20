@@ -1,5 +1,3 @@
-"use client"
-
 import { prisma } from "@/lib/prisma"
 import { Quiz, QuizAttempt, QuizAnswer, QuizResult } from "@/lib/types/quiz"
 

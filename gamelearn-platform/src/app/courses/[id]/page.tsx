@@ -295,7 +295,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                 url={currentLesson.videoUrl}
                 title={currentLesson.title}
                 lessonId={currentLesson.id}
-                courseId={courseId}
+                courseId={params.id}
                 onProgress={(progress) => {
                   console.log("Video progress:", progress)
                 }}
