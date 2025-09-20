@@ -3,6 +3,20 @@ import { z } from "zod"
 // Common validation schemas
 export const uuidSchema = z.string().uuid("Invalid ID format")
 
+// Error reporting schema
+export const errorReportingSchema = z.object({
+  errorId: z.string().uuid("Invalid error ID format"),
+  message: z.string().min(1).max(1000, "Error message too long"),
+  stack: z.string().max(5000, "Stack trace too long").optional(),
+  componentStack: z.string().max(5000, "Component stack too long").optional(),
+  severity: z.enum(["low", "medium", "high", "critical"]),
+  category: z.enum(["network", "validation", "auth", "permission", "server", "client", "unknown"]),
+  url: z.string().url("Invalid URL").optional(),
+  userAgent: z.string().max(500, "User agent too long").optional(),
+  timestamp: z.string().datetime("Invalid timestamp format"),
+  context: z.record(z.any()).optional()
+})
+
 export const paginationSchema = z.object({
   page: z
     .number()
