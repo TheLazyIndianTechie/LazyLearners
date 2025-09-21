@@ -2,13 +2,13 @@ import { z } from 'zod'
 
 // Environment schemas for different categories
 const databaseSchema = z.object({
-  DATABASE_URL: z.string().url('Invalid database URL'),
+  DATABASE_URL: z.string().optional(),
   DATABASE_POOL_SIZE: z.coerce.number().min(1).max(100).default(10),
   DATABASE_TIMEOUT: z.coerce.number().min(1000).max(30000).default(10000),
 })
 
 const redisSchema = z.object({
-  REDIS_URL: z.string().url('Invalid Redis URL').optional(),
+  REDIS_URL: z.string().optional(),
   REDIS_HOST: z.string().optional(),
   REDIS_PORT: z.coerce.number().min(1).max(65535).optional(),
   REDIS_PASSWORD: z.string().optional(),
