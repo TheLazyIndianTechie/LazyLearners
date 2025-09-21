@@ -77,3 +77,4 @@ Missing OAuth environment variables: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GOO
  ○ Compiling middleware ...
  ✓ Compiled middleware in 512ms
  ✓ Ready in 2.2s
+ ✓ Compiled middleware in 2ms

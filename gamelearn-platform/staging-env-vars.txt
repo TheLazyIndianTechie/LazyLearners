@@ -1,0 +1,10 @@
+APP_URL=https://gamelearn-platform-aka9ffa4b-thelazyindiantechies-projects.vercel.app
+NEXTAUTH_URL=https://gamelearn-platform-aka9ffa4b-thelazyindiantechies-projects.vercel.app
+NEXTAUTH_SECRET=staging-nextauth-secret-key-for-gamelearn-platform-at-least-32-chars
+JWT_SECRET=staging-jwt-secret-key-for-gamelearn-platform-minimum-32-characters
+ENCRYPTION_KEY=staging-encryption-key-for-gamelearn-platform-data-protection-32-chars
+DATABASE_URL=file:./staging.db
+REDIS_URL=redis://localhost:6379
+REDIS_HOST=localhost
+REDIS_PORT=6379
+ENABLE_CACHING=false
