@@ -9,16 +9,17 @@
 
 ### 1. PostgreSQL Database Setup
 
-**Recommended Providers:**
-- **Vercel Postgres** (Recommended): Native integration, auto-configured
-- **Neon** (Alternative): Serverless PostgreSQL with generous free tier
-- **Supabase** (Alternative): PostgreSQL with additional features
-- **Railway** (Alternative): Simple deployment platform
+**Recommended Providers (from Vercel Marketplace):**
+- **Neon** (Recommended): Serverless PostgreSQL with generous free tier
+- **Supabase**: PostgreSQL with additional features
+- **PlanetScale**: MySQL-compatible serverless database
+- **Prisma**: Instant Serverless Postgres
 
 **Setup Steps:**
-1. Go to [Vercel Dashboard > Integrations](https://vercel.com/thelazyindiantechies-projects/gamelearn-platform-lms/settings/integrations)
-2. Add "Vercel Postgres" integration
-3. This will automatically configure `DATABASE_URL` environment variable
+1. Go to [Vercel Marketplace Storage](https://vercel.com/marketplace/category/storage)
+2. Choose a provider (Neon recommended for PostgreSQL)
+3. Click "Add Integration" and follow the setup wizard
+4. This will automatically configure `DATABASE_URL` environment variable
 
 **Manual Configuration (if not using Vercel Postgres):**
 ```bash
@@ -28,15 +29,15 @@ DATABASE_URL="postgresql://username:password@host:port/database?sslmode=require"
 
 ### 2. Redis Setup
 
-**Recommended Providers:**
-- **Vercel KV** (Recommended): Native Redis integration
-- **Upstash Redis** (Alternative): Serverless Redis with REST API
-- **Redis Cloud** (Alternative): Managed Redis service
+**Recommended Providers (from Vercel Marketplace):**
+- **Upstash** (Recommended): Serverless Redis with REST API
+- **Redis** (Alternative): Serverless Redis service
 
 **Setup Steps:**
-1. Go to [Vercel Dashboard > Integrations](https://vercel.com/thelazyindiantechies-projects/gamelearn-platform-lms/settings/integrations)
-2. Add "Vercel KV" integration
-3. This will automatically configure Redis environment variables
+1. Go to [Vercel Marketplace Storage](https://vercel.com/marketplace/category/storage)
+2. Search for "Redis" or choose "Upstash"
+3. Click "Add Integration" and follow the setup wizard
+4. This will automatically configure Redis environment variables
 
 **Manual Configuration (if not using Vercel KV):**
 ```bash
