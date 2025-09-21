@@ -88,13 +88,13 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
     response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
   }
 
-  // CSP (Content Security Policy) - Enhanced security
+  // CSP (Content Security Policy) - Relaxed for Next.js compatibility
   const nonce = crypto.randomUUID().replace(/-/g, '')
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://js.stripe.com https://checkout.stripe.com`,
-    `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
-    "font-src 'self' https://fonts.gstatic.com",
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-${nonce}' https://js.stripe.com https://checkout.stripe.com`,
+    `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`,
+    "font-src 'self' https://fonts.gstatic.com https://r2cdn.perplexity.ai",
     "img-src 'self' data: https://*.lazygamedevs.com https://cdn.lazygamedevs.com blob:",
     "media-src 'self' https://*.lazygamedevs.com https://cdn.lazygamedevs.com",
     "connect-src 'self' https://api.stripe.com https://*.lazygamedevs.com wss: ws:",
@@ -102,8 +102,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
     "worker-src 'self' blob:",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'none'",
-    "upgrade-insecure-requests"
+    "frame-ancestors 'none'"
   ].join("; ")
 
   // Add nonce to response for script/style usage

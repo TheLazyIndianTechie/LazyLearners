@@ -89,3 +89,4 @@ Prisma datamodel not available, skipping database monitoring
 Missing OAuth environment variables: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET. OAuth providers will not work.
 2025-09-21T19:07:16.234Z INFO: Incoming request: POST http://localhost:3001/api/video/heartbeat [environment=development, correlationId=1ee8894d-d9b7-41c3-91e4-8af7988f1b60, requestId=e5d29454-3282-4a76-92d9-ce8ef793b43a, method=POST, url=http://localhost:3001/api/video/heartbeat, userAgent=curl/8.7.1, ip=::1]
  POST /api/video/heartbeat 401 in 5251ms
+ ✓ Compiled middleware in 9ms
