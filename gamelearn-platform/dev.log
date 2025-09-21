@@ -66,3 +66,4 @@ Missing OAuth environment variables: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GOO
  POST /api/video/heartbeat 500 in 6720ms
    Reload env: .env.local
  ✓ Compiled middleware in 8ms
+ ✓ Compiled middleware in 1ms
