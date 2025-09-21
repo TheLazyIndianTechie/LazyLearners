@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { withAuth } from "next-auth/middleware"
 import { getToken } from "next-auth/jwt"
-import { redis } from "@/lib/redis"
 
 // Configuration
 const RATE_LIMITS = {
@@ -31,27 +30,7 @@ async function checkRateLimit(key: string, limit: { requests: number; window: nu
   remaining: number
   resetTime: number
 }> {
-  try {
-    // Use Redis for rate limiting in production
-    if (await redis.isHealthy()) {
-      const count = await redis.incrementKey(key, limit.window)
-      const { ttl } = await redis.getRateLimit(key)
-
-      const remaining = Math.max(0, limit.requests - count)
-      const resetTime = Date.now() + (ttl * 1000)
-
-      return {
-        allowed: count <= limit.requests,
-        count,
-        remaining,
-        resetTime
-      }
-    }
-  } catch (error) {
-    console.warn("Redis rate limiting failed, falling back to memory:", error)
-  }
-
-  // Fallback to in-memory rate limiting if Redis is unavailable
+  // Use in-memory rate limiting for Edge Runtime compatibility
   return checkRateLimitMemory(key, limit)
 }
 
@@ -232,9 +211,14 @@ async function middleware(req: NextRequest) {
       ...(process.env.ALLOWED_ORIGINS?.split(",") || [])
     ].filter(Boolean)
 
-    // In development, allow localhost variations
+    // In development, allow localhost variations and different ports
     if (process.env.NODE_ENV === 'development') {
-      allowedOrigins.push('http://localhost:3000', 'http://127.0.0.1:3000')
+      allowedOrigins.push(
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3001'
+      )
     }
 
     if (origin) {
@@ -276,8 +260,9 @@ async function middleware(req: NextRequest) {
           }
         )
       }
-    } else if (pathname.startsWith("/api/")) {
-      // For API endpoints, require either origin or referer
+    } else if (pathname.startsWith("/api/") && process.env.NODE_ENV !== 'development') {
+      // For API endpoints in production, require either origin or referer
+      // In development, allow requests without these headers for testing
       console.warn(`CSRF: Blocked API request missing origin/referer headers`)
       return new NextResponse(
         JSON.stringify({

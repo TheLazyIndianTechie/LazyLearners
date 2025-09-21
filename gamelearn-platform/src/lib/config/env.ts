@@ -203,14 +203,17 @@ function parseEnvironment(): z.infer<typeof envSchema> {
 
     return parsed
   } catch (error) {
-    if (error instanceof z.ZodError) {
+    if (error instanceof z.ZodError && error.errors) {
       const errorMessages = error.errors.map(err =>
         `${err.path.join('.')}: ${err.message}`
       ).join('\n')
 
       throw new Error(`Environment configuration validation failed:\n${errorMessages}`)
     }
-    throw error
+
+    // Handle other types of errors
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    throw new Error(`Environment configuration error: ${errorMessage}`)
   }
 }
 

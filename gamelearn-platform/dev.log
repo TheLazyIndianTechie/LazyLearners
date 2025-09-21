@@ -1,0 +1,67 @@
+
+> lazygamedevs-gamelearn-platform@1.0.0 dev
+> next dev --turbopack
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/package-lock.json
+
+ ⚠ Port 3000 is in use by process 99726, using available port 3001 instead.
+   ▲ Next.js 15.5.3 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.5.148:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 631ms
+ ✓ Ready in 2.7s
+{"timestamp":"2025-09-21T18:38:15.603Z","correlationId":"3a09320f-689b-43f0-893b-3731d452fb30","method":"POST","url":"/api/video/heartbeat","userAgent":"curl/8.7.1","ip":"::1","duration":3,"rateLimitType":"api","type":"api_request"}
+ ○ Compiling /api/video/heartbeat ...
+ ✓ Compiled /api/video/heartbeat in 3.5s
+Redis: Using in-memory storage for development/testing
+Redis: Initialized in-memory mode for Edge Runtime compatibility
+Prisma datamodel not available, skipping database monitoring
+Prisma datamodel not available, skipping database monitoring
+Missing OAuth environment variables: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET. OAuth providers will not work.
+ ⨯ Error: Environment configuration error: [
+  {
+    "code": "invalid_format",
+    "format": "url",
+    "path": [
+      "REDIS_URL"
+    ],
+    "message": "Invalid Redis URL"
+  },
+  {
+    "origin": "number",
+    "code": "too_small",
+    "minimum": 1,
+    "inclusive": true,
+    "path": [
+      "REDIS_PORT"
+    ],
+    "message": "Too small: expected number to be >=1"
+  }
+]
+    at parseEnvironment (src/lib/config/env.ts:216:11)
+    at __TURBOPACK__module__evaluation__ (src/lib/config/env.ts:221:20)
+    at __TURBOPACK__module__evaluation__ (src/lib/video/streaming.ts:3:1)
+    at __TURBOPACK__module__evaluation__ (src/app/api/video/heartbeat/route.ts:5:1)
+    at Object.<anonymous> (.next/server/app/api/video/heartbeat/route.js:10:3)
+  214 |     // Handle other types of errors
+  215 |     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+> 216 |     throw new Error(`Environment configuration error: ${errorMessage}`)
+      |           ^
+  217 |   }
+  218 | }
+  219 | {
+  page: '/api/video/heartbeat'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 2.2s
+ POST /api/video/heartbeat 500 in 6720ms
+   Reload env: .env.local

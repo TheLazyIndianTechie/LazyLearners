@@ -103,7 +103,14 @@ export class DatabaseMonitor {
     // Wrap Prisma operations with performance tracking
     const originalMethods = ['findFirst', 'findMany', 'create', 'update', 'delete', 'upsert', 'aggregate', 'count']
 
-    for (const modelName of Object.keys((prisma as any)._dmmf.datamodel.models)) {
+    // Check if Prisma client has datamodel information
+    const dmmf = (prisma as any)._dmmf
+    if (!dmmf || !dmmf.datamodel || !dmmf.datamodel.models) {
+      console.warn('Prisma datamodel not available, skipping database monitoring')
+      return prisma
+    }
+
+    for (const modelName of Object.keys(dmmf.datamodel.models)) {
       const model = (prisma as any)[modelName.toLowerCase()]
 
       if (model) {

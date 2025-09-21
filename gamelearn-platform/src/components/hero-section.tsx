@@ -41,6 +41,9 @@ export function HeroSection() {
             <Button size="lg" variant="outline" className="px-8 py-6 text-lg" asChild>
               <Link href="/demo">Watch Demo</Link>
             </Button>
+            <Button size="lg" variant="secondary" className="px-8 py-6 text-lg" asChild>
+              <Link href="/test/video">🎬 Test Video Streaming</Link>
+            </Button>
           </div>
 
           {/* Stats */}
