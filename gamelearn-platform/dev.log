@@ -67,3 +67,13 @@ Missing OAuth environment variables: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GOO
    Reload env: .env.local
  ✓ Compiled middleware in 8ms
  ✓ Compiled middleware in 1ms
+ ⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+   ▲ Next.js 15.5.3 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.5.148:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 512ms
+ ✓ Ready in 2.2s
