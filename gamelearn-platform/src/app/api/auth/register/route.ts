@@ -28,14 +28,16 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       requestLogger.warn("Registration attempt with existing email", {
-        email: email.replace(/(.{2}).*(@.*)/, '$1***$2') // Mask email for privacy
+        email: email.replace(/(.{2}).*(@.*)/, '$1***$2'), // Mask email for privacy
+        attemptType: 'duplicate_registration'
       })
 
+      // Use generic error message to prevent user enumeration
       endTimer()
       return NextResponse.json(
         {
           success: false,
-          error: { message: "User already exists with this email" }
+          error: { message: "Registration failed. Please check your information and try again." }
         },
         { status: 400 }
       )

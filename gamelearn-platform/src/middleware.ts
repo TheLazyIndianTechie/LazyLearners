@@ -12,8 +12,17 @@ const RATE_LIMITS = {
 }
 
 function getRateLimitKey(req: NextRequest, type: keyof typeof RATE_LIMITS): string {
-  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "127.0.0.1"
-  return `ratelimit:${type}:${ip}`
+  // Extract the first IP from x-forwarded-for (client IP behind proxy)
+  const forwarded = req.headers.get("x-forwarded-for")
+  const realIp = req.headers.get("x-real-ip")
+  const clientIp = forwarded ? forwarded.split(',')[0].trim() : realIp || "127.0.0.1"
+
+  // Create additional fingerprint using User-Agent for enhanced protection
+  const userAgent = req.headers.get("user-agent") || ""
+  const userAgentHash = userAgent ? btoa(userAgent).slice(0, 8) : "unknown"
+
+  // Combine IP and User-Agent hash for more robust rate limiting
+  return `ratelimit:${type}:${clientIp}:${userAgentHash}`
 }
 
 async function checkRateLimit(key: string, limit: { requests: number; window: number }): Promise<{
@@ -100,18 +109,26 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
     response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
   }
 
-  // CSP (Content Security Policy)
+  // CSP (Content Security Policy) - Enhanced security
+  const nonce = crypto.randomUUID().replace(/-/g, '')
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    `script-src 'self' 'nonce-${nonce}' https://js.stripe.com https://checkout.stripe.com`,
+    `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
     "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' data: https: blob:",
-    "media-src 'self' https:",
-    "connect-src 'self' https://api.stripe.com wss: ws:",
-    "frame-src 'self' https://js.stripe.com",
+    "img-src 'self' data: https://*.lazygamedevs.com https://cdn.lazygamedevs.com blob:",
+    "media-src 'self' https://*.lazygamedevs.com https://cdn.lazygamedevs.com",
+    "connect-src 'self' https://api.stripe.com https://*.lazygamedevs.com wss: ws:",
+    "frame-src 'self' https://js.stripe.com https://checkout.stripe.com",
     "worker-src 'self' blob:",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests"
   ].join("; ")
+
+  // Add nonce to response for script/style usage
+  response.headers.set("X-Content-Nonce", nonce)
 
   response.headers.set("Content-Security-Policy", csp)
 
@@ -180,12 +197,34 @@ async function middleware(req: NextRequest) {
   response.headers.set("X-RateLimit-Remaining", rateLimitResult.remaining.toString())
   response.headers.set("X-RateLimit-Reset", rateLimitResult.resetTime.toString())
 
-  // CSRF Protection for state-changing methods
+  // Enhanced CSRF Protection for state-changing methods
   if (["POST", "PUT", "DELETE", "PATCH"].includes(req.method)) {
     const origin = req.headers.get("origin")
     const host = req.headers.get("host")
+    const referer = req.headers.get("referer")
+    const contentType = req.headers.get("content-type")
 
-    // Allow same-origin requests and configured origins
+    // Validate Content-Type for API endpoints to prevent CSRF via forms
+    if (pathname.startsWith("/api/") && contentType &&
+        !contentType.includes("application/json") &&
+        !contentType.includes("multipart/form-data")) {
+      console.warn(`CSRF attempt blocked: invalid content-type ${contentType}`)
+      return new NextResponse(
+        JSON.stringify({
+          error: "Invalid content type",
+          correlationId
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+            ...Object.fromEntries(response.headers),
+          },
+        }
+      )
+    }
+
+    // Enhanced origin validation
     const allowedOrigins = [
       `https://${host}`,
       `http://${host}`, // For development
@@ -193,11 +232,56 @@ async function middleware(req: NextRequest) {
       ...(process.env.ALLOWED_ORIGINS?.split(",") || [])
     ].filter(Boolean)
 
-    if (origin && !allowedOrigins.includes(origin)) {
-      console.warn(`CSRF: Blocked request from origin ${origin} to ${pathname}`)
+    // In development, allow localhost variations
+    if (process.env.NODE_ENV === 'development') {
+      allowedOrigins.push('http://localhost:3000', 'http://127.0.0.1:3000')
+    }
+
+    if (origin) {
+      if (!allowedOrigins.includes(origin)) {
+        console.warn(`CSRF: Blocked request from origin ${origin} to ${pathname}`)
+        return new NextResponse(
+          JSON.stringify({
+            error: "Forbidden: Invalid origin",
+            correlationId
+          }),
+          {
+            status: 403,
+            headers: {
+              "Content-Type": "application/json",
+              ...Object.fromEntries(response.headers),
+            },
+          }
+        )
+      }
+    } else if (referer) {
+      // Fallback to referer validation if origin is missing
+      const isValidReferer = allowedOrigins.some(allowed =>
+        referer.startsWith(allowed)
+      )
+
+      if (!isValidReferer) {
+        console.warn(`CSRF: Blocked request with invalid referer ${referer}`)
+        return new NextResponse(
+          JSON.stringify({
+            error: "Forbidden: Invalid referer",
+            correlationId
+          }),
+          {
+            status: 403,
+            headers: {
+              "Content-Type": "application/json",
+              ...Object.fromEntries(response.headers),
+            },
+          }
+        )
+      }
+    } else if (pathname.startsWith("/api/")) {
+      // For API endpoints, require either origin or referer
+      console.warn(`CSRF: Blocked API request missing origin/referer headers`)
       return new NextResponse(
         JSON.stringify({
-          error: "Forbidden: Invalid origin",
+          error: "Forbidden: Missing security headers",
           correlationId
         }),
         {

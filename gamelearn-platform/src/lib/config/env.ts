@@ -127,6 +127,7 @@ function validateRequiredForProduction(env: any): void {
     const requiredVars = [
       'DATABASE_URL',
       'NEXTAUTH_SECRET',
+      'JWT_SECRET',
       'NEXTAUTH_URL',
       'APP_URL'
     ]

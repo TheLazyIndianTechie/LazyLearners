@@ -15,7 +15,11 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "security:test": "node -e \"require('./src/lib/security/testing.js').runSecurityTest('webapp_security_basic')\"",
+    "security:test:comprehensive": "node -e \"require('./src/lib/security/testing.js').runSecurityTest('comprehensive')\"",
+    "security:monitor": "curl -s http://localhost:3000/api/monitoring/security | jq .",
+    "security:dashboard": "curl -s http://localhost:3000/api/monitoring/database | jq ."
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
