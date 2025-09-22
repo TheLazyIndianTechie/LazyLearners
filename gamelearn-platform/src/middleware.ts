@@ -89,11 +89,10 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   }
 
   // CSP (Content Security Policy) - Relaxed for Next.js compatibility
-  const nonce = crypto.randomUUID().replace(/-/g, '')
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-${nonce}' https://js.stripe.com https://checkout.stripe.com`,
-    `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://fonts.googleapis.com`,
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://checkout.stripe.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com https://r2cdn.perplexity.ai",
     "img-src 'self' data: https://*.lazygamedevs.com https://cdn.lazygamedevs.com blob:",
     "media-src 'self' https://*.lazygamedevs.com https://cdn.lazygamedevs.com",
@@ -104,9 +103,6 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
     "form-action 'self'",
     "frame-ancestors 'none'"
   ].join("; ")
-
-  // Add nonce to response for script/style usage
-  response.headers.set("X-Content-Nonce", nonce)
 
   response.headers.set("Content-Security-Policy", csp)
 
