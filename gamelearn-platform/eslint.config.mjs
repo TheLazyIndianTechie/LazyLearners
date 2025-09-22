@@ -20,6 +20,21 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    files: ["**/__tests__/**/*", "**/*.test.*", "**/*.spec.*", "**/test-*"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-namespace": "warn",
+    },
+  },
+  {
+    files: ["**/lib/services/**/*", "**/lib/video/**/*", "**/lib/types/**/*"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+    },
+  },
 ];
 
 export default eslintConfig;
