@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { SiteLayout } from "@/components/layout/site-layout"
-import { VideoPlayer } from "@/components/video/video-player"
+import { SimpleVideoPlayer } from "@/components/video/simple-video-player"
 import { QuizCard } from "@/components/quiz/quiz-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -291,7 +291,7 @@ export default function CoursePage({ params }: CoursePageProps) {
         <div className="bg-black">
           <div className="container py-6">
             <div className="aspect-video rounded-lg overflow-hidden">
-              <VideoPlayer
+              <SimpleVideoPlayer
                 url={currentLesson.videoUrl}
                 title={currentLesson.title}
                 lessonId={currentLesson.id}

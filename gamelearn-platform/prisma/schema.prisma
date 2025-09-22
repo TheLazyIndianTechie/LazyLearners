@@ -64,6 +64,8 @@ model User {
   projectSubmission ProjectSubmission[]
   certifications    Certification[]
   reviews           Review[]           @relation("UserReviews")
+  payments          Payment[]
+  licenseKeys       LicenseKey[]
 
   @@map("users")
 }
@@ -105,6 +107,8 @@ model Course {
   enrollments   Enrollment[]
   reviews       Review[]
   progress      Progress[]
+  payments      Payment[]
+  licenseKeys   LicenseKey[]
 }
 
 model Module {
@@ -350,4 +354,61 @@ enum EnrollmentStatus {
   COMPLETED
   PAUSED
   CANCELLED
+}
+
+model Payment {
+  id               String        @id @default(cuid())
+  dodoPaymentId    String        @unique // Payment ID from Dodo Payments
+  status           PaymentStatus @default(PENDING)
+  amount           Int // Amount in smallest currency unit (cents)
+  currency         String        @default("USD")
+  paymentMethod    String?
+  discountCode     String?
+  metadata         String? // JSON metadata from Dodo
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  completedAt      DateTime?
+
+  user       User        @relation(fields: [userId], references: [id])
+  userId     String
+  course     Course      @relation(fields: [courseId], references: [id])
+  courseId   String
+  licenseKey LicenseKey?
+}
+
+model LicenseKey {
+  id                String           @id @default(cuid())
+  key               String           @unique
+  dodoLicenseKeyId  String?          @unique // License key ID from Dodo
+  status            LicenseKeyStatus @default(ACTIVE)
+  activationsLimit  Int?
+  activationsCount  Int              @default(0)
+  expiresAt         DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String
+  course   Course @relation(fields: [courseId], references: [id])
+  courseId String
+  payment  Payment? @relation(fields: [paymentId], references: [id])
+  paymentId String?
+
+  @@unique([userId, courseId])
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  PROCESSING
+  REQUIRES_PAYMENT_METHOD
+}
+
+enum LicenseKeyStatus {
+  ACTIVE
+  EXPIRED
+  DISABLED
+  REVOKED
 }

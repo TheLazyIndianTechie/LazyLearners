@@ -91,3 +91,77 @@ Missing OAuth environment variables: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GOO
  POST /api/video/heartbeat 401 in 5251ms
  ✓ Compiled middleware in 9ms
  ✓ Compiled in 10ms
+ ✓ Compiled middleware in 25ms
+ ✓ Compiled in 190ms
+ ⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+   ▲ Next.js 15.5.3 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.5.148:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 586ms
+ ✓ Ready in 2.3s
+ ⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+   ▲ Next.js 15.5.3 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.5.148:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Compiled middleware in 440ms
+ ✓ Ready in 1886ms
+ ✓ Compiled middleware in 54ms
+ ✓ Compiled in 50ms
+ ⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+   ▲ Next.js 15.5.3 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.5.148:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 1596ms
+ ✓ Ready in 3.9s
+ ⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+   ▲ Next.js 15.5.3 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.5.148:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 2.2s
+ ✓ Ready in 5.4s
+ ⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+   ▲ Next.js 15.5.3 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.5.148:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 514ms
+ ✓ Ready in 2.9s
+ ⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+   ▲ Next.js 15.5.3 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.5.148:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 756ms
+ ✓ Ready in 3.4s
+ ⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+   ▲ Next.js 15.5.3 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.5.148:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 701ms
+ ✓ Ready in 3.7s
+[?25h

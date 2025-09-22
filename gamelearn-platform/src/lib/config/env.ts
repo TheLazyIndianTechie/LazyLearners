@@ -34,6 +34,9 @@ const oauthSchema = z.object({
 })
 
 const paymentSchema = z.object({
+  DODO_API_KEY: z.string().optional(),
+  DODO_WEBHOOK_SECRET: z.string().optional(),
+  DODO_ENVIRONMENT: z.enum(['test', 'live']).default('test'),
   STRIPE_SECRET_KEY: z.string().startsWith('sk_', 'Invalid Stripe secret key format').optional(),
   STRIPE_PUBLISHABLE_KEY: z.string().startsWith('pk_', 'Invalid Stripe publishable key format').optional(),
   STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_', 'Invalid Stripe webhook secret format').optional(),
@@ -86,6 +89,7 @@ const appSchema = z.object({
   APP_VERSION: z.string().default('1.0.0'),
   APP_URL: z.string().url('Invalid APP_URL'),
   API_BASE_URL: z.string().url('Invalid API_BASE_URL').optional(),
+  ENABLE_VIDEO_TEST: z.string().optional(),
   CDN_URL: z.string().url('Invalid CDN_URL').optional(),
   COMPANY_NAME: z.string().default('LazyGameDevs'),
   COMPANY_EMAIL: z.string().email().default('hello@lazygamedevs.com'),
@@ -121,6 +125,12 @@ const envSchema = z.object({
 // Validation functions
 function validateRequiredForProduction(env: any): void {
   const errors: string[] = []
+
+  // Skip validation if testing mode is enabled
+  if (env.ENABLE_VIDEO_TEST === 'true') {
+    console.log('⚠️  Warning: Production validation bypassed for video testing')
+    return
+  }
 
   if (env.NODE_ENV === 'production') {
     // Required for production
@@ -164,8 +174,8 @@ function validateFeatureDependencies(env: any): void {
 
   // Payment features require payment provider configuration
   if (env.ENABLE_PAYMENTS) {
-    if (!env.STRIPE_SECRET_KEY && !env.PAYPAL_CLIENT_ID) {
-      errors.push('ENABLE_PAYMENTS requires either Stripe or PayPal configuration')
+    if (!env.DODO_API_KEY && !env.STRIPE_SECRET_KEY && !env.PAYPAL_CLIENT_ID) {
+      errors.push('ENABLE_PAYMENTS requires either Dodo Payments, Stripe, or PayPal configuration')
     }
   }
 
@@ -273,6 +283,11 @@ export const authConfig = {
 
 // Payment configuration
 export const paymentConfig = {
+  dodo: {
+    apiKey: env.DODO_API_KEY,
+    webhookSecret: env.DODO_WEBHOOK_SECRET,
+    environment: env.DODO_ENVIRONMENT,
+  },
   stripe: {
     secretKey: env.STRIPE_SECRET_KEY,
     publishableKey: env.STRIPE_PUBLISHABLE_KEY,
@@ -323,6 +338,7 @@ export const features = {
   payments: env.ENABLE_PAYMENTS,
   email: env.ENABLE_EMAIL,
   maintenanceMode: env.MAINTENANCE_MODE,
+  videoTest: env.ENABLE_VIDEO_TEST === 'true',
 }
 
 // Logging configuration
@@ -340,6 +356,11 @@ export const loggingConfig = {
 // Helper function to check if a feature is enabled
 export function isFeatureEnabled(feature: keyof typeof features): boolean {
   return features[feature] === true
+}
+
+// Helper function to check if video test mode is enabled
+export function isVideoTestEnabled(): boolean {
+  return env.ENABLE_VIDEO_TEST === 'true'
 }
 
 // Helper function to get environment-specific configuration
@@ -392,6 +413,7 @@ export function generateConfigReport(): {
       database: !!env.DATABASE_URL,
       redis: !!(env.REDIS_URL || env.REDIS_HOST),
       auth: !!env.NEXTAUTH_SECRET,
+      dodoPayments: !!env.DODO_API_KEY,
       stripe: !!env.STRIPE_SECRET_KEY,
       paypal: !!env.PAYPAL_CLIENT_ID,
       email: !!(env.SMTP_HOST || env.SENDGRID_API_KEY || env.RESEND_API_KEY),

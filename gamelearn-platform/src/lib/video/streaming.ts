@@ -527,6 +527,91 @@ export class VideoStreamingService {
 
   private async getStreamingManifest(videoId: string): Promise<StreamingManifest | null> {
     try {
+      // For testing purposes, return mock manifests for sample videos
+      const mockManifests: Record<string, StreamingManifest> = {
+        'sample-unity-tutorial': {
+          videoId: 'sample-unity-tutorial',
+          baseUrl: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
+          format: 'mp4',
+          duration: 900, // 15 minutes
+          qualities: ['360p', '720p', '1080p'],
+          thumbnails: [
+            'https://via.placeholder.com/160x90/4285f4/ffffff?text=Unity+Basics',
+            'https://via.placeholder.com/160x90/4285f4/ffffff?text=05:00',
+            'https://via.placeholder.com/160x90/4285f4/ffffff?text=10:00'
+          ],
+          metadata: {
+            width: 1280,
+            height: 720,
+            frameRate: 30,
+            bitrate: 1500000
+          },
+          drm: {
+            enabled: false
+          },
+          analytics: {
+            trackingId: `analytics_${videoId}`,
+            events: ['play', 'pause', 'seek', 'quality_change', 'buffer']
+          }
+        },
+        'sample-csharp-tutorial': {
+          videoId: 'sample-csharp-tutorial',
+          baseUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          format: 'mp4',
+          duration: 1500, // 25 minutes
+          qualities: ['480p', '720p', '1080p'],
+          thumbnails: [
+            'https://via.placeholder.com/160x90/34a853/ffffff?text=C%23+Basics',
+            'https://via.placeholder.com/160x90/34a853/ffffff?text=08:00',
+            'https://via.placeholder.com/160x90/34a853/ffffff?text=16:00'
+          ],
+          metadata: {
+            width: 1920,
+            height: 1080,
+            frameRate: 24,
+            bitrate: 2500000
+          },
+          drm: {
+            enabled: false
+          },
+          analytics: {
+            trackingId: `analytics_${videoId}`,
+            events: ['play', 'pause', 'seek', 'quality_change', 'buffer']
+          }
+        },
+        'sample-physics-tutorial': {
+          videoId: 'sample-physics-tutorial',
+          baseUrl: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4',
+          format: 'mp4',
+          duration: 1080, // 18 minutes
+          qualities: ['360p', '720p'],
+          thumbnails: [
+            'https://via.placeholder.com/160x90/ea4335/ffffff?text=Physics+Demo',
+            'https://via.placeholder.com/160x90/ea4335/ffffff?text=06:00',
+            'https://via.placeholder.com/160x90/ea4335/ffffff?text=12:00'
+          ],
+          metadata: {
+            width: 1280,
+            height: 720,
+            frameRate: 30,
+            bitrate: 2000000
+          },
+          drm: {
+            enabled: false
+          },
+          analytics: {
+            trackingId: `analytics_${videoId}`,
+            events: ['play', 'pause', 'seek', 'quality_change', 'buffer']
+          }
+        }
+      }
+
+      // Return mock manifest if it's a test video
+      if (mockManifests[videoId]) {
+        return mockManifests[videoId]
+      }
+
+      // Otherwise try to get from Redis (production behavior)
       return await redis.get(`video_manifest:${videoId}`)
     } catch (error) {
       this.logger.warn('Failed to get streaming manifest', error as Error)
