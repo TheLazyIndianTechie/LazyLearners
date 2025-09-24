@@ -30,9 +30,10 @@ export function SiteLayout({ children }: SiteLayoutProps) {
               <h4 className="font-semibold">Platform</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><a href="/courses" className="hover:text-foreground">Courses</a></li>
+                <li><a href="/features" className="hover:text-foreground">Features</a></li>
+                <li><a href="/pricing" className="hover:text-foreground">Pricing</a></li>
                 <li><a href="/dashboard" className="hover:text-foreground">Dashboard</a></li>
                 <li><a href="/portfolio" className="hover:text-foreground">Portfolio</a></li>
-                <li><a href="/community" className="hover:text-foreground">Community</a></li>
               </ul>
             </div>
 
@@ -47,10 +48,11 @@ export function SiteLayout({ children }: SiteLayoutProps) {
             </div>
 
             <div className="space-y-4">
-              <h4 className="font-semibold">Support</h4>
+              <h4 className="font-semibold">Company</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/help" className="hover:text-foreground">Help Center</a></li>
+                <li><a href="/about" className="hover:text-foreground">About Us</a></li>
                 <li><a href="/contact" className="hover:text-foreground">Contact</a></li>
+                <li><a href="/help" className="hover:text-foreground">Help Center</a></li>
                 <li><a href="/privacy" className="hover:text-foreground">Privacy Policy</a></li>
                 <li><a href="/terms" className="hover:text-foreground">Terms of Service</a></li>
               </ul>

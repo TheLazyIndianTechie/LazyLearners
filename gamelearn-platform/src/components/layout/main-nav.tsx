@@ -11,6 +11,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 
 const navigation = [
   { name: "Courses", href: "/courses" },
+  { name: "Features", href: "/features" },
+  { name: "Pricing", href: "/pricing" },
+  { name: "About", href: "/about" },
   { name: "Dashboard", href: "/dashboard", authRequired: true },
   { name: "Portfolio", href: "/portfolio", authRequired: true },
   { name: "Community", href: "/community" },
