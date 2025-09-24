@@ -22,48 +22,43 @@ import {
   DollarSign
 } from "lucide-react"
 
-// Mock instructor course data - replace with real API call
-const mockInstructorCourses = [
-  {
-    id: "1",
-    title: "Complete Unity Game Development Course",
-    description: "Learn Unity from scratch and build 10 complete games.",
-    thumbnail: "/api/placeholder/300/200",
-    status: "published",
-    price: 89.99,
-    enrollmentCount: 1542,
-    rating: 4.8,
-    reviewCount: 245,
-    createdAt: new Date("2024-01-15"),
-    updatedAt: new Date("2024-12-01"),
-    modules: 8,
-    lessons: 42,
-    duration: 2400, // minutes
-    revenue: 137268.58
-  },
-  {
-    id: "2",
-    title: "Advanced C# for Game Development",
-    description: "Master advanced C# concepts for Unity development.",
-    thumbnail: "/api/placeholder/300/200",
-    status: "draft",
-    price: 129.99,
-    enrollmentCount: 0,
-    rating: 0,
-    reviewCount: 0,
-    createdAt: new Date("2024-12-01"),
-    updatedAt: new Date("2024-12-01"),
-    modules: 6,
-    lessons: 28,
-    duration: 1800,
-    revenue: 0
-  }
-]
+interface Course {
+  id: string
+  title: string
+  description: string
+  thumbnail: string | null
+  price: number
+  published: boolean
+  enrollmentCount: number
+  rating: number
+  reviewCount: number
+  createdAt: Date
+  updatedAt: Date
+  modules: Array<any>
+  revenue?: number
+}
 
 export default function InstructorDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [courses, setCourses] = useState(mockInstructorCourses)
+  const [courses, setCourses] = useState<Course[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchInstructorCourses = async () => {
+    try {
+      if (!session?.user?.id) return
+
+      const response = await fetch(`/api/courses?instructorId=${session.user.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setCourses(data.courses || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch instructor courses:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (status === "loading") return
@@ -71,10 +66,12 @@ export default function InstructorDashboard() {
       router.push("/auth/signin")
       return
     }
-    if (session.user?.role !== "instructor" && session.user?.role !== "admin") {
+    if (session.user?.role !== "INSTRUCTOR" && session.user?.role !== "ADMIN") {
       router.push("/")
       return
     }
+
+    fetchInstructorCourses()
   }, [session, status, router])
 
   if (status === "loading") {
@@ -92,13 +89,28 @@ export default function InstructorDashboard() {
     )
   }
 
-  if (!session || (session.user?.role !== "instructor" && session.user?.role !== "admin")) {
+  if (!session || (session.user?.role !== "INSTRUCTOR" && session.user?.role !== "ADMIN")) {
     return null
   }
 
-  const totalRevenue = courses.reduce((sum, course) => sum + course.revenue, 0)
+  if (loading) {
+    return (
+      <SiteLayout>
+        <div className="container py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-muted-foreground">Loading courses...</p>
+            </div>
+          </div>
+        </div>
+      </SiteLayout>
+    )
+  }
+
+  const totalRevenue = courses.reduce((sum, course) => sum + (course.revenue || course.price * course.enrollmentCount), 0)
   const totalEnrollments = courses.reduce((sum, course) => sum + course.enrollmentCount, 0)
-  const publishedCourses = courses.filter(course => course.status === "published").length
+  const publishedCourses = courses.filter(course => course.published).length
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {

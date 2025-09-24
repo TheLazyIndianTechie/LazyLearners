@@ -89,8 +89,16 @@ export function CollaborationSession({
   })
 
   const handleToggleVideo = () => {
-    setIsVideoOn(!isVideoOn)
-    // TODO: Implement actual video toggle
+    const newVideoState = !isVideoOn
+    setIsVideoOn(newVideoState)
+
+    // Toggle video stream
+    collaboration.toggleVideo(newVideoState)
+
+    // Update session state for other participants
+    collaboration.updateSessionState({
+      videoEnabled: newVideoState
+    })
   }
 
   const handleToggleMute = () => {
@@ -115,8 +123,14 @@ export function CollaborationSession({
     }
   }
 
-  const handleInviteUser = (email: string) => {
-    // TODO: Implement user invitation
+  const handleInviteUser = async (email: string) => {
+    try {
+      await collaboration.inviteUser(email, sessionId)
+      // Show success notification
+      console.log(`Invitation sent to ${email}`)
+    } catch (error) {
+      console.error('Failed to invite user:', error)
+    }
     console.log("Inviting user:", email)
   }
 
@@ -124,24 +138,86 @@ export function CollaborationSession({
     collaboration.grantPermission(participantId, permissions)
   }
 
-  const handleRemoveParticipant = (participantId: string) => {
-    // TODO: Implement participant removal
-    console.log("Removing participant:", participantId)
+  const handleRemoveParticipant = async (participantId: string) => {
+    try {
+      await collaboration.removeParticipant(sessionId, participantId)
+      console.log(`🚫 Removed participant ${participantId}`)
+    } catch (error) {
+      console.error('Failed to remove participant:', error)
+    }
   }
 
-  const handlePromoteToCoHost = (participantId: string) => {
-    // TODO: Implement role promotion
-    console.log("Promoting to co-host:", participantId)
+  const handlePromoteToCoHost = async (participantId: string) => {
+    try {
+      const newPermissions: ParticipantPermissions = {
+        canEdit: true,
+        canModerate: true,
+        canInvite: true,
+        canRemove: true,
+        canManageFiles: true,
+        canUseVoice: true,
+        canUseVideo: true,
+        canShareScreen: true
+      }
+
+      await collaboration.grantPermission(participantId, newPermissions)
+      console.log(`👑 Promoted participant ${participantId} to co-host`)
+    } catch (error) {
+      console.error('Failed to promote participant:', error)
+    }
   }
 
-  const handleMuteParticipant = (participantId: string) => {
-    // TODO: Implement participant muting
-    console.log("Muting participant:", participantId)
+  const handleMuteParticipant = async (participantId: string) => {
+    try {
+      // Send mute command to the participant
+      await collaboration.muteParticipant(participantId)
+
+      // Update participant permissions to disable voice
+      const participant = collaboration.participants.find(p => p.id === participantId)
+      if (participant) {
+        const updatedPermissions = {
+          ...JSON.parse(participant.permissions as string),
+          canUseVoice: false
+        }
+        await collaboration.grantPermission(participantId, updatedPermissions)
+      }
+
+      console.log(`🔇 Muted participant ${participantId}`)
+    } catch (error) {
+      console.error('Failed to mute participant:', error)
+    }
   }
 
-  const handleReaction = (messageId: string, emoji: string) => {
-    // TODO: Implement message reactions
-    console.log("Adding reaction:", emoji, "to message:", messageId)
+  const handleReaction = async (messageId: string, emoji: string) => {
+    try {
+      // Add reaction to the message
+      await collaboration.addMessageReaction(messageId, emoji)
+
+      // Update local message state with the new reaction
+      const message = collaboration.messages.find(m => m.id === messageId)
+      if (message) {
+        if (!message.reactions) {
+          message.reactions = []
+        }
+
+        // Check if user already reacted with this emoji
+        const existingReaction = message.reactions.find(
+          r => r.emoji === emoji && r.userId === currentUser?.userId
+        )
+
+        if (!existingReaction) {
+          message.reactions.push({
+            emoji,
+            userId: currentUser?.userId || '',
+            timestamp: new Date()
+          })
+        }
+      }
+
+      console.log(`😀 Added reaction ${emoji} to message ${messageId}`)
+    } catch (error) {
+      console.error('Failed to add reaction:', error)
+    }
   }
 
   const currentUser = collaboration.currentUser

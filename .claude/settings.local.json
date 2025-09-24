@@ -18,11 +18,66 @@
       "WebSearch",
       "Bash(curl:*)",
       "Bash(npm test)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "mcp__firecrawl-mcp__firecrawl_search",
+      "mcp__firecrawl-mcp__firecrawl_scrape",
+      "Bash(git push:*)",
+      "Bash(vercel:*)",
+      "mcp__dodopayments_api__list_supported_countries_misc",
+      "mcp__dodopayments_api__create_products",
+      "mcp__dodopayments_api__list_payments",
+      "mcp__dodopayments_api__list_subscriptions",
+      "mcp__dodopayments_api__list_products",
+      "mcp__dodopayments_api__list_customers",
+      "mcp__dodopayments_api__create_webhooks",
+      "mcp__dodopayments_api__retrieve_secret_webhooks",
+      "Bash(sqlite3:*)",
+      "Bash(git remote add:*)",
+      "Bash(node:*)",
+      "mcp__linear__list_teams",
+      "mcp__linear__list_projects",
+      "mcp__linear__list_issue_labels",
+      "mcp__linear__create_issue_label",
+      "mcp__linear__create_project",
+      "mcp__linear__create_issue",
+      "mcp__linear__update_issue",
+      "mcp__linear__list_issues",
+      "mcp__linear__create_comment",
+      "mcp__linear__get_project",
+      "mcp__linear__update_project",
+      "mcp__vercel__list_teams",
+      "mcp__vercel__list_projects",
+      "mcp__vercel__get_project",
+      "mcp__vercel__list_deployments",
+      "mcp__vercel__web_fetch_vercel_url"
     ]
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "shadcn"
-  ]
+  ],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \\\"$file_path\\\" | grep -q '\\\\.ts$'; then npx prettier --write \\\"$file_path\\\"; fi; }"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send 'Claude Code' 'Awaiting your input'"
+          }
+        ]
+      }
+    ]
+  }
 }

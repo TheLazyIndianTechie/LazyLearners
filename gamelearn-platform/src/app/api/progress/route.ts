@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { updateLessonProgress, getLessonProgress, getCourseProgress } from "@/lib/progress"
-import { progressUpdateSchema, uuidSchema } from "@/lib/validations/common"
-import { ZodError } from "zod"
+import { prisma } from "@/lib/prisma"
+import { z, ZodError } from "zod"
+
+// Validation schema for progress updates
+const progressUpdateSchema = z.object({
+  courseId: z.string().cuid(),
+  lessonId: z.string().cuid(),
+  completionPercentage: z.number().min(0).max(100),
+  completed: z.boolean().optional(),
+  timeSpent: z.number().min(0).optional(),
+})
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,44 +19,65 @@ export async function POST(request: NextRequest) {
 
     if (!session?.user?.id) {
       return NextResponse.json(
-        {
-          success: false,
-          error: { message: "Unauthorized" }
-        },
+        { error: "Authentication required" },
         { status: 401 }
       )
     }
 
     const body = await request.json()
-
-    // Validate input using Zod schema
     const validatedData = progressUpdateSchema.parse(body)
-    const { lessonId, progress, timeSpent } = validatedData
+    const { courseId, lessonId, completionPercentage, completed, timeSpent } = validatedData
 
-    const updatedProgress = await updateLessonProgress(
-      session.user.id,
-      lessonId,
-      progress,
-      timeSpent
-    )
+    // Check if user is enrolled in the course
+    const enrollment = await prisma.enrollment.findFirst({
+      where: {
+        userId: session.user.id,
+        courseId: courseId
+      }
+    })
+
+    if (!enrollment) {
+      return NextResponse.json(
+        { error: "You must be enrolled in this course to track progress" },
+        { status: 403 }
+      )
+    }
+
+    // Create or update progress record
+    const progressData = await prisma.progress.upsert({
+      where: {
+        userId_courseId_lessonId: {
+          userId: session.user.id,
+          courseId: courseId,
+          lessonId: lessonId,
+        }
+      },
+      update: {
+        completionPercentage,
+        completed: completed || completionPercentage >= 90,
+        timeSpent: timeSpent || 0,
+        updatedAt: new Date(),
+      },
+      create: {
+        userId: session.user.id,
+        courseId: courseId,
+        lessonId: lessonId,
+        completionPercentage,
+        completed: completed || completionPercentage >= 90,
+        timeSpent: timeSpent || 0,
+      }
+    })
 
     return NextResponse.json({
       success: true,
-      data: updatedProgress,
-      meta: {
-        correlationId: request.headers.get("x-correlation-id") || undefined,
-        timestamp: new Date().toISOString()
-      }
+      data: progressData
     })
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
         {
-          success: false,
-          error: {
-            message: "Validation failed",
-            details: error.errors
-          }
+          error: "Validation failed",
+          details: error.errors
         },
         { status: 400 }
       )
@@ -56,10 +85,7 @@ export async function POST(request: NextRequest) {
 
     console.error("Error updating progress:", error)
     return NextResponse.json(
-      {
-        success: false,
-        error: { message: "Internal server error" }
-      },
+      { error: "Failed to update progress" },
       { status: 500 }
     )
   }
@@ -71,10 +97,7 @@ export async function GET(request: NextRequest) {
 
     if (!session?.user?.id) {
       return NextResponse.json(
-        {
-          success: false,
-          error: { message: "Unauthorized" }
-        },
+        { error: "Authentication required" },
         { status: 401 }
       )
     }
@@ -83,61 +106,59 @@ export async function GET(request: NextRequest) {
     const lessonId = searchParams.get("lessonId")
     const courseId = searchParams.get("courseId")
 
-    if (lessonId) {
-      // Validate lessonId format
-      const validatedLessonId = uuidSchema.parse(lessonId)
-      const progress = await getLessonProgress(session.user.id, validatedLessonId)
+    if (lessonId && courseId) {
+      // Get specific lesson progress
+      const progress = await prisma.progress.findUnique({
+        where: {
+          userId_courseId_lessonId: {
+            userId: session.user.id,
+            courseId: courseId,
+            lessonId: lessonId,
+          }
+        }
+      })
+
       return NextResponse.json({
         success: true,
-        data: progress,
-        meta: {
-          correlationId: request.headers.get("x-correlation-id") || undefined,
-          timestamp: new Date().toISOString()
-        }
+        data: progress
       })
     }
 
     if (courseId) {
-      // Validate courseId format
-      const validatedCourseId = uuidSchema.parse(courseId)
-      const progress = await getCourseProgress(session.user.id, validatedCourseId)
+      // Get all progress for a course
+      const progress = await prisma.progress.findMany({
+        where: {
+          userId: session.user.id,
+          courseId: courseId
+        },
+        include: {
+          lesson: {
+            select: {
+              id: true,
+              title: true,
+              order: true
+            }
+          }
+        },
+        orderBy: [
+          { lesson: { order: 'asc' } }
+        ]
+      })
+
       return NextResponse.json({
         success: true,
-        data: progress,
-        meta: {
-          correlationId: request.headers.get("x-correlation-id") || undefined,
-          timestamp: new Date().toISOString()
-        }
+        data: progress
       })
     }
 
     return NextResponse.json(
-      {
-        success: false,
-        error: { message: "Missing lessonId or courseId parameter" }
-      },
+      { error: "Missing courseId parameter" },
       { status: 400 }
     )
   } catch (error) {
-    if (error instanceof ZodError) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            message: "Invalid ID format",
-            details: error.errors
-          }
-        },
-        { status: 400 }
-      )
-    }
-
     console.error("Error fetching progress:", error)
     return NextResponse.json(
-      {
-        success: false,
-        error: { message: "Internal server error" }
-      },
+      { error: "Failed to fetch progress" },
       { status: 500 }
     )
   }

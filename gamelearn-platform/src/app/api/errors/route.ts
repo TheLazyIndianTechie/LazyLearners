@@ -4,6 +4,8 @@ import { errorReportingSchema } from "@/lib/validations/common"
 import { ZodError } from "zod"
 import { redis } from "@/lib/redis"
 import { env, isProduction } from "@/lib/config/env"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
   const requestLogger = createRequestLogger(request)
@@ -290,11 +292,28 @@ export async function GET(request: NextRequest) {
   const requestLogger = createRequestLogger(request)
 
   try {
-    // TODO: Add admin authentication check
-    // const session = await getServerSession(authOptions)
-    // if (!session?.user || session.user.role !== 'ADMIN') {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    // }
+    // Admin authentication check required for error analytics
+    const session = await getServerSession(authOptions)
+    if (!session?.user || session.user.role !== 'ADMIN') {
+      requestLogger.warn("Unauthorized access attempt to error analytics", {
+        userId: session?.user?.id,
+        userRole: session?.user?.role,
+        ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+      })
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: "Unauthorized. Admin access required." }
+        },
+        { status: 401 }
+      )
+    }
+
+    requestLogger.info("Admin accessing error analytics", {
+      adminId: session.user.id,
+      adminEmail: session.user.email
+    })
 
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get("days") || "7")

@@ -12,6 +12,14 @@ import {
   CollaborationSettings
 } from "./types/collaboration"
 
+// Utility functions
+function extractMentionsFromContent(content: string): string[] {
+  // Extract @mentions from message content using regex
+  const mentionRegex = /@([a-zA-Z0-9_.-]+)/g
+  const matches = content.match(mentionRegex)
+  return matches ? matches.map(mention => mention.substring(1)) : []
+}
+
 // Session Management
 export async function createCollaborationSession(
   hostId: string,
@@ -219,7 +227,7 @@ export async function sendChatMessage(
         content,
         type,
         replyToId,
-        mentions: [], // TODO: Extract mentions from content
+        mentions: extractMentionsFromContent(content),
         attachments: [],
         reactions: [],
         isEdited: false,

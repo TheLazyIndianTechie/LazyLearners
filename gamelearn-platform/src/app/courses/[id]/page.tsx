@@ -262,13 +262,33 @@ export default function CoursePage({ params }: CoursePageProps) {
     }
   }, [session])
 
-  const handleEnroll = () => {
+  const handleEnroll = async () => {
     if (!session) {
       router.push("/auth/signin")
       return
     }
-    setIsEnrolled(true)
-    // TODO: Implement actual enrollment logic
+
+    try {
+      const response = await fetch('/api/enrollments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          courseId: mockCourse.id
+        }),
+      })
+
+      if (response.ok) {
+        setIsEnrolled(true)
+        // Show success message
+        console.log('Successfully enrolled in course')
+      } else {
+        console.error('Failed to enroll in course')
+      }
+    } catch (error) {
+      console.error('Enrollment error:', error)
+    }
   }
 
   const handleLessonSelect = (lesson: typeof currentLesson) => {
