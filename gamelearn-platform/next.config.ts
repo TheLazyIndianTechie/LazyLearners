@@ -42,6 +42,8 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['cdn.lazygamedevs.com', 'r2cdn.perplexity.ai'],
     formats: ['image/webp', 'image/avif'],
+    // Allow SVGs from our own API placeholder route
+    dangerouslyAllowSVG: true,
   },
 };
 
