@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { SiteLayout } from "@/components/layout/site-layout"
 import { Button } from "@/components/ui/button"
@@ -56,7 +56,7 @@ interface CourseForm {
 }
 
 export default function CreateCoursePage() {
-  const { data: session } = useSession()
+  const { isSignedIn, user } = useUser()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState<CourseForm>({
@@ -79,7 +79,7 @@ export default function CreateCoursePage() {
   const handleSubmit = async (e: React.FormEvent, publish = false) => {
     e.preventDefault()
 
-    if (!session?.user?.id) {
+    if (!user?.id) {
       toast.error("You must be logged in to create a course")
       return
     }

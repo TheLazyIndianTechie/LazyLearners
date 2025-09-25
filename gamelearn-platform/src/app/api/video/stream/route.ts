@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createRequestLogger } from "@/lib/logger"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
 import {
   videoStreaming,
   createVideoSession,
@@ -45,6 +44,207 @@ const deviceInfoSchema = z.object({
   }).optional()
 })
 
+// GET - Stream video content or get streaming manifest
+export async function GET(request: NextRequest) {
+  const requestLogger = createRequestLogger(request)
+  const endTimer = requestLogger.time('video_stream_get')
+
+  try {
+    requestLogger.logRequest(request)
+    requestLogger.info("Getting video streaming content")
+
+    // 1. Authentication check (allow test access for development)
+    const { userId: clerkUserId } = auth()
+    let userId = clerkUserId
+
+    // For testing purposes, allow access with a mock user ID
+    if (!userId && (process.env.NODE_ENV === 'development' || process.env.ENABLE_VIDEO_TEST === 'true')) {
+      userId = 'test-user-123'
+      requestLogger.info("Using test user for video streaming testing")
+    } else if (!clerkUserId) {
+      requestLogger.warn("Unauthorized video streaming attempt")
+      await logSecurityEvent(
+        'unauthorized_access',
+        'medium',
+        {
+          resource: 'video_streaming',
+          method: request.method,
+          url: request.url
+        },
+        undefined,
+        request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined,
+        request.headers.get('user-agent') || undefined,
+        request.headers.get('x-correlation-id') || undefined
+      )
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: "Authentication required" }
+        },
+        { status: 401 }
+      )
+    }
+
+    // 2. Get parameters from URL
+    const { searchParams } = new URL(request.url)
+    const videoId = searchParams.get('videoId')
+    const courseId = searchParams.get('courseId')
+    const sessionId = searchParams.get('sessionId')
+    const quality = searchParams.get('quality') || 'auto'
+    const format = searchParams.get('format') || 'hls'
+
+    if (!videoId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: "Video ID is required" }
+        },
+        { status: 400 }
+      )
+    }
+
+    // 3. Verify video exists and user has access
+    const videoExists = await verifyVideoExists(videoId)
+    if (!videoExists) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: "Video not found" }
+        },
+        { status: 404 }
+      )
+    }
+
+    // 4. Check if user has access to the video/course
+    const hasAccess = await verifyUserVideoAccess(userId, videoId, courseId)
+    if (!hasAccess) {
+      requestLogger.warn("User attempted to access restricted video", {
+        userId,
+        videoId,
+        courseId
+      })
+
+      await logSecurityEvent(
+        'unauthorized_access',
+        'medium',
+        {
+          resource: 'video_content',
+          videoId,
+          courseId,
+          action: 'stream_access_denied'
+        },
+        userId
+      )
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: "Access denied. You need to enroll in this course." }
+        },
+        { status: 403 }
+      )
+    }
+
+    // 5. Get or create streaming session if needed
+    let streamingManifest
+    if (sessionId) {
+      // Use existing session
+      const existingSession = await videoStreaming.getSession?.(sessionId)
+      if (existingSession && existingSession.userId === userId) {
+        streamingManifest = await videoStreaming.getManifest?.(sessionId, { quality, format })
+      }
+    }
+
+    // If no valid session, create a new one
+    if (!streamingManifest) {
+      const deviceInfo = {
+        userAgent: request.headers.get('user-agent') || 'unknown',
+        ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+        referer: request.headers.get('referer') || 'unknown'
+      }
+
+      streamingManifest = await createVideoSession(
+        videoId,
+        userId,
+        courseId,
+        deviceInfo
+      )
+    }
+
+    // 6. Log streaming access
+    requestLogger.info("Video streaming content accessed", {
+      sessionId: streamingManifest.sessionId,
+      userId,
+      videoId,
+      courseId,
+      quality,
+      format
+    })
+
+    // 7. Track analytics
+    await trackStreamingAnalytics('stream_accessed', {
+      sessionId: streamingManifest.sessionId,
+      userId,
+      videoId,
+      courseId,
+      quality,
+      format
+    })
+
+    endTimer()
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          sessionId: streamingManifest.sessionId,
+          manifestUrl: streamingManifest.baseUrl,
+          streamUrl: streamingManifest.streamUrl || `${streamingManifest.baseUrl}/playlist.m3u8`,
+          format: streamingManifest.format,
+          qualities: streamingManifest.qualities,
+          duration: streamingManifest.duration,
+          thumbnails: streamingManifest.thumbnails,
+          currentQuality: quality,
+          accessToken: streamingManifest.accessToken,
+          restrictions: streamingManifest.restrictions,
+          watermark: streamingManifest.watermark,
+          analytics: streamingManifest.analytics,
+          playerConfig: {
+            autoplay: false,
+            controls: true,
+            responsive: true,
+            fluid: true,
+            defaultQuality: quality === 'auto' ? STREAMING_CONFIG.abr.defaultQuality : quality,
+            enableQualitySelector: true,
+            enableSubtitles: true,
+            enableFullscreen: !streamingManifest.restrictions.seekingDisabled
+          }
+        },
+        meta: {
+          correlationId: request.headers.get("x-correlation-id") || undefined,
+          timestamp: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + STREAMING_CONFIG.security.tokenExpiry * 1000).toISOString()
+        }
+      },
+      { status: 200 }
+    )
+
+  } catch (error) {
+    requestLogger.error("Video streaming access failed", error as Error, {
+      operation: 'video_stream_get'
+    })
+
+    endTimer()
+    return NextResponse.json(
+      {
+        success: false,
+        error: { message: "Failed to access video streaming" }
+      },
+      { status: 500 }
+    )
+  }
+}
+
 // POST - Create new video streaming session
 export async function POST(request: NextRequest) {
   const requestLogger = createRequestLogger(request)
@@ -55,14 +255,14 @@ export async function POST(request: NextRequest) {
     requestLogger.info("Creating video streaming session")
 
     // 1. Authentication check (allow test access for development)
-    const session = await getServerSession(authOptions)
-    let userId = session?.user?.id
+    const { userId: clerkUserId } = auth()
+    let userId = clerkUserId
 
     // For testing purposes, allow access with a mock user ID
     if (!userId && (process.env.NODE_ENV === 'development' || process.env.ENABLE_VIDEO_TEST === 'true')) {
       userId = 'test-user-123'
       requestLogger.info("Using test user for video streaming testing")
-    } else if (!session?.user) {
+    } else if (!clerkUserId) {
       requestLogger.warn("Unauthorized video streaming attempt")
       await logSecurityEvent(
         'unauthorized_access',
@@ -244,8 +444,8 @@ export async function PUT(request: NextRequest) {
 
   try {
     // Authentication check
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const { userId } = auth()
+    if (!userId) {
       return NextResponse.json(
         {
           success: false,
@@ -286,17 +486,17 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    if (streamingSession.userId !== session.user.id) {
+    if (streamingSession.userId !== userId) {
       await logSecurityEvent(
         'unauthorized_access',
         'medium',
         {
           resource: 'video_session',
           sessionId,
-          attemptedUserId: session.user.id,
+          attemptedUserId: userId,
           actualUserId: streamingSession.userId
         },
-        session.user.id
+        userId
       )
 
       return NextResponse.json(
@@ -313,7 +513,7 @@ export async function PUT(request: NextRequest) {
 
     requestLogger.debug("Video streaming session updated", {
       sessionId,
-      userId: session.user.id,
+      userId: userId,
       updates: Object.keys(updates)
     })
 
@@ -353,8 +553,8 @@ export async function DELETE(request: NextRequest) {
 
   try {
     // Authentication check
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const { userId } = auth()
+    if (!userId) {
       return NextResponse.json(
         {
           success: false,
@@ -389,7 +589,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    if (streamingSession.userId !== session.user.id) {
+    if (streamingSession.userId !== userId) {
       return NextResponse.json(
         {
           success: false,
@@ -405,7 +605,7 @@ export async function DELETE(request: NextRequest) {
     // Track analytics
     await trackStreamingAnalytics('session_ended', {
       sessionId,
-      userId: session.user.id,
+      userId: userId,
       videoId: streamingSession.videoId,
       courseId: streamingSession.courseId,
       duration: Date.now() - streamingSession.startTime,
@@ -415,7 +615,7 @@ export async function DELETE(request: NextRequest) {
 
     requestLogger.info("Video streaming session ended", {
       sessionId,
-      userId: session.user.id,
+      userId: userId,
       watchTime: streamingSession.watchTime,
       completionPercentage: streamingSession.completionPercentage
     })

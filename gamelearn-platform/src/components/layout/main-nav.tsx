@@ -2,12 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useSession, signOut } from "next-auth/react"
+import { useUser, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 const navigation = [
   { name: "Courses", href: "/courses" },
@@ -21,8 +18,8 @@ const navigation = [
 
 export function MainNav() {
   const pathname = usePathname()
-  const { data: session, status } = useSession()
-  const isLoggedIn = !!session
+  const { isSignedIn, user } = useUser()
+  const isLoggedIn = isSignedIn
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -61,56 +58,22 @@ export function MainNav() {
         {/* User Actions */}
         <div className="flex items-center space-x-4">
           {isLoggedIn ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} />
-                    <AvatarFallback>
-                      {session?.user?.name
-                        ? session.user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-                        : "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="flex flex-col space-y-1 leading-none">
-                    {session?.user?.name && (
-                      <p className="font-medium">{session.user.name}</p>
-                    )}
-                    {session?.user?.email && (
-                      <p className="w-[200px] truncate text-sm text-muted-foreground">
-                        {session.user.email}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard">Dashboard</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/portfolio">Portfolio</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/settings">Settings</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "h-8 w-8"
+                }
+              }}
+            />
           ) : (
             <div className="flex items-center space-x-2">
-              <Button variant="ghost" asChild>
-                <Link href="/auth/signin">Sign In</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/auth/signup">Start Learning</Link>
-              </Button>
+              <SignInButton>
+                <Button variant="ghost">Sign In</Button>
+              </SignInButton>
+              <SignUpButton>
+                <Button>Start Learning</Button>
+              </SignUpButton>
             </div>
           )}
         </div>

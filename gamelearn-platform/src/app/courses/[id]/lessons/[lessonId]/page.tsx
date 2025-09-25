@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { SiteLayout } from "@/components/layout/site-layout"
@@ -52,7 +52,7 @@ interface Course {
 }
 
 export default function LessonPage() {
-  const { data: session } = useSession()
+  const { isSignedIn, user } = useUser()
   const router = useRouter()
   const params = useParams()
   const courseId = params.id as string
@@ -97,7 +97,7 @@ export default function LessonPage() {
     setProgress(progressPercent)
 
     // Save progress to backend
-    if (session?.user?.id && progressPercent > 80) {
+    if (user?.id && progressPercent > 80) {
       try {
         await fetch('/api/progress', {
           method: 'POST',
@@ -119,7 +119,7 @@ export default function LessonPage() {
 
   const handleVideoEnd = async () => {
     // Mark lesson as completed
-    if (session?.user?.id) {
+    if (user?.id) {
       try {
         await fetch('/api/progress', {
           method: 'POST',
@@ -243,10 +243,10 @@ export default function LessonPage() {
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Video Player */}
-              {currentLesson.type === 'VIDEO' && currentLesson.videoUrl && (
+              {currentLesson.type === 'VIDEO' && (
                 <div className="aspect-video bg-black rounded-lg overflow-hidden">
                   <SimpleVideoPlayer
-                    url={currentLesson.videoUrl}
+                    videoId={currentLesson.videoUrl || `sample-${courseId}-${lessonId}`}
                     title={currentLesson.title}
                     lessonId={lessonId}
                     courseId={courseId}

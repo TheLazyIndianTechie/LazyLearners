@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { auth } from "@clerk/nextjs/server"
+
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
@@ -41,9 +41,9 @@ export async function GET(
   context: RouteParams
 ) {
   try {
-    const params = await context.params
+    const { id } = context.params
     const course = await prisma.course.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         instructor: {
           select: {
@@ -118,10 +118,11 @@ export async function GET(
 // PUT /api/courses/[id] - Update course
 export async function PUT(
   request: NextRequest,
-  { params }: RouteParams
+  context: RouteParams
 ) {
   try {
-    const session = await getServerSession(authOptions)
+    const { id } = context.params
+    const session = await getServerSession()
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -132,7 +133,7 @@ export async function PUT(
 
     // Check if user owns the course or is admin
     const existingCourse = await prisma.course.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         instructor: {
           select: { id: true, role: true }
@@ -148,11 +149,11 @@ export async function PUT(
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { role: true }
     })
 
-    if (existingCourse.instructorId !== session.user.id && user?.role !== 'ADMIN') {
+    if (existingCourse.instructorId !== userId && user?.role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'You can only edit your own courses' },
         { status: 403 }
@@ -178,7 +179,7 @@ export async function PUT(
     }
 
     const course = await prisma.course.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         instructor: {
@@ -224,10 +225,11 @@ export async function PUT(
 // DELETE /api/courses/[id] - Delete course
 export async function DELETE(
   request: NextRequest,
-  { params }: RouteParams
+  context: RouteParams
 ) {
   try {
-    const session = await getServerSession(authOptions)
+    const { id } = context.params
+    const session = await getServerSession()
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -238,7 +240,7 @@ export async function DELETE(
 
     // Check if user owns the course or is admin
     const existingCourse = await prisma.course.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { instructorId: true }
     })
 
@@ -250,11 +252,11 @@ export async function DELETE(
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { role: true }
     })
 
-    if (existingCourse.instructorId !== session.user.id && user?.role !== 'ADMIN') {
+    if (existingCourse.instructorId !== userId && user?.role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'You can only delete your own courses' },
         { status: 403 }
@@ -263,7 +265,7 @@ export async function DELETE(
 
     // Check if course has enrollments
     const enrollmentCount = await prisma.enrollment.count({
-      where: { courseId: params.id }
+      where: { courseId: id }
     })
 
     if (enrollmentCount > 0) {
@@ -274,7 +276,7 @@ export async function DELETE(
     }
 
     await prisma.course.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json(

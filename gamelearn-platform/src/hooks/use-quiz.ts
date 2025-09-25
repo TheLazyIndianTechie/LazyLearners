@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import { Quiz, QuizAnswer, QuizResult, QuizAttempt } from "@/lib/types/quiz"
 
 interface QuizEligibility {
@@ -11,7 +11,7 @@ interface QuizEligibility {
 }
 
 export function useQuiz(quizId?: string) {
-  const { data: session } = useSession()
+  const { isSignedIn, user } = useUser()
   const [quiz, setQuiz] = useState<Quiz | null>(null)
   const [eligibility, setEligibility] = useState<QuizEligibility | null>(null)
   const [attempts, setAttempts] = useState<QuizAttempt[]>([])
@@ -20,7 +20,7 @@ export function useQuiz(quizId?: string) {
   const [error, setError] = useState<string | null>(null)
 
   const fetchQuiz = async (id: string) => {
-    if (!session?.user?.id) return
+    if (!user?.id) return
 
     try {
       setLoading(true)
@@ -44,7 +44,7 @@ export function useQuiz(quizId?: string) {
   }
 
   const fetchAttempts = async (id: string) => {
-    if (!session?.user?.id) return
+    if (!user?.id) return
 
     try {
       const response = await fetch(`/api/quiz/${id}/attempts`)
@@ -65,7 +65,7 @@ export function useQuiz(quizId?: string) {
     answers: QuizAnswer[],
     timeSpent: number
   ): Promise<QuizResult | null> => {
-    if (!session?.user?.id) return null
+    if (!user?.id) return null
 
     try {
       setSubmitting(true)
@@ -102,11 +102,11 @@ export function useQuiz(quizId?: string) {
   }
 
   useEffect(() => {
-    if (quizId && session?.user?.id) {
+    if (quizId && user?.id) {
       fetchQuiz(quizId)
       fetchAttempts(quizId)
     }
-  }, [quizId, session?.user?.id])
+  }, [quizId, user?.id])
 
   const refetch = () => {
     if (quizId) {

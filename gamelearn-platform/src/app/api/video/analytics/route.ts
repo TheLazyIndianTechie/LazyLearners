@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createRequestLogger } from "@/lib/logger"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
+
 import {
   videoStreaming,
   trackVideoEvent,
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     requestLogger.logRequest(request)
 
     // 1. Authentication check
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user) {
       return NextResponse.json(
         {
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (streamingSession.userId !== session.user.id) {
+    if (streamingSession.userId !== userId) {
       return NextResponse.json(
         {
           success: false,
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     // 4. Enhanced metadata with context
     const enhancedMetadata = {
       ...metadata,
-      userId: session.user.id,
+      userId: userId,
       videoId: streamingSession.videoId,
       courseId: streamingSession.courseId,
       userAgent: request.headers.get('user-agent'),
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       eventType,
       position,
       videoId: streamingSession.videoId,
-      userId: session.user.id
+      userId: userId
     })
 
     endTimer()
@@ -167,7 +167,7 @@ export async function GET(request: NextRequest) {
     requestLogger.logRequest(request)
 
     // 1. Authentication check
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user) {
       return NextResponse.json(
         {
@@ -205,7 +205,7 @@ export async function GET(request: NextRequest) {
     const { videoId, courseId, timeRange, aggregation, metrics, includeEvents } = validationResult.data
 
     // 3. Verify access permissions
-    if (videoId && !await verifyVideoAnalyticsAccess(session.user.id, session.user.role, videoId)) {
+    if (videoId && !await verifyVideoAnalyticsAccess(userId, session.user.role, videoId)) {
       return NextResponse.json(
         {
           success: false,
@@ -223,10 +223,10 @@ export async function GET(request: NextRequest) {
       analyticsData = await getVideoAnalytics(videoId, timeRange)
     } else if (courseId) {
       // Get course-level analytics
-      analyticsData = await getCourseAnalytics(courseId, timeRange, session.user.id)
+      analyticsData = await getCourseAnalytics(courseId, timeRange, userId)
     } else {
       // Get user's videos analytics (for instructors)
-      analyticsData = await getUserVideosAnalytics(session.user.id, timeRange)
+      analyticsData = await getUserVideosAnalytics(userId, timeRange)
     }
 
     // 5. Filter metrics if specified
@@ -244,7 +244,7 @@ export async function GET(request: NextRequest) {
     const comparisonData = await getComparisonAnalytics(
       videoId,
       courseId,
-      session.user.id,
+      userId,
       timeRange,
       aggregation
     )
@@ -252,7 +252,7 @@ export async function GET(request: NextRequest) {
     requestLogger.info("Video analytics retrieved", {
       videoId,
       courseId,
-      userId: session.user.id,
+      userId: userId,
       timeRange,
       metrics,
       dataPoints: Object.keys(analyticsData).length

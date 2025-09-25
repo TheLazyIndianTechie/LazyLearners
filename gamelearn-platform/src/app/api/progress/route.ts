@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+
 import { prisma } from "@/lib/prisma"
 import { z, ZodError } from "zod"
 
@@ -15,7 +15,7 @@ const progressUpdateSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Check if user is enrolled in the course
     const enrollment = await prisma.enrollment.findFirst({
       where: {
-        userId: session.user.id,
+        userId: userId,
         courseId: courseId
       }
     })
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const progressData = await prisma.progress.upsert({
       where: {
         userId_courseId_lessonId: {
-          userId: session.user.id,
+          userId: userId,
           courseId: courseId,
           lessonId: lessonId,
         }
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date(),
       },
       create: {
-        userId: session.user.id,
+        userId: userId,
         courseId: courseId,
         lessonId: lessonId,
         completionPercentage,
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
       const progress = await prisma.progress.findUnique({
         where: {
           userId_courseId_lessonId: {
-            userId: session.user.id,
+            userId: userId,
             courseId: courseId,
             lessonId: lessonId,
           }
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
       // Get all progress for a course
       const progress = await prisma.progress.findMany({
         where: {
-          userId: session.user.id,
+          userId: userId,
           courseId: courseId
         },
         include: {

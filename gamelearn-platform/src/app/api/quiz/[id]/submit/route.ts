@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+
 import { submitQuizAttempt, canUserTakeQuiz } from "@/lib/quiz"
 import { QuizAnswer } from "@/lib/types/quiz"
 
@@ -9,7 +9,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -27,7 +27,7 @@ export async function POST(
     }
 
     // Check if user can take the quiz
-    const eligibility = await canUserTakeQuiz(session.user.id, quizId)
+    const eligibility = await canUserTakeQuiz(userId, quizId)
     if (!eligibility.canTake) {
       return NextResponse.json({
         error: "Cannot take quiz",
@@ -37,7 +37,7 @@ export async function POST(
 
     // Submit the quiz attempt
     const result = await submitQuizAttempt(
-      session.user.id,
+      userId,
       quizId,
       answers as QuizAnswer[],
       timeSpent

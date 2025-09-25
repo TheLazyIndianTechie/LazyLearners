@@ -1,6 +1,6 @@
 "use client"
 
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { SiteLayout } from "@/components/layout/site-layout"
@@ -14,19 +14,18 @@ import { useDashboard } from "@/hooks/use-dashboard"
 
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession()
+  const { isSignedIn, user } = useUser()
   const router = useRouter()
   const { data: dashboardData, loading: dashboardLoading, error: dashboardError } = useDashboard()
 
   useEffect(() => {
-    if (status === "loading") return
-    if (!session) {
+    if (!isSignedIn) {
       router.push("/auth/signin")
       return
     }
-  }, [session, status, router])
+  }, [isSignedIn, router])
 
-  if (status === "loading" || dashboardLoading) {
+  if (dashboardLoading) {
     return (
       <SiteLayout>
         <div className="container py-8">
@@ -41,7 +40,7 @@ export default function DashboardPage() {
     )
   }
 
-  if (!session) {
+  if (!isSignedIn) {
     return null
   }
 
@@ -71,7 +70,7 @@ export default function DashboardPage() {
         <div className="space-y-4">
           <div>
             <h1 className="text-4xl font-bold tracking-tight">
-              Welcome back, {session.user?.name?.split(' ')[0]}! 👋
+              Welcome back, {user?.firstName || user?.fullName?.split(' ')[0] || 'Student'}! 👋
             </h1>
             <p className="text-xl text-muted-foreground mt-2">
               Continue your game development journey

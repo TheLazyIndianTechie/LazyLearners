@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { SiteLayout } from "@/components/layout/site-layout"
@@ -39,16 +39,16 @@ interface Course {
 }
 
 export default function InstructorDashboard() {
-  const { data: session, status } = useSession()
+  const { isSignedIn, user } = useUser()
   const router = useRouter()
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchInstructorCourses = async () => {
     try {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
-      const response = await fetch(`/api/courses?instructorId=${session.user.id}`)
+      const response = await fetch(`/api/courses?instructorId=${user?.id}`)
       if (response.ok) {
         const data = await response.json()
         setCourses(data.courses || [])
@@ -61,8 +61,8 @@ export default function InstructorDashboard() {
   }
 
   useEffect(() => {
-    if (status === "loading") return
-    if (!session) {
+    // Remove loading check since Clerk handles loading state
+    if (!isSignedIn) {
       router.push("/auth/signin")
       return
     }
@@ -72,9 +72,9 @@ export default function InstructorDashboard() {
     }
 
     fetchInstructorCourses()
-  }, [session, status, router])
+  }, [isSignedIn, router])
 
-  if (status === "loading") {
+  if (!isSignedIn) {
     return (
       <SiteLayout>
         <div className="container py-8">
@@ -89,7 +89,7 @@ export default function InstructorDashboard() {
     )
   }
 
-  if (!session || (session.user?.role !== "INSTRUCTOR" && session.user?.role !== "ADMIN")) {
+  if (!isSignedIn || (session.user?.role !== "INSTRUCTOR" && session.user?.role !== "ADMIN")) {
     return null
   }
 

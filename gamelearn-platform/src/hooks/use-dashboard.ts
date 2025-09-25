@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 
 export interface DashboardStats {
   totalCourses: number
@@ -38,14 +38,14 @@ export interface DashboardData {
 }
 
 export function useDashboard() {
-  const { data: session, status } = useSession()
+  const { isSignedIn, user } = useUser()
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchDashboardData() {
-      if (!session?.user?.id) {
+      if (!user?.id) {
         setLoading(false)
         return
       }
@@ -70,10 +70,10 @@ export function useDashboard() {
     if (status !== "loading") {
       fetchDashboardData()
     }
-  }, [session?.user?.id, status])
+  }, [user?.id, status])
 
   const refetch = async () => {
-    if (!session?.user?.id) return
+    if (!user?.id) return
 
     try {
       setLoading(true)

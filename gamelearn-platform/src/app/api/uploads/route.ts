@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createRequestLogger } from "@/lib/logger"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
+
 import {
   FileValidator,
   validateFileUpload,
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     requestLogger.info("Processing file upload")
 
     // 1. Authentication check
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user) {
       requestLogger.warn("Unauthorized upload attempt")
       return NextResponse.json(
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = userId
     const userRole = session.user.role || 'student'
 
     // 2. Rate limiting check

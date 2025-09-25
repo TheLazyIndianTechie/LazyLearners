@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+
 import { getQuizById, canUserTakeQuiz } from "@/lib/quiz"
 
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -22,7 +22,7 @@ export async function GET(
     }
 
     // Check if user can take the quiz
-    const eligibility = await canUserTakeQuiz(session.user.id, quizId)
+    const eligibility = await canUserTakeQuiz(userId, quizId)
 
     // Remove correct answers from questions for security
     const sanitizedQuiz = {

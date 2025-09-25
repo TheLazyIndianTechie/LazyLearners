@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { SiteLayout } from "@/components/layout/site-layout"
 import { Button } from "@/components/ui/button"
@@ -83,7 +83,7 @@ interface CourseEditPageProps {
 }
 
 export default function CourseEditPage({ params }: CourseEditPageProps) {
-  const { data: session } = useSession()
+  const { isSignedIn, user } = useUser()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -103,7 +103,7 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!session?.user?.id) {
+    if (!user?.id) {
       router.push("/auth/signin")
       return
     }

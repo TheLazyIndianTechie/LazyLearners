@@ -5,7 +5,7 @@ import { ZodError } from "zod"
 import { redis } from "@/lib/redis"
 import { env, isProduction } from "@/lib/config/env"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+
 
 export async function POST(request: NextRequest) {
   const requestLogger = createRequestLogger(request)
@@ -293,7 +293,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Admin authentication check required for error analytics
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user || session.user.role !== 'ADMIN') {
       requestLogger.warn("Unauthorized access attempt to error analytics", {
         userId: session?.user?.id,
@@ -311,7 +311,7 @@ export async function GET(request: NextRequest) {
     }
 
     requestLogger.info("Admin accessing error analytics", {
-      adminId: session.user.id,
+      adminId: userId,
       adminEmail: session.user.email
     })
 

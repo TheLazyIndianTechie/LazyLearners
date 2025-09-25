@@ -49,7 +49,16 @@
       "mcp__vercel__list_projects",
       "mcp__vercel__get_project",
       "mcp__vercel__list_deployments",
-      "mcp__vercel__web_fetch_vercel_url"
+      "mcp__vercel__web_fetch_vercel_url",
+      "mcp__linear__get_team",
+      "mcp__linear__get_issue",
+      "mcp__vercel__deploy_to_vercel",
+      "Bash(BASE_URL=https://gamelearn-platform-gzfn2pr5q-thelazyindiantechies-projects.vercel.app node scripts/validate-video-streaming-fix.js)",
+      "mcp__vercel__get_deployment_build_logs",
+      "mcp__jam__getDetails",
+      "mcp__jam__getConsoleLogs",
+      "mcp__jam__getNetworkRequests",
+      "mcp__jam__getUserEvents"
     ]
   },
   "enableAllProjectMcpServers": true,

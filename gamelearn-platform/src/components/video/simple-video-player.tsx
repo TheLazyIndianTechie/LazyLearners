@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 
 interface SimpleVideoPlayerProps {
   url?: string
+  videoId?: string
   title?: string
   lessonId?: string
   courseId?: string
@@ -29,6 +30,7 @@ interface VideoState {
 
 export function SimpleVideoPlayer({
   url,
+  videoId,
   title,
   lessonId,
   courseId,
@@ -39,6 +41,7 @@ export function SimpleVideoPlayer({
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [showControls, setShowControls] = useState(true)
+  const [streamUrl, setStreamUrl] = useState<string | null>(null)
 
   const [state, setState] = useState<VideoState>({
     isPlaying: false,
@@ -51,10 +54,50 @@ export function SimpleVideoPlayer({
     error: null
   })
 
+  // Fetch streaming URL when videoId is provided
+  useEffect(() => {
+    if (!videoId || url) return
+
+    const fetchStreamUrl = async () => {
+      try {
+        setState(prev => ({ ...prev, isLoading: true, error: null }))
+
+        const params = new URLSearchParams({
+          videoId,
+          ...(courseId && { courseId }),
+          quality: 'auto',
+          format: 'hls'
+        })
+
+        const response = await fetch(`/api/video/stream?${params.toString()}`)
+        const data = await response.json()
+
+        if (data.success && data.data.streamUrl) {
+          setStreamUrl(data.data.streamUrl)
+        } else {
+          setState(prev => ({
+            ...prev,
+            error: data.error?.message || 'Failed to load video stream',
+            isLoading: false
+          }))
+        }
+      } catch (error) {
+        setState(prev => ({
+          ...prev,
+          error: 'Failed to connect to video service',
+          isLoading: false
+        }))
+      }
+    }
+
+    fetchStreamUrl()
+  }, [videoId, courseId, url])
+
   // Initialize video and setup event listeners
   useEffect(() => {
     const video = videoRef.current
-    if (!video || !url) return
+    const videoSource = streamUrl || url
+    if (!video || !videoSource) return
 
     setState(prev => ({ ...prev, isLoading: true, error: null }))
 
@@ -125,7 +168,7 @@ export function SimpleVideoPlayer({
       video.removeEventListener('error', handleError)
       video.removeEventListener('volumechange', handleVolumeChange)
     }
-  }, [url, onProgress, onEnded])
+  }, [streamUrl, url, onProgress, onEnded])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -185,7 +228,9 @@ export function SimpleVideoPlayer({
     }
   }
 
-  if (!url) {
+  const currentVideoUrl = streamUrl || url
+
+  if (!currentVideoUrl && !videoId) {
     return (
       <div className={cn("relative bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center", className)}>
         <div className="text-center text-white p-8">
@@ -233,7 +278,7 @@ export function SimpleVideoPlayer({
       {/* Video Element */}
       <video
         ref={videoRef}
-        src={url}
+        src={currentVideoUrl}
         className="w-full h-full"
         onClick={togglePlay}
         onDoubleClick={toggleFullscreen}

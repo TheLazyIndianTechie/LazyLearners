@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createRequestLogger } from "@/lib/logger"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
+
 import {
   videoStreaming,
   processVideoHeartbeat,
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     requestLogger.logRequest(request)
 
     // 1. Authentication check
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user) {
       return NextResponse.json(
         {
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (streamingSession.userId !== session.user.id) {
+    if (streamingSession.userId !== userId) {
       return NextResponse.json(
         {
           success: false,
@@ -202,7 +202,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Authentication check
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user) {
       return NextResponse.json(
         {
@@ -238,7 +238,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    if (streamingSession.userId !== session.user.id) {
+    if (streamingSession.userId !== userId) {
       return NextResponse.json(
         {
           success: false,

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import {
   WebSocketMessage,
   WebSocketEventType,
@@ -44,7 +44,7 @@ interface CollaborationState {
 }
 
 export function useCollaboration(options: UseCollaborationOptions) {
-  const { data: session } = useSession()
+  const { isSignedIn, user } = useUser()
   const [state, setState] = useState<CollaborationState>({
     isConnected: false,
     isConnecting: false,
@@ -58,7 +58,7 @@ export function useCollaboration(options: UseCollaborationOptions) {
   const maxReconnectAttempts = 5
 
   const connect = useCallback(() => {
-    if (!session?.user?.id || wsRef.current?.readyState === WebSocket.OPEN) {
+    if (!user?.id || wsRef.current?.readyState === WebSocket.OPEN) {
       return
     }
 
@@ -83,7 +83,7 @@ export function useCollaboration(options: UseCollaborationOptions) {
         sendMessage({
           type: "join_session",
           sessionId: options.sessionId,
-          userId: session.user.id,
+          userId: user?.id,
           data: { role: "participant" },
           timestamp: new Date()
         })
@@ -122,7 +122,7 @@ export function useCollaboration(options: UseCollaborationOptions) {
       setState(prev => ({ ...prev, isConnecting: false }))
       options.onError?.("Failed to connect to collaboration server")
     }
-  }, [session?.user?.id, options.sessionId])
+  }, [user?.id, options.sessionId])
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
@@ -243,160 +243,160 @@ export function useCollaboration(options: UseCollaborationOptions) {
   // Collaboration actions
   const actions = {
     sendChatMessage: useCallback((content: string, type: "text" | "code" = "text", replyToId?: string) => {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
       sendMessage({
         type: "send_message",
         sessionId: options.sessionId,
-        userId: session.user.id,
+        userId: user?.id,
         data: { content, type, replyToId },
         timestamp: new Date()
       })
-    }, [session?.user?.id, options.sessionId, sendMessage]),
+    }, [user?.id, options.sessionId, sendMessage]),
 
     sendCodeChange: useCallback((change: any) => {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
       sendMessage({
         type: "code_change",
         sessionId: options.sessionId,
-        userId: session.user.id,
+        userId: user?.id,
         data: change,
         timestamp: new Date()
       })
-    }, [session?.user?.id, options.sessionId, sendMessage]),
+    }, [user?.id, options.sessionId, sendMessage]),
 
     moveCursor: useCallback((position: any) => {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
       sendMessage({
         type: "cursor_move",
         sessionId: options.sessionId,
-        userId: session.user.id,
+        userId: user?.id,
         data: position,
         timestamp: new Date()
       })
-    }, [session?.user?.id, options.sessionId, sendMessage]),
+    }, [user?.id, options.sessionId, sendMessage]),
 
     startScreenShare: useCallback((type: string, quality: string = "medium") => {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
       sendMessage({
         type: "start_screen_share",
         sessionId: options.sessionId,
-        userId: session.user.id,
+        userId: user?.id,
         data: { type, quality },
         timestamp: new Date()
       })
-    }, [session?.user?.id, options.sessionId, sendMessage]),
+    }, [user?.id, options.sessionId, sendMessage]),
 
     stopScreenShare: useCallback(() => {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
       sendMessage({
         type: "stop_screen_share",
         sessionId: options.sessionId,
-        userId: session.user.id,
+        userId: user?.id,
         data: {},
         timestamp: new Date()
       })
-    }, [session?.user?.id, options.sessionId, sendMessage]),
+    }, [user?.id, options.sessionId, sendMessage]),
 
     startVoiceCall: useCallback(() => {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
       sendMessage({
         type: "start_voice_call",
         sessionId: options.sessionId,
-        userId: session.user.id,
+        userId: user?.id,
         data: {},
         timestamp: new Date()
       })
-    }, [session?.user?.id, options.sessionId, sendMessage]),
+    }, [user?.id, options.sessionId, sendMessage]),
 
     endVoiceCall: useCallback(() => {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
       sendMessage({
         type: "end_voice_call",
         sessionId: options.sessionId,
-        userId: session.user.id,
+        userId: user?.id,
         data: {},
         timestamp: new Date()
       })
-    }, [session?.user?.id, options.sessionId, sendMessage]),
+    }, [user?.id, options.sessionId, sendMessage]),
 
     toggleMute: useCallback((isMuted: boolean) => {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
       sendMessage({
         type: isMuted ? "mute_audio" : "unmute_audio",
         sessionId: options.sessionId,
-        userId: session.user.id,
+        userId: user?.id,
         data: { isMuted },
         timestamp: new Date()
       })
-    }, [session?.user?.id, options.sessionId, sendMessage]),
+    }, [user?.id, options.sessionId, sendMessage]),
 
     requestPermission: useCallback((permission: string, reason?: string) => {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
       sendMessage({
         type: "request_permission",
         sessionId: options.sessionId,
-        userId: session.user.id,
+        userId: user?.id,
         data: { permission, reason },
         timestamp: new Date()
       })
-    }, [session?.user?.id, options.sessionId, sendMessage]),
+    }, [user?.id, options.sessionId, sendMessage]),
 
     grantPermission: useCallback((participantId: string, permissions: any) => {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
       sendMessage({
         type: "grant_permission",
         sessionId: options.sessionId,
-        userId: session.user.id,
+        userId: user?.id,
         data: { participantId, permissions },
         timestamp: new Date()
       })
-    }, [session?.user?.id, options.sessionId, sendMessage]),
+    }, [user?.id, options.sessionId, sendMessage]),
 
     lockFile: useCallback((fileId: string) => {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
       sendMessage({
         type: "lock_file",
         sessionId: options.sessionId,
-        userId: session.user.id,
+        userId: user?.id,
         data: { fileId },
         timestamp: new Date()
       })
-    }, [session?.user?.id, options.sessionId, sendMessage]),
+    }, [user?.id, options.sessionId, sendMessage]),
 
     unlockFile: useCallback((fileId: string) => {
-      if (!session?.user?.id) return
+      if (!user?.id) return
 
       sendMessage({
         type: "unlock_file",
         sessionId: options.sessionId,
-        userId: session.user.id,
+        userId: user?.id,
         data: { fileId },
         timestamp: new Date()
       })
-    }, [session?.user?.id, options.sessionId, sendMessage])
+    }, [user?.id, options.sessionId, sendMessage])
   }
 
   // Connect when component mounts and session is available
   useEffect(() => {
-    if (session?.user?.id) {
+    if (user?.id) {
       connect()
     }
 
     return () => {
       disconnect()
     }
-  }, [session?.user?.id, connect, disconnect])
+  }, [user?.id, connect, disconnect])
 
   // Cleanup on unmount
   useEffect(() => {

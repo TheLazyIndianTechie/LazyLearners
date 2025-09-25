@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createRequestLogger } from "@/lib/logger"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
+
 import {
   securityTestRunner,
   runSecurityTest,
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     requestLogger.info("Processing security testing GET request")
 
     // 1. Authentication check - restrict to admin/security users
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user) {
       requestLogger.warn("Unauthorized security testing access attempt")
       await logSecurityEvent(
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
     //       userRole: session.user.role,
     //       requiredRole: 'SECURITY_ADMIN'
     //     },
-    //     session.user.id
+    //     userId
     //   )
     //
     //   return NextResponse.json(
@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
     requestLogger.info("Processing security testing POST request")
 
     // Authentication check
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user) {
       return NextResponse.json(
         {
@@ -335,11 +335,11 @@ async function handleRunTest(body: any, session: any, logger: any, endTimer: () 
       suiteId,
       suiteName: suite.name,
       targetUrl: targetUrl || suite.targets[0],
-      initiatedBy: session.user.id,
+      initiatedBy: userId,
       initiatedByEmail: session.user.email,
       scheduled: schedule
     },
-    session.user.id
+    userId
   )
 
   try {
@@ -351,13 +351,13 @@ async function handleRunTest(body: any, session: any, logger: any, endTimer: () 
           logger.info("Security test suite completed", {
             suiteId,
             summary: results.summary,
-            initiatedBy: session.user.id
+            initiatedBy: userId
           })
         })
         .catch(error => {
           logger.error("Security test suite failed", error as Error, {
             suiteId,
-            initiatedBy: session.user.id
+            initiatedBy: userId
           })
         })
 
@@ -393,7 +393,7 @@ async function handleRunTest(body: any, session: any, logger: any, endTimer: () 
   } catch (error) {
     logger.error("Failed to start security test", error as Error, {
       suiteId,
-      initiatedBy: session.user.id
+      initiatedBy: userId
     })
 
     endTimer()
@@ -449,16 +449,16 @@ async function handleCreateTestSuite(body: any, session: any, logger: any, endTi
       suiteId,
       suiteName: suiteData.name,
       testCount: suiteData.tests.length,
-      createdBy: session.user.id,
+      createdBy: userId,
       createdByEmail: session.user.email
     },
-    session.user.id
+    userId
   )
 
   logger.info("Security test suite created", {
     suiteId,
     suiteName: suiteData.name,
-    createdBy: session.user.id
+    createdBy: userId
   })
 
   endTimer()
@@ -512,10 +512,10 @@ async function handleUpdateTestSuite(body: any, session: any, logger: any, endTi
       action: 'security_test_suite_updated',
       suiteId,
       updates: Object.keys(updates),
-      updatedBy: session.user.id,
+      updatedBy: userId,
       updatedByEmail: session.user.email
     },
-    session.user.id
+    userId
   )
 
   endTimer()
@@ -575,10 +575,10 @@ async function handleDeleteTestSuite(body: any, session: any, logger: any, endTi
     {
       action: 'security_test_suite_deleted',
       suiteId,
-      deletedBy: session.user.id,
+      deletedBy: userId,
       deletedByEmail: session.user.email
     },
-    session.user.id
+    userId
   )
 
   endTimer()
@@ -625,10 +625,10 @@ async function handleStopTest(body: any, session: any, logger: any, endTimer: ()
     {
       action: 'security_test_stopped',
       suiteId,
-      stoppedBy: session.user.id,
+      stoppedBy: userId,
       stoppedByEmail: session.user.email
     },
-    session.user.id
+    userId
   )
 
   // Note: In a full implementation, you would need to implement test stopping logic

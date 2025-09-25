@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { SiteLayout } from "@/components/layout/site-layout"
+import { RoleGuard } from "@/components/auth/role-guard"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -37,7 +38,7 @@ interface DashboardStats {
 }
 
 export default function InstructorDashboard() {
-  const { data: session, status } = useSession()
+  const { isSignedIn, user } = useUser()
   const router = useRouter()
   const [courses, setCourses] = useState<Course[]>([])
   const [stats, setStats] = useState<DashboardStats>({
@@ -49,22 +50,22 @@ export default function InstructorDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (status === "loading") return
+    // Removed loading check - Clerk handles loading state
 
-    if (!session) {
+    if (!isSignedIn) {
       router.push("/auth/signin")
       return
     }
 
     // Check if user is instructor or admin
-    if (session.user?.role !== "INSTRUCTOR" && session.user?.role !== "ADMIN") {
+    if (user?.publicMetadata?.role !== "INSTRUCTOR" && user?.publicMetadata?.role !== "ADMIN") {
       toast.error("Access denied. Only instructors can access this page.")
       router.push("/")
       return
     }
 
     fetchInstructorData()
-  }, [session, status, router])
+  }, [isSignedIn, router])
 
   const fetchInstructorData = async () => {
     try {
@@ -72,7 +73,7 @@ export default function InstructorDashboard() {
 
       // Fetch instructor's courses
       const coursesResponse = await fetch(
-        `/api/courses?instructorId=${session?.user?.id}`,
+        `/api/courses?instructorId=${user?.id}`,
         { method: 'GET' }
       )
 
@@ -151,7 +152,7 @@ export default function InstructorDashboard() {
     }
   }
 
-  if (status === "loading" || loading) {
+  if (loading) {
     return (
       <SiteLayout>
         <div className="container py-8">
@@ -169,7 +170,8 @@ export default function InstructorDashboard() {
   }
 
   return (
-    <SiteLayout>
+    <RoleGuard requiredRole="INSTRUCTOR">
+      <SiteLayout>
       <div className="container py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -349,6 +351,7 @@ export default function InstructorDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </SiteLayout>
+      </SiteLayout>
+    </RoleGuard>
   )
 }

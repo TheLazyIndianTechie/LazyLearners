@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -249,7 +249,7 @@ interface CoursePageProps {
 }
 
 export default function CoursePage({ params }: CoursePageProps) {
-  const { data: session } = useSession()
+  const { isSignedIn, user } = useUser()
   const router = useRouter()
   const [isEnrolled, setIsEnrolled] = useState(false)
   const [currentLesson, setCurrentLesson] = useState(mockCourse.modules[0].lessons[0])
@@ -263,7 +263,7 @@ export default function CoursePage({ params }: CoursePageProps) {
   }, [session])
 
   const handleEnroll = async () => {
-    if (!session) {
+    if (!isSignedIn) {
       router.push("/auth/signin")
       return
     }

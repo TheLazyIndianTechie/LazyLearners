@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createRequestLogger } from "@/lib/logger"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
+
 import {
   videoProcessor,
   submitVideo,
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     requestLogger.info("Processing video upload request")
 
     // 1. Authentication check
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user) {
       requestLogger.warn("Unauthorized video upload attempt")
       return NextResponse.json(
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = userId
     const userRole = session.user.role || 'student'
 
     // 2. Check if user can upload videos (instructors and admins only for courses)
@@ -262,7 +262,7 @@ export async function GET(request: NextRequest) {
     requestLogger.info("Processing video status request")
 
     // Authentication check
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user) {
       return NextResponse.json(
         {
@@ -273,7 +273,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = userId
 
     // Parse query parameters
     const { searchParams } = new URL(request.url)
@@ -393,7 +393,7 @@ export async function DELETE(request: NextRequest) {
 
   try {
     // Authentication check
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
     if (!session?.user) {
       return NextResponse.json(
         {
@@ -418,7 +418,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Cancel the job
-    const cancelled = await cancelVideoJob(jobId, session.user.id)
+    const cancelled = await cancelVideoJob(jobId, userId)
 
     if (!cancelled) {
       return NextResponse.json(
@@ -432,7 +432,7 @@ export async function DELETE(request: NextRequest) {
 
     requestLogger.info("Video processing job cancelled", {
       jobId,
-      userId: session.user.id
+      userId: userId
     })
 
     endTimer()

@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+
 import { getOrCreateCart, addToCart, removeFromCart } from "@/lib/payment"
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const cart = await getOrCreateCart(session.user.id)
+    const cart = await getOrCreateCart(userId)
 
     if (!cart) {
       return NextResponse.json({ error: "Failed to get cart" }, { status: 500 })
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -44,10 +44,10 @@ export async function POST(request: NextRequest) {
     let result
     switch (action) {
       case "add":
-        result = await addToCart(session.user.id, courseId)
+        result = await addToCart(userId, courseId)
         break
       case "remove":
-        result = await removeFromCart(session.user.id, courseId)
+        result = await removeFromCart(userId, courseId)
         break
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 })

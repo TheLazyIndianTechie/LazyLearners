@@ -17,12 +17,12 @@ import {
   Loader2
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
+import { useUser } from "@clerk/nextjs"
 import { Cart as CartType } from "@/lib/types/payment"
 import Image from "next/image"
 
 export default function CheckoutPage() {
-  const { data: session } = useSession()
+  const { isSignedIn, user } = useUser()
   const router = useRouter()
 
   const [cart, setCart] = useState<CartType | null>(null)
@@ -55,13 +55,13 @@ export default function CheckoutPage() {
   const [agreeToTerms, setAgreeToTerms] = useState(false)
 
   useEffect(() => {
-    if (!session) {
+    if (!isSignedIn) {
       router.push("/auth/signin?callbackUrl=/checkout")
       return
     }
 
     fetchCart()
-  }, [session, router])
+  }, [isSignedIn, router])
 
   const fetchCart = async () => {
     try {
@@ -71,12 +71,12 @@ export default function CheckoutPage() {
         const data = await response.json()
         setCart(data.cart)
 
-        // Pre-fill email from session
-        if (session?.user?.email) {
+        // Pre-fill email from user
+        if (user?.emailAddresses?.[0]?.emailAddress) {
           setBillingDetails(prev => ({
             ...prev,
-            email: session.user.email || "",
-            name: session.user.name || ""
+            email: user.emailAddresses[0].emailAddress || "",
+            name: user.fullName || ""
           }))
         }
       } else {
@@ -222,7 +222,7 @@ export default function CheckoutPage() {
     }
   }
 
-  if (!session) {
+  if (!isSignedIn) {
     return <div>Redirecting to login...</div>
   }
 

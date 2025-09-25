@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { auth } from "@clerk/nextjs/server"
+
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
 // POST /api/courses - Create a new course
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession()
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user is instructor or admin
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { role: true }
     })
 
@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
     const course = await prisma.course.create({
       data: {
         ...validatedData,
-        instructorId: session.user.id,
+        instructorId: userId,
         requirements: validatedData.requirements ? JSON.stringify(validatedData.requirements) : null,
         objectives: validatedData.objectives ? JSON.stringify(validatedData.objectives) : null,
         tags: validatedData.tags ? JSON.stringify(validatedData.tags) : null,
