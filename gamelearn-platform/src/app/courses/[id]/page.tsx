@@ -257,10 +257,10 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   // Check if user is enrolled (mock logic)
   useEffect(() => {
-    if (session) {
+    if (isSignedIn) {
       setIsEnrolled(true) // Mock enrollment check
     }
-  }, [session])
+  }, [isSignedIn])
 
   const handleEnroll = async () => {
     if (!isSignedIn) {

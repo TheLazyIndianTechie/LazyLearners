@@ -58,7 +58,9 @@
       "mcp__jam__getDetails",
       "mcp__jam__getConsoleLogs",
       "mcp__jam__getNetworkRequests",
-      "mcp__jam__getUserEvents"
+      "mcp__jam__getUserEvents",
+      "mcp__vercel__get_deployment",
+      "Bash(find:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

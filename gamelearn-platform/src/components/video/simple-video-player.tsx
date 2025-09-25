@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { Play, Pause, Volume2, VolumeX, Maximize, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
@@ -28,6 +28,56 @@ interface VideoState {
   error: string | null
 }
 
+const FALLBACK_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+
+function isLikelyPlayableUrl(u?: string | null) {
+  if (!u) return false
+  try {
+    const parsed = new URL(u)
+    const ext = parsed.pathname.split('.').pop()?.toLowerCase()
+    // Allow common HTML5 video formats and HLS
+    if (ext && ["mp4", "webm", "ogg", "m3u8"].includes(ext)) return true
+    // Explicitly disallow YouTube URLs for <video>
+    if (parsed.hostname.includes("youtube.com") || parsed.hostname.includes("youtu.be")) return false
+    return false
+  } catch {
+    return false
+  }
+}
+
+function isYouTubeUrl(u?: string | null) {
+  if (!u) return false
+  try {
+    const parsed = new URL(u)
+    return parsed.hostname.includes("youtube.com") || parsed.hostname.includes("youtu.be")
+  } catch {
+    return false
+  }
+}
+
+function getYouTubeId(u?: string | null) {
+  if (!u) return null
+  try {
+    const parsed = new URL(u)
+    if (parsed.hostname.includes('youtu.be')) {
+      // youtu.be/<id>
+      return parsed.pathname.slice(1) || null
+    }
+    if (parsed.hostname.includes('youtube.com')) {
+      // youtube.com/watch?v=<id>
+      const v = parsed.searchParams.get('v')
+      if (v) return v
+      // youtube.com/embed/<id>
+      const parts = parsed.pathname.split('/')
+      const idx = parts.indexOf('embed')
+      if (idx >= 0 && parts[idx+1]) return parts[idx+1]
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 export function SimpleVideoPlayer({
   url,
   videoId,
@@ -53,6 +103,9 @@ export function SimpleVideoPlayer({
     isLoading: false,
     error: null
   })
+
+  const youtubeUrl = url && isYouTubeUrl(url) ? url : null
+  const youtubeId = useMemo(() => getYouTubeId(youtubeUrl || undefined), [youtubeUrl])
 
   // Fetch streaming URL when videoId is provided
   useEffect(() => {
@@ -95,8 +148,18 @@ export function SimpleVideoPlayer({
 
   // Initialize video and setup event listeners
   useEffect(() => {
+    // If this is a YouTube URL, skip native <video> setup; handled by react-player
+    if (youtubeUrl) return
     const video = videoRef.current
-    const videoSource = streamUrl || url
+    // Choose a safe playable source
+    let chosenSource: string | null = streamUrl || (isLikelyPlayableUrl(url) ? url! : null)
+    if (!chosenSource && !streamUrl && url && !isLikelyPlayableUrl(url)) {
+      // Fallback to a sample video when URL is not directly playable (e.g., YouTube)
+      chosenSource = FALLBACK_VIDEO_URL
+      setStreamUrl(FALLBACK_VIDEO_URL)
+    }
+
+    const videoSource = chosenSource
     if (!video || !videoSource) return
 
     setState(prev => ({ ...prev, isLoading: true, error: null }))
@@ -136,6 +199,17 @@ export function SimpleVideoPlayer({
 
     const handleError = () => {
       const errorMessage = video.error?.message || 'Video failed to load'
+      // If the current source isn't already the fallback, try switching to fallback once
+      if (video.src !== FALLBACK_VIDEO_URL) {
+        try {
+          video.src = FALLBACK_VIDEO_URL
+          video.load()
+          void video.play().catch(() => {/* ignore */})
+          setStreamUrl(FALLBACK_VIDEO_URL)
+          setState(prev => ({ ...prev, isLoading: false, error: null }))
+          return
+        } catch {}
+      }
       setState(prev => ({
         ...prev,
         error: errorMessage,
@@ -168,7 +242,7 @@ export function SimpleVideoPlayer({
       video.removeEventListener('error', handleError)
       video.removeEventListener('volumechange', handleVolumeChange)
     }
-  }, [streamUrl, url, onProgress, onEnded])
+  }, [streamUrl, url, youtubeUrl, onProgress, onEnded])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -263,6 +337,24 @@ export function SimpleVideoPlayer({
           >
             Try Again
           </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Render YouTube via react-player when applicable
+  if (youtubeUrl && youtubeId) {
+    const embedSrc = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&playsinline=1&rel=0`
+    return (
+      <div className={cn("relative bg-black rounded-lg overflow-hidden group", className)}>
+        <div className="relative" style={{ paddingTop: '56.25%' }}>
+          <iframe
+            src={embedSrc}
+            title={title || 'YouTube video player'}
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full"
+          />
         </div>
       </div>
     )
