@@ -13,10 +13,7 @@ const isProtectedRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, req) => {
-  // Dev-only bypass: when debugging via MCP or local tools, allow access with ?debug=mcp
-  const debugBypass = process.env.NODE_ENV !== 'production' && req.nextUrl.searchParams.get('debug') === 'mcp'
-
-  if (!debugBypass && isProtectedRoute(req)) {
+  if (isProtectedRoute(req)) {
     await auth.protect()
   }
 })
