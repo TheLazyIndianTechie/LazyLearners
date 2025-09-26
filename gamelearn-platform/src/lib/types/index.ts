@@ -28,12 +28,32 @@ export interface Course {
   rating: number
   reviewCount: number
   modules: Module[]
-  requirements: string[]
-  objectives: string[]
-  tags: string[]
+  requirements: CourseRequirement[]
+  objectives: CourseObjective[]
+  tags: CourseTag[]
   isPublished: boolean
   createdAt: Date
   updatedAt: Date
+}
+
+export interface CourseRequirement {
+  id: string
+  requirement: string
+  order: number
+  createdAt: Date
+}
+
+export interface CourseObjective {
+  id: string
+  objective: string
+  order: number
+  createdAt: Date
+}
+
+export interface CourseTag {
+  id: string
+  tag: string
+  createdAt: Date
 }
 
 export interface Module {
@@ -138,12 +158,18 @@ export interface ForumPost {
   title: string
   content: string
   category: string
-  tags: string[]
+  tags: ForumPostTag[]
   replies: Reply[]
   likes: number
   views: number
   createdAt: Date
   updatedAt: Date
+}
+
+export interface ForumPostTag {
+  id: string
+  tag: string
+  createdAt: Date
 }
 
 export interface Reply {

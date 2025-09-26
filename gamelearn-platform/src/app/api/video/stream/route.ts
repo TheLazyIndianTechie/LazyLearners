@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     requestLogger.info("Getting video streaming content")
 
     // 1. Authentication check
-    const { userId } = auth()
+    const { userId } = await auth()
 
     if (!userId) {
       requestLogger.warn("Unauthorized video streaming attempt")

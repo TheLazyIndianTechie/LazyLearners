@@ -58,6 +58,13 @@ export async function GET(
             bio: true,
           }
         },
+        requirements: {
+          orderBy: { order: 'asc' }
+        },
+        objectives: {
+          orderBy: { order: 'asc' }
+        },
+        tags: true,
         // Get modules with lesson counts but not all lesson data
         modules: {
           select: {
@@ -120,9 +127,9 @@ export async function GET(
 
     const formattedCourse = {
       ...course,
-      requirements: course.requirements ? JSON.parse(course.requirements) : [],
-      objectives: course.objectives ? JSON.parse(course.objectives) : [],
-      tags: course.tags ? JSON.parse(course.tags) : [],
+      requirements: course.requirements.map(r => r.requirement),
+      objectives: course.objectives.map(o => o.objective),
+      tags: course.tags.map(t => t.tag),
       rating: avgRating,
       reviewCount: course._count.reviews,
       enrollmentCount: course._count.enrollments,
@@ -148,7 +155,7 @@ export async function PUT(
 ) {
   try {
     const { id } = context.params
-    const { userId } = auth()
+    const { userId } = await auth()
 
     if (!userId) {
       return NextResponse.json(
@@ -189,19 +196,39 @@ export async function PUT(
     const body = await request.json()
     const validatedData = updateCourseSchema.parse(body)
 
+    // Extract arrays for separate handling
+    const { requirements: reqArray, objectives: objArray, tags: tagArray, ...courseData } = validatedData
+
     const updateData: any = {
-      ...validatedData,
+      ...courseData,
     }
 
-    // Handle JSON fields
-    if (validatedData.requirements) {
-      updateData.requirements = JSON.stringify(validatedData.requirements)
+    // Handle nested updates for normalized fields
+    if (reqArray !== undefined) {
+      updateData.requirements = {
+        deleteMany: {},
+        create: reqArray.map((req, index) => ({
+          requirement: req,
+          order: index
+        }))
+      }
     }
-    if (validatedData.objectives) {
-      updateData.objectives = JSON.stringify(validatedData.objectives)
+    if (objArray !== undefined) {
+      updateData.objectives = {
+        deleteMany: {},
+        create: objArray.map((obj, index) => ({
+          objective: obj,
+          order: index
+        }))
+      }
     }
-    if (validatedData.tags) {
-      updateData.tags = JSON.stringify(validatedData.tags)
+    if (tagArray !== undefined) {
+      updateData.tags = {
+        deleteMany: {},
+        create: tagArray.map(tag => ({
+          tag: tag
+        }))
+      }
     }
 
     const course = await prisma.course.update({
@@ -216,6 +243,13 @@ export async function PUT(
             image: true,
           }
         },
+        requirements: {
+          orderBy: { order: 'asc' }
+        },
+        objectives: {
+          orderBy: { order: 'asc' }
+        },
+        tags: true,
         _count: {
           select: {
             modules: true
@@ -226,9 +260,9 @@ export async function PUT(
 
     const formattedCourse = {
       ...course,
-      requirements: course.requirements ? JSON.parse(course.requirements) : [],
-      objectives: course.objectives ? JSON.parse(course.objectives) : [],
-      tags: course.tags ? JSON.parse(course.tags) : [],
+      requirements: course.requirements.map(r => r.requirement),
+      objectives: course.objectives.map(o => o.objective),
+      tags: course.tags.map(t => t.tag),
     }
 
     return NextResponse.json({ course: formattedCourse })
@@ -255,7 +289,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = context.params
-    const { userId } = auth()
+    const { userId } = await auth()
 
     if (!userId) {
       return NextResponse.json(

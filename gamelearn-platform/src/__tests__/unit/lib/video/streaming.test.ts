@@ -164,13 +164,13 @@ describe('VideoStreamingService', () => {
     })
 
     test('should create a streaming session successfully', async () => {
-      const session = await createVideoSession('video123', 'user123', 'course456', mockDeviceInfo)
+      const session = await createVideoSession('sample-unity-tutorial', 'user123', 'course456', mockDeviceInfo)
 
       expect(session).toBeDefined()
       expect(session.sessionId).toBeDefined()
       expect(session.accessToken).toBeDefined()
-      expect(session.videoId).toBe('video123')
-      expect(session.format).toBe('hls')
+      expect(session.videoId).toBe('sample-unity-tutorial')
+      expect(session.format).toBe('mp4')
       expect(session.restrictions).toBeDefined()
       expect(session.analytics).toBeDefined()
       expect(session.analytics.trackingUrl).toBeDefined()
@@ -178,7 +178,7 @@ describe('VideoStreamingService', () => {
     })
 
     test('should include watermark for premium access', async () => {
-      const session = await createVideoSession('video123', 'user123')
+      const session = await createVideoSession('sample-unity-tutorial', 'user123')
 
       expect(session.watermark).toBeDefined()
       expect(session.watermark.text).toContain('user123')
@@ -187,7 +187,7 @@ describe('VideoStreamingService', () => {
     })
 
     test('should persist session to Redis', async () => {
-      await createVideoSession('video123', 'user123')
+      await createVideoSession('sample-unity-tutorial', 'user123')
 
       expect(redis.set).toHaveBeenCalledWith(
         expect.stringMatching(/^video_session:/),
@@ -205,12 +205,14 @@ describe('VideoStreamingService', () => {
     test('should enforce concurrent session limits', async () => {
       // Create multiple sessions to test limits
       const sessions = []
+      const videoIds = ['sample-unity-tutorial', 'sample-csharp-tutorial']
       for (let i = 0; i < STREAMING_CONFIG.security.maxConcurrentSessions; i++) {
-        sessions.push(await createVideoSession(`video${i}`, 'user123'))
+        const videoId = videoIds[i % videoIds.length]
+        sessions.push(await createVideoSession(videoId, 'user123'))
       }
 
       // Creating one more should trigger enforcement
-      await createVideoSession('video_extra', 'user123')
+      await createVideoSession('sample-unity-tutorial', 'user123')
 
       expect(logSecurityEvent).toHaveBeenCalledWith(
         'resource_abuse',
@@ -225,15 +227,15 @@ describe('VideoStreamingService', () => {
     })
 
     test('should generate unique session IDs', async () => {
-      const session1 = await createVideoSession('video123', 'user123')
-      const session2 = await createVideoSession('video123', 'user123')
+      const session1 = await createVideoSession('sample-unity-tutorial', 'user123')
+      const session2 = await createVideoSession('sample-unity-tutorial', 'user123')
 
       expect(session1.sessionId).not.toBe(session2.sessionId)
       expect(session1.sessionId).toMatch(/^session_\d+_[a-z0-9]+$/)
     })
 
     test('should include device info in session', async () => {
-      await createVideoSession('video123', 'user123', undefined, mockDeviceInfo)
+      await createVideoSession('sample-unity-tutorial', 'user123', undefined, mockDeviceInfo)
 
       // Check that the session was created with device info
       const sessionCall = redis.set.mock.calls.find(call =>
@@ -251,13 +253,13 @@ describe('VideoStreamingService', () => {
 
     beforeEach(async () => {
       // Create a session first
-      const session = await createVideoSession('video123', 'user123')
+      const session = await createVideoSession('sample-unity-tutorial', 'user123')
       sessionId = session.sessionId
 
       mockSession = {
         sessionId,
         userId: 'user123',
-        videoId: 'video123',
+        videoId: 'sample-unity-tutorial',
         startTime: Date.now(),
         lastActivity: Date.now(),
         currentPosition: 0,
@@ -276,15 +278,23 @@ describe('VideoStreamingService', () => {
         events: [],
       }
 
-      // Mock session retrieval
+      // Mock session retrieval and updates
       redis.get.mockImplementation((key: string) => {
         if (key === `video_session:${sessionId}`) {
           return Promise.resolve(mockSession)
         }
-        if (key === 'video_manifest:video123') {
+        if (key === 'video_manifest:sample-unity-tutorial') {
           return Promise.resolve({ duration: 1800 })
         }
         return Promise.resolve(null)
+      })
+
+      // Mock set to update our mockSession
+      redis.set.mockImplementation((key: string, value: any) => {
+        if (key === `video_session:${sessionId}`) {
+          Object.assign(mockSession, value)
+        }
+        return Promise.resolve(undefined)
       })
     })
 
@@ -346,13 +356,13 @@ describe('VideoStreamingService', () => {
     let mockSession: any
 
     beforeEach(async () => {
-      const session = await createVideoSession('video123', 'user123')
+      const session = await createVideoSession('sample-unity-tutorial', 'user123')
       sessionId = session.sessionId
 
       mockSession = {
         sessionId,
         userId: 'user123',
-        videoId: 'video123',
+        videoId: 'sample-unity-tutorial',
         events: [],
         lastActivity: Date.now(),
       }
@@ -462,7 +472,7 @@ describe('VideoStreamingService', () => {
     let mockSession: any
 
     beforeEach(async () => {
-      const session = await createVideoSession('video123', 'user123')
+      const session = await createVideoSession('sample-unity-tutorial', 'user123')
       sessionId = session.sessionId
 
       mockSession = {
@@ -540,7 +550,7 @@ describe('VideoStreamingService', () => {
     let mockSession: any
 
     beforeEach(async () => {
-      const session = await createVideoSession('video123', 'user123')
+      const session = await createVideoSession('sample-unity-tutorial', 'user123')
       sessionId = session.sessionId
 
       mockSession = {
@@ -645,7 +655,7 @@ describe('VideoStreamingService', () => {
 
   describe('access control', () => {
     test('should verify video access for premium users', async () => {
-      const session = await createVideoSession('video123', 'user123')
+      const session = await createVideoSession('sample-unity-tutorial', 'user123')
 
       expect(session.restrictions).toBeDefined()
       expect(session.restrictions.downloadDisabled).toBe(true)
@@ -654,7 +664,7 @@ describe('VideoStreamingService', () => {
     })
 
     test('should include appropriate watermarks', async () => {
-      const session = await createVideoSession('video123', 'user123')
+      const session = await createVideoSession('sample-unity-tutorial', 'user123')
 
       expect(session.watermark).toBeDefined()
       expect(session.watermark.text).toContain('LazyGameDevs')
@@ -668,7 +678,7 @@ describe('VideoStreamingService', () => {
 
   describe('security features', () => {
     test('should generate secure access tokens', async () => {
-      const session = await createVideoSession('video123', 'user123')
+      const session = await createVideoSession('sample-unity-tutorial', 'user123')
 
       expect(session.accessToken).toBeDefined()
       expect(typeof session.accessToken).toBe('string')
@@ -679,7 +689,7 @@ describe('VideoStreamingService', () => {
     })
 
     test('should include expiry in access tokens', async () => {
-      const session = await createVideoSession('video123', 'user123')
+      const session = await createVideoSession('sample-unity-tutorial', 'user123')
 
       const tokenData = JSON.parse(Buffer.from(session.accessToken, 'base64').toString())
       expect(tokenData.exp).toBeDefined()
@@ -689,7 +699,7 @@ describe('VideoStreamingService', () => {
 
   describe('analytics tracking', () => {
     test('should provide analytics URLs', async () => {
-      const session = await createVideoSession('video123', 'user123')
+      const session = await createVideoSession('sample-unity-tutorial', 'user123')
 
       expect(session.analytics.trackingUrl).toBeDefined()
       expect(session.analytics.heartbeatUrl).toBeDefined()
@@ -703,7 +713,7 @@ describe('VideoStreamingService', () => {
       redis.get.mockRejectedValue(new Error('Redis error'))
 
       // Should not throw errors
-      await expect(createVideoSession('video123', 'user123')).resolves.toBeDefined()
+      await expect(createVideoSession('sample-unity-tutorial', 'user123')).resolves.toBeDefined()
     })
 
     test('should handle concurrent session management errors', async () => {
@@ -711,7 +721,7 @@ describe('VideoStreamingService', () => {
       logSecurityEvent.mockRejectedValue(new Error('Logging error'))
 
       // Should still complete session creation
-      await expect(createVideoSession('video123', 'user123')).resolves.toBeDefined()
+      await expect(createVideoSession('sample-unity-tutorial', 'user123')).resolves.toBeDefined()
     })
   })
 })

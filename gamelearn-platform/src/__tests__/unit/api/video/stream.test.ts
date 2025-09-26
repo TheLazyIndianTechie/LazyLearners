@@ -43,11 +43,25 @@ jest.mock('@/lib/security/monitoring', () => ({
   logSecurityEvent: jest.fn(),
 }))
 
+jest.mock('@/lib/prisma', () => ({
+  prisma: {
+    video: {
+      findUnique: jest.fn(),
+    },
+    user: {
+      findUnique: jest.fn(),
+    },
+    licenseKey: {
+      findFirst: jest.fn(),
+    },
+  },
+}))
+
 describe('/api/video/stream', () => {
   let POST: any
   let PUT: any
   let DELETE: any
-  let getServerSession: any
+  let auth: any
   let createVideoSession: any
   let updateVideoSession: any
   let endVideoSession: any
@@ -64,6 +78,9 @@ describe('/api/video/stream', () => {
     // Import mocked functions
     const clerkAuth = await import('@clerk/nextjs/server')
     auth = clerkAuth.auth
+
+    // Set up default auth mock
+    auth.mockResolvedValue({ userId: 'user123' })
 
     const streaming = await import('@/lib/video/streaming')
     createVideoSession = streaming.createVideoSession
@@ -333,7 +350,7 @@ describe('/api/video/stream', () => {
     })
 
     test('should reject unauthenticated requests', async () => {
-      getServerSession.mockResolvedValue(null)
+      auth.mockResolvedValue(null)
 
       const request = createMockRequest({ sessionId: 'session123' })
       const response = await PUT(request)
@@ -468,7 +485,7 @@ describe('/api/video/stream', () => {
     })
 
     test('should reject unauthenticated requests', async () => {
-      getServerSession.mockResolvedValue(null)
+      auth.mockResolvedValue(null)
 
       const request = createMockRequest({ sessionId: 'session123' })
       const response = await DELETE(request)
@@ -594,7 +611,7 @@ describe('/api/video/stream', () => {
     })
 
     test('should handle session errors', async () => {
-      getServerSession.mockRejectedValue(new Error('Session error'))
+      auth.mockRejectedValue(new Error('Session error'))
 
       const request = {
         headers: new Headers(),

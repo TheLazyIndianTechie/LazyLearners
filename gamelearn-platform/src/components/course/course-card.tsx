@@ -132,8 +132,8 @@ export function CourseCard({ course, showProgress = false, progress = 0 }: Cours
         {/* Tags */}
         <div className="flex flex-wrap gap-1 pt-2">
           {course.tags.slice(0, 3).map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
-              {tag}
+            <Badge key={tag.id} variant="outline" className="text-xs">
+              {tag.tag}
             </Badge>
           ))}
           {course.tags.length > 3 && (

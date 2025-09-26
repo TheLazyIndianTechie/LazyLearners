@@ -86,6 +86,14 @@ export async function GET(request: NextRequest) {
             image: true,
           }
         },
+        // Include normalized relationships
+        requirements: {
+          orderBy: { order: 'asc' }
+        },
+        objectives: {
+          orderBy: { order: 'asc' }
+        },
+        tags: true,
         // Only get count of modules and lessons, not full data
         _count: {
           select: {
@@ -142,9 +150,9 @@ export async function GET(request: NextRequest) {
     const formattedCourses = courses.map(course => {
       return {
         ...course,
-        requirements: course.requirements ? JSON.parse(course.requirements) : [],
-        objectives: course.objectives ? JSON.parse(course.objectives) : [],
-        tags: course.tags ? JSON.parse(course.tags) : [],
+        requirements: course.requirements.map(r => r.requirement),
+        objectives: course.objectives.map(o => o.objective),
+        tags: course.tags.map(t => t.tag),
         rating: ratingsMap.get(course.id) || 0,
         reviewCount: course._count.reviews,
         enrollmentCount: course._count.enrollments,
@@ -182,7 +190,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Get current user from Clerk
-    const { userId } = auth()
+    const { userId } = await auth()
 
     if (!userId) {
       return NextResponse.json(
@@ -207,13 +215,31 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createCourseSchema.parse(body)
 
+    // Extract arrays for separate creation
+    const { requirements: reqArray, objectives: objArray, tags: tagArray, ...courseData } = validatedData
+
     const course = await prisma.course.create({
       data: {
-        ...validatedData,
+        ...courseData,
         instructorId: userId,
-        requirements: validatedData.requirements ? JSON.stringify(validatedData.requirements) : null,
-        objectives: validatedData.objectives ? JSON.stringify(validatedData.objectives) : null,
-        tags: validatedData.tags ? JSON.stringify(validatedData.tags) : null,
+        // Create related records
+        requirements: reqArray ? {
+          create: reqArray.map((req, index) => ({
+            requirement: req,
+            order: index
+          }))
+        } : undefined,
+        objectives: objArray ? {
+          create: objArray.map((obj, index) => ({
+            objective: obj,
+            order: index
+          }))
+        } : undefined,
+        tags: tagArray ? {
+          create: tagArray.map(tag => ({
+            tag: tag
+          }))
+        } : undefined,
       },
       include: {
         instructor: {
@@ -224,15 +250,22 @@ export async function POST(request: NextRequest) {
             image: true,
           }
         },
+        requirements: {
+          orderBy: { order: 'asc' }
+        },
+        objectives: {
+          orderBy: { order: 'asc' }
+        },
+        tags: true,
         modules: true,
       }
     })
 
     const formattedCourse = {
       ...course,
-      requirements: course.requirements ? JSON.parse(course.requirements) : [],
-      objectives: course.objectives ? JSON.parse(course.objectives) : [],
-      tags: course.tags ? JSON.parse(course.tags) : [],
+      requirements: course.requirements.map(r => r.requirement),
+      objectives: course.objectives.map(o => o.objective),
+      tags: course.tags.map(t => t.tag),
     }
 
     return NextResponse.json(
