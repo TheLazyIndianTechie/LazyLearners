@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createRequestLogger } from "@/lib/logger"
 import { auth } from "@clerk/nextjs/server"
+import { prisma } from "@/lib/prisma"
 import {
   videoStreaming,
   createVideoSession,
@@ -53,15 +54,10 @@ export async function GET(request: NextRequest) {
     requestLogger.logRequest(request)
     requestLogger.info("Getting video streaming content")
 
-    // 1. Authentication check (allow test access for development)
-    const { userId: clerkUserId } = auth()
-    let userId = clerkUserId
+    // 1. Authentication check
+    const { userId } = auth()
 
-    // For testing purposes, allow access with a mock user ID
-    if (!userId && (process.env.NODE_ENV === 'development' || process.env.ENABLE_VIDEO_TEST === 'true')) {
-      userId = 'test-user-123'
-      requestLogger.info("Using test user for video streaming testing")
-    } else if (!clerkUserId) {
+    if (!userId) {
       requestLogger.warn("Unauthorized video streaming attempt")
       await logSecurityEvent(
         'unauthorized_access',
@@ -682,15 +678,53 @@ async function verifyUserVideoAccess(
   courseId?: string
 ): Promise<boolean> {
   try {
-    // In production, this would check:
-    // 1. Course enrollment status
-    // 2. Payment/subscription status
-    // 3. Video access permissions
-    // 4. Geographic restrictions
-    // 5. Time-based access windows
+    // If courseId is provided directly, check license for that course
+    if (courseId) {
+      const licenseKey = await prisma.licenseKey.findFirst({
+        where: {
+          userId,
+          courseId,
+          status: 'ACTIVE',
+          OR: [
+            { expiresAt: null },
+            { expiresAt: { gt: new Date() } }
+          ]
+        }
+      })
+      return !!licenseKey
+    }
 
-    // For now, allowing access for authenticated users
-    return true
+    // If no courseId provided, find the course through the lesson
+    // videoId should correspond to lessonId
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: videoId },
+      include: {
+        module: {
+          include: {
+            course: true
+          }
+        }
+      }
+    })
+
+    if (!lesson?.module?.course) {
+      return false
+    }
+
+    // Check if user has active license for the course
+    const licenseKey = await prisma.licenseKey.findFirst({
+      where: {
+        userId,
+        courseId: lesson.module.course.id,
+        status: 'ACTIVE',
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gt: new Date() } }
+        ]
+      }
+    })
+
+    return !!licenseKey
   } catch (error) {
     console.warn('Failed to verify user video access:', error)
     return false
