@@ -46,50 +46,36 @@ export interface DodoCustomerResponse {
 }
 
 /**
- * MCP wrapper functions for Dodo Payments API
- * These functions will be called from server-side contexts where MCP tools are available
+ * Dodo Payments API client functions
+ * Direct HTTP calls to Dodo Payments REST API
  */
 
 export async function mcp__dodopayments_api__retrieve_payments(params: {
   payment_id: string
   jq_filter?: string
 }): Promise<DodoPaymentResponse> {
-  // In a real implementation, this would use the actual MCP tool
-  // For now, we'll use the fetch-based approach with proper error handling
-
   try {
-    // This should be replaced with actual MCP tool call
-    // when running in Claude Code environment
-    if (typeof global !== 'undefined' && global.mcpTools) {
-      // Use actual MCP tool if available
-      return await global.mcpTools.mcp__dodopayments_api__retrieve_payments(params)
-    }
+    const apiKey = process.env.DODO_API_KEY
+    const environment = process.env.DODO_ENVIRONMENT || 'test'
+    const baseUrl = environment === 'live'
+      ? 'https://api.dodopayments.com'
+      : 'https://api.dodopayments.com' // Dodo uses same API for test/live with different keys
 
-    // Fallback for development/testing
-    console.warn('MCP tools not available, using development fallback')
-
-    // Return mock data for development
-    return {
-      payment_id: params.payment_id,
-      status: 'succeeded',
-      total_amount: 2999,
-      currency: 'USD',
-      customer: {
-        customer_id: 'cus_dev_example',
-        name: 'Development User',
-        email: 'dev@example.com'
+    const response = await fetch(`${baseUrl}/v1/payments/${params.payment_id}`, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
       },
-      payment_method: 'credit',
-      payment_method_type: 'card',
-      created_at: new Date().toISOString(),
-      metadata: {
-        course_id: 'course_dev_123',
-        user_id: 'user_dev_456',
-        environment: 'development'
-      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Dodo API error: ${response.status} ${response.statusText}`)
     }
+
+    const data = await response.json()
+    return data
   } catch (error) {
-    console.error('Error in MCP payment retrieval:', error)
+    console.error('Error retrieving payment from Dodo API:', error)
     throw new Error(`Failed to retrieve payment: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
@@ -112,21 +98,29 @@ export async function mcp__dodopayments_api__create_checkout_sessions(params: {
   confirm: boolean
 }): Promise<DodoCheckoutSessionResponse> {
   try {
-    if (typeof global !== 'undefined' && global.mcpTools) {
-      return await global.mcpTools.mcp__dodopayments_api__create_checkout_sessions(params)
+    const apiKey = process.env.DODO_API_KEY
+    const environment = process.env.DODO_ENVIRONMENT || 'test'
+    const baseUrl = environment === 'live'
+      ? 'https://api.dodopayments.com'
+      : 'https://api.dodopayments.com'
+
+    const response = await fetch(`${baseUrl}/v1/checkout/sessions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Dodo API error: ${response.status} ${response.statusText}`)
     }
 
-    console.warn('MCP tools not available, using development fallback')
-
-    // Return mock checkout session for development
-    const sessionId = `cs_dev_${Date.now()}`
-    return {
-      id: sessionId,
-      url: `https://checkout.dodo.dev/session/${sessionId}?mode=test`,
-      payment_id: `pay_dev_${Date.now()}`
-    }
+    const data = await response.json()
+    return data
   } catch (error) {
-    console.error('Error in MCP checkout session creation:', error)
+    console.error('Error creating checkout session with Dodo API:', error)
     throw new Error(`Failed to create checkout session: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
@@ -147,24 +141,29 @@ export async function mcp__dodopayments_api__create_products(params: {
   metadata?: Record<string, any>
 }): Promise<DodoProductResponse> {
   try {
-    if (typeof global !== 'undefined' && global.mcpTools) {
-      return await global.mcpTools.mcp__dodopayments_api__create_products(params)
+    const apiKey = process.env.DODO_API_KEY
+    const environment = process.env.DODO_ENVIRONMENT || 'test'
+    const baseUrl = environment === 'live'
+      ? 'https://api.dodopayments.com'
+      : 'https://api.dodopayments.com'
+
+    const response = await fetch(`${baseUrl}/v1/products`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Dodo API error: ${response.status} ${response.statusText}`)
     }
 
-    console.warn('MCP tools not available, using development fallback')
-
-    // Return mock product for development
-    return {
-      id: `prod_dev_${Date.now()}`,
-      name: params.name,
-      description: params.description,
-      price: params.price,
-      tax_category: params.tax_category,
-      license_key_enabled: params.license_key_enabled,
-      metadata: params.metadata
-    }
+    const data = await response.json()
+    return data
   } catch (error) {
-    console.error('Error in MCP product creation:', error)
+    console.error('Error creating product with Dodo API:', error)
     throw new Error(`Failed to create product: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
@@ -179,18 +178,36 @@ export async function mcp__dodopayments_api__list_payments(params: {
   jq_filter?: string
 }): Promise<{ items: DodoPaymentResponse[] }> {
   try {
-    if (typeof global !== 'undefined' && global.mcpTools) {
-      return await global.mcpTools.mcp__dodopayments_api__list_payments(params)
+    const apiKey = process.env.DODO_API_KEY
+    const environment = process.env.DODO_ENVIRONMENT || 'test'
+    const baseUrl = environment === 'live'
+      ? 'https://api.dodopayments.com'
+      : 'https://api.dodopayments.com'
+
+    const queryParams = new URLSearchParams()
+    if (params.customer_id) queryParams.append('customer_id', params.customer_id)
+    if (params.status) queryParams.append('status', params.status)
+    if (params.created_at_gte) queryParams.append('created_at_gte', params.created_at_gte)
+    if (params.created_at_lte) queryParams.append('created_at_lte', params.created_at_lte)
+    if (params.page_number) queryParams.append('page_number', params.page_number.toString())
+    if (params.page_size) queryParams.append('page_size', params.page_size.toString())
+    if (params.jq_filter) queryParams.append('jq_filter', params.jq_filter)
+
+    const response = await fetch(`${baseUrl}/v1/payments?${queryParams.toString()}`, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Dodo API error: ${response.status} ${response.statusText}`)
     }
 
-    console.warn('MCP tools not available, using development fallback')
-
-    // Return mock payments list for development
-    return {
-      items: []
-    }
+    const data = await response.json()
+    return data
   } catch (error) {
-    console.error('Error in MCP payments list:', error)
+    console.error('Error listing payments from Dodo API:', error)
     throw new Error(`Failed to list payments: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
@@ -201,22 +218,29 @@ export async function mcp__dodopayments_api__create_customers(params: {
   phone_number?: string
 }): Promise<DodoCustomerResponse> {
   try {
-    if (typeof global !== 'undefined' && global.mcpTools) {
-      return await global.mcpTools.mcp__dodopayments_api__create_customers(params)
+    const apiKey = process.env.DODO_API_KEY
+    const environment = process.env.DODO_ENVIRONMENT || 'test'
+    const baseUrl = environment === 'live'
+      ? 'https://api.dodopayments.com'
+      : 'https://api.dodopayments.com'
+
+    const response = await fetch(`${baseUrl}/v1/customers`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Dodo API error: ${response.status} ${response.statusText}`)
     }
 
-    console.warn('MCP tools not available, using development fallback')
-
-    // Return mock customer for development
-    return {
-      customer_id: `cus_dev_${Date.now()}`,
-      name: params.name,
-      email: params.email,
-      phone_number: params.phone_number,
-      created_at: new Date().toISOString()
-    }
+    const data = await response.json()
+    return data
   } catch (error) {
-    console.error('Error in MCP customer creation:', error)
+    console.error('Error creating customer with Dodo API:', error)
     throw new Error(`Failed to create customer: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
@@ -227,47 +251,33 @@ export async function mcp__dodopayments_api__list_products(params: {
   archived?: boolean
 }): Promise<{ items: DodoProductResponse[] }> {
   try {
-    if (typeof global !== 'undefined' && global.mcpTools) {
-      return await global.mcpTools.mcp__dodopayments_api__list_products(params)
+    const apiKey = process.env.DODO_API_KEY
+    const environment = process.env.DODO_ENVIRONMENT || 'test'
+    const baseUrl = environment === 'live'
+      ? 'https://api.dodopayments.com'
+      : 'https://api.dodopayments.com'
+
+    const queryParams = new URLSearchParams()
+    if (params.page_number) queryParams.append('page_number', params.page_number.toString())
+    if (params.page_size) queryParams.append('page_size', params.page_size.toString())
+    if (params.archived !== undefined) queryParams.append('archived', params.archived.toString())
+
+    const response = await fetch(`${baseUrl}/v1/products?${queryParams.toString()}`, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Dodo API error: ${response.status} ${response.statusText}`)
     }
 
-    console.warn('MCP tools not available, using development fallback')
-
-    // Return mock products list for development
-    return {
-      items: [
-        {
-          id: `prod_dev_${Date.now()}`,
-          name: 'Game Development Fundamentals',
-          description: 'Learn the basics of game development with Unity',
-          price: {
-            type: 'one_time_price',
-            currency: 'USD',
-            price: 2999
-          },
-          tax_category: 'edtech',
-          license_key_enabled: true,
-          metadata: {
-            environment: 'development',
-            duration: '8 hours'
-          }
-        }
-      ]
-    }
+    const data = await response.json()
+    return data
   } catch (error) {
-    console.error('Error in MCP products list:', error)
+    console.error('Error listing products from Dodo API:', error)
     throw new Error(`Failed to list products: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
 
-// Type declaration for global MCP tools (when available)
-declare global {
-  var mcpTools: {
-    mcp__dodopayments_api__retrieve_payments: (params: any) => Promise<any>
-    mcp__dodopayments_api__create_checkout_sessions: (params: any) => Promise<any>
-    mcp__dodopayments_api__create_products: (params: any) => Promise<any>
-    mcp__dodopayments_api__list_payments: (params: any) => Promise<any>
-    mcp__dodopayments_api__create_customers: (params: any) => Promise<any>
-    mcp__dodopayments_api__list_products: (params: any) => Promise<any>
-  } | undefined
-}
