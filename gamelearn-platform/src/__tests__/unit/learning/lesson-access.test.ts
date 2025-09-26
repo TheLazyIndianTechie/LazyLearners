@@ -1,11 +1,10 @@
 import { NextRequest } from "next/server";
 import { GET } from "@/app/api/courses/[id]/modules/[moduleId]/lessons/[lessonId]/route";
-import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 
 // Mock dependencies
-jest.mock("next-auth", () => ({
-  getServerSession: jest.fn(),
+jest.mock("@clerk/nextjs/server", () => ({
+  auth: jest.fn(),
 }));
 
 jest.mock("@/lib/prisma", () => ({

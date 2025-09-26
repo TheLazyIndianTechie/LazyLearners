@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
+import { NextResponse } from 'next/server'
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
@@ -12,9 +13,27 @@ const isProtectedRoute = createRouteMatcher([
   '/api/video(.*)'
 ])
 
+const isInstructorRoute = createRouteMatcher([
+  '/instructor(.*)',
+  '/api/instructor(.*)'
+])
+
 export default clerkMiddleware(async (auth, req) => {
+  const { userId, sessionClaims } = await auth()
+
   if (isProtectedRoute(req)) {
     await auth.protect()
+  }
+
+  // Check instructor role for instructor routes
+  if (isInstructorRoute(req) && userId) {
+    await auth.protect()
+
+    const userRole = sessionClaims?.metadata?.role || sessionClaims?.publicMetadata?.role
+
+    if (userRole !== 'INSTRUCTOR' && userRole !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
   }
 })
 

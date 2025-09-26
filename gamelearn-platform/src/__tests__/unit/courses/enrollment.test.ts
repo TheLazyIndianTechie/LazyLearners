@@ -1,12 +1,11 @@
 import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/enrollment/route";
-import { getServerSession } from "next-auth";
 import { enrollUserInCourse, getUserEnrollments } from "@/lib/payment";
 import { prisma } from "@/lib/prisma";
 
 // Mock dependencies
-jest.mock("next-auth", () => ({
-  getServerSession: jest.fn(),
+jest.mock("@clerk/nextjs/server", () => ({
+  auth: jest.fn(),
 }));
 
 jest.mock("@/lib/payment", () => ({

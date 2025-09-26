@@ -9,12 +9,8 @@ import { jest } from '@jest/globals'
 import { NextRequest } from 'next/server'
 
 // Mock dependencies
-jest.mock('next-auth/next', () => ({
-  getServerSession: jest.fn(),
-}))
-
-jest.mock('@/lib/auth', () => ({
-  authOptions: {},
+jest.mock('@clerk/nextjs/server', () => ({
+  auth: jest.fn(),
 }))
 
 jest.mock('@/lib/logger', () => ({

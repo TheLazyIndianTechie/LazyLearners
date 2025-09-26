@@ -1,13 +1,12 @@
 import { NextRequest } from "next/server";
 import { GET, PUT, DELETE } from "@/app/api/courses/[id]/route";
 import { POST } from "@/app/api/courses/route";
-import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { ZodError } from "zod";
 
 // Mock dependencies
-jest.mock("next-auth", () => ({
-  getServerSession: jest.fn(),
+jest.mock("@clerk/nextjs/server", () => ({
+  auth: jest.fn(),
 }));
 
 jest.mock("@/lib/prisma", () => ({

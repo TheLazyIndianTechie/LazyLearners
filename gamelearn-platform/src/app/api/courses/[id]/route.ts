@@ -35,13 +35,17 @@ interface RouteParams {
   params: { id: string }
 }
 
-// GET /api/courses/[id] - Get specific course
+// GET /api/courses/[id] - Get specific course with optimized queries
 export async function GET(
   request: NextRequest,
   context: RouteParams
 ) {
   try {
     const { id } = context.params
+    const { searchParams } = new URL(request.url)
+    const includeReviews = searchParams.get('includeReviews') === 'true'
+
+    // Get course with basic info and counts
     const course = await prisma.course.findUnique({
       where: { id },
       include: {
@@ -54,25 +58,21 @@ export async function GET(
             bio: true,
           }
         },
+        // Get modules with lesson counts but not all lesson data
         modules: {
-          include: {
-            lessons: {
-              orderBy: { order: 'asc' }
-            }
-          },
-          orderBy: { order: 'asc' }
-        },
-        reviews: {
-          include: {
-            user: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            order: true,
+            duration: true,
+            _count: {
               select: {
-                id: true,
-                name: true,
-                image: true,
+                lessons: true
               }
             }
           },
-          orderBy: { createdAt: 'desc' }
+          orderBy: { order: 'asc' }
         },
         _count: {
           select: {
@@ -90,10 +90,33 @@ export async function GET(
       )
     }
 
-    // Calculate average rating
-    const avgRating = course.reviews.length > 0
-      ? course.reviews.reduce((sum, review) => sum + review.rating, 0) / course.reviews.length
-      : 0
+    // Get aggregated rating efficiently
+    const ratingResult = await prisma.review.aggregate({
+      where: { courseId: id },
+      _avg: { rating: true }
+    })
+
+    const avgRating = ratingResult._avg.rating || 0
+
+    // Get reviews only if requested (for course detail page)
+    let reviews = null
+    if (includeReviews) {
+      const reviewsLimit = Math.min(10, parseInt(searchParams.get('reviewsLimit') || '5'))
+      reviews = await prisma.review.findMany({
+        where: { courseId: id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: reviewsLimit
+      })
+    }
 
     const formattedCourse = {
       ...course,
@@ -103,6 +126,9 @@ export async function GET(
       rating: avgRating,
       reviewCount: course._count.reviews,
       enrollmentCount: course._count.enrollments,
+      reviews,
+      // Add total lesson count across all modules
+      totalLessons: course.modules.reduce((sum, module) => sum + module._count.lessons, 0)
     }
 
     return NextResponse.json({ course: formattedCourse })
@@ -122,9 +148,9 @@ export async function PUT(
 ) {
   try {
     const { id } = context.params
-    const session = await getServerSession()
+    const { userId } = auth()
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
@@ -190,11 +216,11 @@ export async function PUT(
             image: true,
           }
         },
-        modules: {
-          include: {
-            lessons: true
+        _count: {
+          select: {
+            modules: true
           }
-        },
+        }
       }
     })
 
@@ -229,9 +255,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = context.params
-    const session = await getServerSession()
+    const { userId } = auth()
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }

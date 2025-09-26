@@ -18,12 +18,8 @@ jest.mock('@/lib/logger', () => ({
   })),
 }))
 
-jest.mock('next-auth/next', () => ({
-  getServerSession: jest.fn(),
-}))
-
-jest.mock('@/lib/auth', () => ({
-  authOptions: {},
+jest.mock('@clerk/nextjs/server', () => ({
+  auth: jest.fn(),
 }))
 
 jest.mock('@/lib/video/streaming', () => ({
@@ -66,8 +62,8 @@ describe('/api/video/stream', () => {
     DELETE = streamRoute.DELETE
 
     // Import mocked functions
-    const nextAuth = await import('next-auth/next')
-    getServerSession = nextAuth.getServerSession
+    const clerkAuth = await import('@clerk/nextjs/server')
+    auth = clerkAuth.auth
 
     const streaming = await import('@/lib/video/streaming')
     createVideoSession = streaming.createVideoSession
@@ -83,13 +79,8 @@ describe('/api/video/stream', () => {
     jest.clearAllMocks()
 
     // Default mock implementations
-    getServerSession.mockResolvedValue({
-      user: {
-        id: 'user123',
-        email: 'student@lazygamedevs.com',
-        name: 'Test Student',
-        role: 'student',
-      },
+    auth.mockResolvedValue({
+      userId: 'user123',
     })
   })
 
@@ -167,7 +158,7 @@ describe('/api/video/stream', () => {
     })
 
     test('should reject unauthenticated requests', async () => {
-      getServerSession.mockResolvedValue(null)
+      auth.mockResolvedValue({ userId: null })
 
       const request = createMockRequest({ videoId: 'video123' })
       const response = await POST(request)

@@ -30,7 +30,7 @@ const createCourseSchema = z.object({
   tags: z.array(z.string()).optional(),
 })
 
-// GET /api/courses - List all courses or user's courses
+// GET /api/courses - List all courses or user's courses with pagination
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -39,6 +39,11 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     const difficulty = searchParams.get('difficulty')
     const search = searchParams.get('search')
+
+    // Pagination parameters
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20')))
+    const skip = (page - 1) * limit
 
     // Build where clause
     const where: any = {}
@@ -66,6 +71,10 @@ export async function GET(request: NextRequest) {
       ]
     }
 
+    // Get total count for pagination
+    const totalCourses = await prisma.course.count({ where })
+
+    // Optimized query without N+1 issues
     const courses = await prisma.course.findMany({
       where,
       include: {
@@ -77,18 +86,10 @@ export async function GET(request: NextRequest) {
             image: true,
           }
         },
-        modules: {
-          include: {
-            lessons: true
-          }
-        },
-        reviews: {
-          select: {
-            rating: true
-          }
-        },
+        // Only get count of modules and lessons, not full data
         _count: {
           select: {
+            modules: true,
             enrollments: true,
             reviews: true
           }
@@ -96,27 +97,78 @@ export async function GET(request: NextRequest) {
       },
       orderBy: {
         createdAt: 'desc'
+      },
+      skip,
+      take: limit
+    })
+
+    // Get aggregated ratings efficiently using raw query
+    const courseIds = courses.map(course => course.id)
+    const ratings = await prisma.review.groupBy({
+      by: ['courseId'],
+      where: {
+        courseId: {
+          in: courseIds
+        }
+      },
+      _avg: {
+        rating: true
       }
     })
 
-    // Calculate ratings and format response
-    const formattedCourses = courses.map(course => {
-      const avgRating = course.reviews.length > 0
-        ? course.reviews.reduce((sum, review) => sum + review.rating, 0) / course.reviews.length
-        : 0
+    // Create ratings lookup map
+    const ratingsMap = new Map(
+      ratings.map(r => [r.courseId, r._avg.rating || 0])
+    )
 
+    // Get module and lesson counts efficiently
+    const moduleCounts = await prisma.module.groupBy({
+      by: ['courseId'],
+      where: {
+        courseId: {
+          in: courseIds
+        }
+      },
+      _count: {
+        lessons: true
+      }
+    })
+
+    const moduleCountsMap = new Map(
+      moduleCounts.map(m => [m.courseId, m._count.lessons])
+    )
+
+    // Format response with optimized data
+    const formattedCourses = courses.map(course => {
       return {
         ...course,
         requirements: course.requirements ? JSON.parse(course.requirements) : [],
         objectives: course.objectives ? JSON.parse(course.objectives) : [],
         tags: course.tags ? JSON.parse(course.tags) : [],
-        rating: avgRating,
+        rating: ratingsMap.get(course.id) || 0,
         reviewCount: course._count.reviews,
         enrollmentCount: course._count.enrollments,
+        moduleCount: course._count.modules,
+        lessonCount: moduleCountsMap.get(course.id) || 0,
       }
     })
 
-    return NextResponse.json({ courses: formattedCourses })
+    // Calculate pagination info
+    const totalPages = Math.ceil(totalCourses / limit)
+    const hasNextPage = page < totalPages
+    const hasPreviousPage = page > 1
+
+    return NextResponse.json({
+      courses: formattedCourses,
+      pagination: {
+        page,
+        limit,
+        totalCourses,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage
+      }
+    })
   } catch (error) {
     console.error('Failed to fetch courses:', error)
     return NextResponse.json(
@@ -129,16 +181,17 @@ export async function GET(request: NextRequest) {
 // POST /api/courses - Create a new course
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    // Get current user from Clerk
+    const { userId } = auth()
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       )
     }
 
-    // Check if user is instructor or admin
+    // Check if user exists and is instructor or admin
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true }

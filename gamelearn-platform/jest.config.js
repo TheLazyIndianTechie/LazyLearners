@@ -16,6 +16,11 @@ const customJestConfig = {
   // Test environment
   testEnvironment: 'jest-environment-jsdom',
 
+  // Transform ES modules
+  transformIgnorePatterns: [
+    'node_modules/(?!(next-auth|@clerk|@auth)/)',
+  ],
+
   // Module name mapping for path aliases
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',

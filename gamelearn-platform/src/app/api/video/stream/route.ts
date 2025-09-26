@@ -14,7 +14,7 @@ import { z } from "zod"
 // Validation schemas
 const createSessionSchema = z.object({
   videoId: z.string().min(1, 'Video ID is required'),
-  courseId: z.string().uuid().optional(),
+  courseId: z.string().optional(), // Allow flexible courseId format (UUID or slug)
   deviceInfo: z.object({
     userAgent: z.string().optional(),
     platform: z.string().optional(),

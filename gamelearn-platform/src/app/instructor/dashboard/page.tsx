@@ -48,7 +48,7 @@ export default function InstructorDashboard() {
     try {
       if (!user?.id) return
 
-      const response = await fetch(`/api/courses?instructorId=${user?.id}`)
+      const response = await fetch(`/api/courses?instructorId=${user?.id}&limit=10`)
       if (response.ok) {
         const data = await response.json()
         setCourses(data.courses || [])
@@ -66,7 +66,8 @@ export default function InstructorDashboard() {
       router.push("/auth/signin")
       return
     }
-    if (session.user?.role !== "INSTRUCTOR" && session.user?.role !== "ADMIN") {
+    const userRole = (user?.publicMetadata?.role as string) || 'STUDENT'
+    if (userRole !== "INSTRUCTOR" && userRole !== "ADMIN") {
       router.push("/")
       return
     }
@@ -89,7 +90,8 @@ export default function InstructorDashboard() {
     )
   }
 
-  if (!isSignedIn || (session.user?.role !== "INSTRUCTOR" && session.user?.role !== "ADMIN")) {
+  const userRole = (user?.publicMetadata?.role as string) || 'STUDENT'
+  if (!isSignedIn || (userRole !== "INSTRUCTOR" && userRole !== "ADMIN")) {
     return null
   }
 
