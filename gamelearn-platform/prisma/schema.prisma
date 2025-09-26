@@ -43,12 +43,11 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  password      String?   // For credentials login
+  password      String? // For credentials login
   role          Role      @default(STUDENT)
   bio           String?
   website       String?
   location      String?
-  skills        String? // JSON string of skills
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -63,11 +62,23 @@ model User {
   quizAttempts      QuizAttempt[]
   projectSubmission ProjectSubmission[]
   certifications    Certification[]
-  reviews           Review[]           @relation("UserReviews")
+  reviews           Review[]            @relation("UserReviews")
   payments          Payment[]
   licenseKeys       LicenseKey[]
+  skills            UserSkill[]
 
   @@map("users")
+}
+
+model UserSkill {
+  id        String   @id @default(cuid())
+  skill     String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@unique([userId, skill])
 }
 
 model VerificationToken {
@@ -95,20 +106,55 @@ model Course {
   engine      GameEngine?
   difficulty  Difficulty
   duration    Int // in minutes
-  requirements String? // JSON array
-  objectives   String? // JSON array
-  tags         String? // JSON array
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  instructor    User         @relation(fields: [instructorId], references: [id])
-  instructorId  String
-  modules       Module[]
-  enrollments   Enrollment[]
-  reviews       Review[]
-  progress      Progress[]
-  payments      Payment[]
-  licenseKeys   LicenseKey[]
+  instructor   User                @relation(fields: [instructorId], references: [id])
+  instructorId String
+  modules      Module[]
+  enrollments  Enrollment[]
+  reviews      Review[]
+  progress     Progress[]
+  payments     Payment[]
+  licenseKeys  LicenseKey[]
+  requirements CourseRequirement[]
+  objectives   CourseObjective[]
+  tags         CourseTag[]
+}
+
+model CourseRequirement {
+  id          String   @id @default(cuid())
+  requirement String
+  order       Int
+  createdAt   DateTime @default(now())
+
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId String
+
+  @@unique([courseId, requirement])
+}
+
+model CourseObjective {
+  id        String   @id @default(cuid())
+  objective String
+  order     Int
+  createdAt DateTime @default(now())
+
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId String
+
+  @@unique([courseId, objective])
+}
+
+model CourseTag {
+  id        String   @id @default(cuid())
+  tag       String
+  createdAt DateTime @default(now())
+
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId String
+
+  @@unique([courseId, tag])
 }
 
 model Module {
@@ -134,29 +180,41 @@ model Lesson {
   order       Int
   duration    Int // in minutes
   videoUrl    String?
-  resources   String? // JSON array of resources
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  module   Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  moduleId String
-  quiz     Quiz?
-  progress Progress[]
+  module    Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId  String
+  quiz      Quiz?
+  progress  Progress[]
+  resources LessonResource[]
+}
+
+model LessonResource {
+  id        String   @id @default(cuid())
+  title     String
+  url       String
+  type      String // 'document', 'link', 'download', etc.
+  order     Int
+  createdAt DateTime @default(now())
+
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId String
 }
 
 model Quiz {
-  id           String    @id @default(cuid())
+  id           String   @id @default(cuid())
   title        String
   description  String?
   questions    String // JSON array of questions
   timeLimit    Int? // in minutes
   passingScore Int
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  lesson    Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  lessonId  String        @unique
-  attempts  QuizAttempt[]
+  lesson   Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId String        @unique
+  attempts QuizAttempt[]
 }
 
 model QuizAttempt {
@@ -173,9 +231,9 @@ model QuizAttempt {
 }
 
 model Enrollment {
-  id          String          @id @default(cuid())
+  id          String           @id @default(cuid())
   status      EnrollmentStatus @default(ACTIVE)
-  enrolledAt  DateTime        @default(now())
+  enrolledAt  DateTime         @default(now())
   completedAt DateTime?
 
   user     User   @relation(fields: [userId], references: [id])
@@ -219,13 +277,13 @@ model Review {
 }
 
 model Portfolio {
-  id           String    @id @default(cuid())
+  id           String   @id @default(cuid())
   title        String
   description  String?
-  isPublic     Boolean   @default(true)
+  isPublic     Boolean  @default(true)
   customDomain String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   user     User      @relation(fields: [userId], references: [id])
   userId   String    @unique
@@ -233,23 +291,34 @@ model Portfolio {
 }
 
 model Project {
-  id           String      @id @default(cuid())
-  title        String
-  description  String
-  thumbnail    String?
-  engine       GameEngine?
-  webglBuild   String? // URL to WebGL build
-  sourceCode   String? // URL to source code
-  liveDemo     String? // URL to live demo
-  tags         String? // JSON array
-  isPublic     Boolean     @default(true)
-  featured     Boolean     @default(false)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  thumbnail   String?
+  engine      GameEngine?
+  webglBuild  String? // URL to WebGL build
+  sourceCode  String? // URL to source code
+  liveDemo    String? // URL to live demo
+  isPublic    Boolean     @default(true)
+  featured    Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+  portfolio   Portfolio           @relation(fields: [portfolioId], references: [id])
   portfolioId String
   submissions ProjectSubmission[]
+  tags        ProjectTag[]
+}
+
+model ProjectTag {
+  id        String   @id @default(cuid())
+  tag       String
+  createdAt DateTime @default(now())
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+
+  @@unique([projectId, tag])
 }
 
 model ProjectSubmission {
@@ -271,7 +340,6 @@ model ForumPost {
   title     String
   content   String
   category  String
-  tags      String? // JSON array
   likes     Int      @default(0)
   views     Int      @default(0)
   pinned    Boolean  @default(false)
@@ -279,9 +347,21 @@ model ForumPost {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  author  User    @relation(fields: [authorId], references: [id])
+  author   User           @relation(fields: [authorId], references: [id])
   authorId String
-  replies Reply[]
+  replies  Reply[]
+  tags     ForumPostTag[]
+}
+
+model ForumPostTag {
+  id        String   @id @default(cuid())
+  tag       String
+  createdAt DateTime @default(now())
+
+  forumPost   ForumPost @relation(fields: [forumPostId], references: [id], onDelete: Cascade)
+  forumPostId String
+
+  @@unique([forumPostId, tag])
 }
 
 model Reply {
@@ -357,17 +437,17 @@ enum EnrollmentStatus {
 }
 
 model Payment {
-  id               String        @id @default(cuid())
-  dodoPaymentId    String        @unique // Payment ID from Dodo Payments
-  status           PaymentStatus @default(PENDING)
-  amount           Int // Amount in smallest currency unit (cents)
-  currency         String        @default("USD")
-  paymentMethod    String?
-  discountCode     String?
-  metadata         String? // JSON metadata from Dodo
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  completedAt      DateTime?
+  id            String        @id @default(cuid())
+  dodoPaymentId String        @unique // Payment ID from Dodo Payments
+  status        PaymentStatus @default(PENDING)
+  amount        Int // Amount in smallest currency unit (cents)
+  currency      String        @default("USD")
+  paymentMethod String?
+  discountCode  String?
+  metadata      String? // JSON metadata from Dodo
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  completedAt   DateTime?
 
   user       User        @relation(fields: [userId], references: [id])
   userId     String
@@ -377,22 +457,22 @@ model Payment {
 }
 
 model LicenseKey {
-  id                String           @id @default(cuid())
-  key               String           @unique
-  dodoLicenseKeyId  String?          @unique // License key ID from Dodo
-  status            LicenseKeyStatus @default(ACTIVE)
-  activationsLimit  Int?
-  activationsCount  Int              @default(0)
-  expiresAt         DateTime?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id               String           @id @default(cuid())
+  key              String           @unique
+  dodoLicenseKeyId String?          @unique // License key ID from Dodo
+  status           LicenseKeyStatus @default(ACTIVE)
+  activationsLimit Int?
+  activationsCount Int              @default(0)
+  expiresAt        DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
-  user     User   @relation(fields: [userId], references: [id])
-  userId   String
-  course   Course @relation(fields: [courseId], references: [id])
-  courseId String
-  payment  Payment? @relation(fields: [paymentId], references: [id])
-  paymentId String? @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  course    Course   @relation(fields: [courseId], references: [id])
+  courseId  String
+  payment   Payment? @relation(fields: [paymentId], references: [id])
+  paymentId String?  @unique
 
   @@unique([userId, courseId])
 }
