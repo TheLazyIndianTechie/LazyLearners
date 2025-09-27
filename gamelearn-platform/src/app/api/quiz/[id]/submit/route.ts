@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
+import { auth } from "@clerk/nextjs/server"
 
 import { submitQuizAttempt, canUserTakeQuiz } from "@/lib/quiz"
 import { QuizAnswer } from "@/lib/types/quiz"
@@ -9,9 +9,9 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession()
+    const { userId } = auth()
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

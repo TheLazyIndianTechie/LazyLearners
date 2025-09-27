@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
+import { auth } from "@clerk/nextjs/server"
 
 import { enrollUserInCourse, getUserEnrollments } from "@/lib/payment"
+import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const { userId } = auth()
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -22,9 +23,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const { userId } = auth()
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

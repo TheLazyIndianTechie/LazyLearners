@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
+import { auth } from "@clerk/nextjs/server"
 
 import { prisma } from "@/lib/prisma"
 import { z, ZodError } from "zod"
@@ -15,9 +15,9 @@ const progressUpdateSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const { userId } = auth()
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -93,9 +93,9 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const { userId } = auth()
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }

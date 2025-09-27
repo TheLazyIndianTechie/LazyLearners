@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
     requestLogger.logRequest(request)
 
     // 1. Authentication check
-    const session = await getServerSession()
-    if (!session?.user) {
+    const { userId } = auth()
+    if (!userId) {
       return NextResponse.json(
         {
           success: false,
@@ -167,8 +167,8 @@ export async function GET(request: NextRequest) {
     requestLogger.logRequest(request)
 
     // 1. Authentication check
-    const session = await getServerSession()
-    if (!session?.user) {
+    const { userId } = auth()
+    if (!userId) {
       return NextResponse.json(
         {
           success: false,

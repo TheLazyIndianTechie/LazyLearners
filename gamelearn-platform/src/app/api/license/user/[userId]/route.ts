@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from "@clerk/nextjs/server"
+
 import { licenseKeyService } from '@/lib/license/license-service'
-import { getServerSession } from "next-auth"
 
 
 interface RouteParams {
@@ -12,17 +13,18 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     // Authentication check - users can only access their own license keys or admins can access any
-    const session = await getServerSession()
-    if (!session?.user) {
+    const { userId: authUserId, sessionClaims } = await auth()
+
+    if (!authUserId) {
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 }
       )
     }
 
-    const { userId } = params
+    const targetUserId = params.userId
 
-    if (!userId) {
+    if (!targetUserId) {
       return NextResponse.json(
         { success: false, error: 'User ID is required' },
         { status: 400 }
@@ -30,14 +32,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Authorization check - users can only access their own license keys unless they're admin
-    if (userId !== userId && session.user.role !== 'ADMIN') {
+    const role = (sessionClaims as any)?.metadata?.role || (sessionClaims as any)?.publicMetadata?.role || 'STUDENT'
+
+    if (targetUserId !== authUserId && role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'Unauthorized. You can only access your own license keys.' },
         { status: 403 }
       )
     }
 
-    const licenseKeys = await licenseKeyService.getUserLicenseKeys(userId)
+    const licenseKeys = await licenseKeyService.getUserLicenseKeys(targetUserId)
 
     return NextResponse.json({
       success: true,
