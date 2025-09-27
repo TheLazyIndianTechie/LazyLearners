@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
     requestLogger.info("Processing file upload")
 
     // 1. Authentication check
-    const session = await getServerSession()
-    if (!session?.user) {
+    const { userId, sessionClaims } = auth()
+    if (!userId) {
       requestLogger.warn("Unauthorized upload attempt")
       return NextResponse.json(
         {
@@ -45,8 +45,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userId = userId
-    const userRole = session.user.role || 'student'
+    const userRoleClaim =
+      (sessionClaims as any)?.metadata?.role ??
+      (sessionClaims as any)?.publicMetadata?.role ??
+      'student'
+    const userRole = String(userRoleClaim)
 
     // 2. Rate limiting check
     const rateLimitResult = await checkUploadRateLimit(userId, requestLogger)

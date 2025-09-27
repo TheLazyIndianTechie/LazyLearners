@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createRequestLogger } from "@/lib/logger"
-import { auth } from "@clerk/nextjs/server"
+import { auth, clerkClient } from "@clerk/nextjs/server"
 
 import {
   securityTestRunner,
@@ -55,6 +55,12 @@ const updateTestSuiteSchema = z.object({
   })
 })
 
+type AuthContext = {
+  userId: string
+  email?: string
+  role: string
+}
+
 // GET endpoint - List test suites and results
 export async function GET(request: NextRequest) {
   const requestLogger = createRequestLogger(request)
@@ -65,8 +71,8 @@ export async function GET(request: NextRequest) {
     requestLogger.info("Processing security testing GET request")
 
     // 1. Authentication check - restrict to admin/security users
-    const session = await getServerSession()
-    if (!session?.user) {
+    const { userId, sessionClaims } = auth()
+    if (!userId) {
       requestLogger.warn("Unauthorized security testing access attempt")
       await logSecurityEvent(
         'unauthorized_access',
@@ -90,6 +96,20 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       )
     }
+
+    const clerkUser = await clerkClient.users.getUser(userId)
+    const roleClaim =
+      (sessionClaims as any)?.metadata?.role ??
+      (sessionClaims as any)?.publicMetadata?.role ??
+      (clerkUser.publicMetadata?.role as string | undefined) ??
+      'student'
+    const role = String(roleClaim).toLowerCase()
+    void role
+    const email =
+      clerkUser.emailAddresses?.find(addr => addr.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+      clerkUser.emailAddresses?.[0]?.emailAddress ??
+      undefined
+    void email
 
     // For now, allowing all authenticated users - in production, restrict to security admins
     // if (!['ADMIN', 'SECURITY_ADMIN'].includes(session.user.role)) {
@@ -228,8 +248,8 @@ export async function POST(request: NextRequest) {
     requestLogger.info("Processing security testing POST request")
 
     // Authentication check
-    const session = await getServerSession()
-    if (!session?.user) {
+    const { userId } = auth()
+    if (!userId) {
       return NextResponse.json(
         {
           success: false,
@@ -239,24 +259,37 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const clerkUser = await clerkClient.users.getUser(userId)
+    const role = String(
+      clerkUser.publicMetadata?.role as string | undefined ??
+      clerkUser.privateMetadata?.role as string | undefined ??
+      clerkUser.unsafeMetadata?.role as string | undefined ??
+      'student'
+    ).toLowerCase()
+    const email =
+      clerkUser.emailAddresses?.find(addr => addr.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+      clerkUser.emailAddresses?.[0]?.emailAddress ??
+      undefined
+    const authContext: AuthContext = { userId, email, role }
+
     const body = await request.json()
     const { action } = body
 
     switch (action) {
       case 'run_test':
-        return await handleRunTest(body, session, requestLogger, endTimer)
+        return await handleRunTest(body, authContext, requestLogger, endTimer)
 
       case 'create_suite':
-        return await handleCreateTestSuite(body, session, requestLogger, endTimer)
+        return await handleCreateTestSuite(body, authContext, requestLogger, endTimer)
 
       case 'update_suite':
-        return await handleUpdateTestSuite(body, session, requestLogger, endTimer)
+        return await handleUpdateTestSuite(body, authContext, requestLogger, endTimer)
 
       case 'delete_suite':
-        return await handleDeleteTestSuite(body, session, requestLogger, endTimer)
+        return await handleDeleteTestSuite(body, authContext, requestLogger, endTimer)
 
       case 'stop_test':
-        return await handleStopTest(body, session, requestLogger, endTimer)
+        return await handleStopTest(body, authContext, requestLogger, endTimer)
 
       default:
         return NextResponse.json(
@@ -286,7 +319,8 @@ export async function POST(request: NextRequest) {
 
 // Handler functions
 
-async function handleRunTest(body: any, session: any, logger: any, endTimer: () => void) {
+async function handleRunTest(body: any, authContext: AuthContext, logger: any, endTimer: () => void) {
+  const { userId, email } = authContext
   const validationResult = runTestSchema.safeParse(body)
   if (!validationResult.success) {
     return NextResponse.json(
@@ -336,7 +370,7 @@ async function handleRunTest(body: any, session: any, logger: any, endTimer: () 
       suiteName: suite.name,
       targetUrl: targetUrl || suite.targets[0],
       initiatedBy: userId,
-      initiatedByEmail: session.user.email,
+      initiatedByEmail: email,
       scheduled: schedule
     },
     userId
@@ -407,7 +441,8 @@ async function handleRunTest(body: any, session: any, logger: any, endTimer: () 
   }
 }
 
-async function handleCreateTestSuite(body: any, session: any, logger: any, endTimer: () => void) {
+async function handleCreateTestSuite(body: any, authContext: AuthContext, logger: any, endTimer: () => void) {
+  const { userId, email } = authContext
   const validationResult = createTestSuiteSchema.safeParse(body)
   if (!validationResult.success) {
     return NextResponse.json(
@@ -450,7 +485,7 @@ async function handleCreateTestSuite(body: any, session: any, logger: any, endTi
       suiteName: suiteData.name,
       testCount: suiteData.tests.length,
       createdBy: userId,
-      createdByEmail: session.user.email
+      createdByEmail: email
     },
     userId
   )
@@ -474,7 +509,8 @@ async function handleCreateTestSuite(body: any, session: any, logger: any, endTi
   )
 }
 
-async function handleUpdateTestSuite(body: any, session: any, logger: any, endTimer: () => void) {
+async function handleUpdateTestSuite(body: any, authContext: AuthContext, logger: any, endTimer: () => void) {
+  const { userId, email } = authContext
   const validationResult = updateTestSuiteSchema.safeParse(body)
   if (!validationResult.success) {
     return NextResponse.json(
@@ -513,7 +549,7 @@ async function handleUpdateTestSuite(body: any, session: any, logger: any, endTi
       suiteId,
       updates: Object.keys(updates),
       updatedBy: userId,
-      updatedByEmail: session.user.email
+      updatedByEmail: email
     },
     userId
   )
@@ -531,7 +567,8 @@ async function handleUpdateTestSuite(body: any, session: any, logger: any, endTi
   )
 }
 
-async function handleDeleteTestSuite(body: any, session: any, logger: any, endTimer: () => void) {
+async function handleDeleteTestSuite(body: any, authContext: AuthContext, logger: any, endTimer: () => void) {
+  const { userId, email } = authContext
   const { suiteId } = body
 
   if (!suiteId) {
@@ -576,7 +613,7 @@ async function handleDeleteTestSuite(body: any, session: any, logger: any, endTi
       action: 'security_test_suite_deleted',
       suiteId,
       deletedBy: userId,
-      deletedByEmail: session.user.email
+      deletedByEmail: email
     },
     userId
   )
@@ -594,7 +631,8 @@ async function handleDeleteTestSuite(body: any, session: any, logger: any, endTi
   )
 }
 
-async function handleStopTest(body: any, session: any, logger: any, endTimer: () => void) {
+async function handleStopTest(body: any, authContext: AuthContext, logger: any, endTimer: () => void) {
+  const { userId, email } = authContext
   const { suiteId } = body
 
   if (!suiteId) {
@@ -626,7 +664,7 @@ async function handleStopTest(body: any, session: any, logger: any, endTimer: ()
       action: 'security_test_stopped',
       suiteId,
       stoppedBy: userId,
-      stoppedByEmail: session.user.email
+      stoppedByEmail: email
     },
     userId
   )

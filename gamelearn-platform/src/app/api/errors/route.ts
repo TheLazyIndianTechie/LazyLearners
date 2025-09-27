@@ -4,7 +4,7 @@ import { errorReportingSchema } from "@/lib/validations/common"
 import { ZodError } from "zod"
 import { redis } from "@/lib/redis"
 import { env, isProduction } from "@/lib/config/env"
-import { getServerSession } from "next-auth"
+import { auth, clerkClient } from "@clerk/nextjs/server"
 
 
 export async function POST(request: NextRequest) {
@@ -293,11 +293,10 @@ export async function GET(request: NextRequest) {
 
   try {
     // Admin authentication check required for error analytics
-    const session = await getServerSession()
-    if (!session?.user || session.user.role !== 'ADMIN') {
+    const { userId, sessionClaims } = auth()
+    if (!userId) {
       requestLogger.warn("Unauthorized access attempt to error analytics", {
-        userId: session?.user?.id,
-        userRole: session?.user?.role,
+        userId: null,
         ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
       })
 
@@ -310,9 +309,38 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    const clerkUser = await clerkClient.users.getUser(userId)
+    const roleClaim =
+      (sessionClaims as any)?.metadata?.role ??
+      (sessionClaims as any)?.publicMetadata?.role ??
+      (clerkUser.publicMetadata?.role as string | undefined) ??
+      'student'
+    const role = String(roleClaim).toLowerCase()
+
+    if (role !== 'admin') {
+      requestLogger.warn("Unauthorized access attempt to error analytics", {
+        userId,
+        userRole: role,
+        ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+      })
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: { message: "Unauthorized. Admin access required." }
+        },
+        { status: 401 }
+      )
+    }
+
+    const email =
+      clerkUser.emailAddresses?.find(addr => addr.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+      clerkUser.emailAddresses?.[0]?.emailAddress ??
+      undefined
+
     requestLogger.info("Admin accessing error analytics", {
       adminId: userId,
-      adminEmail: session.user.email
+      adminEmail: email
     })
 
     const { searchParams } = new URL(request.url)

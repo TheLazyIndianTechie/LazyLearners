@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createRequestLogger } from "@/lib/logger"
-import { auth } from "@clerk/nextjs/server"
+import { auth, clerkClient } from "@clerk/nextjs/server"
 
 import {
   videoProcessor,
@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
     requestLogger.info("Processing video upload request")
 
     // 1. Authentication check
-    const session = await getServerSession()
-    if (!session?.user) {
+    const { userId } = auth()
+    if (!userId) {
       requestLogger.warn("Unauthorized video upload attempt")
       return NextResponse.json(
         {
@@ -54,11 +54,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userId = userId
-    const userRole = session.user.role || 'student'
+    const clerkUser = await clerkClient.users.getUser(userId)
+    const userRoleMetadata =
+      (clerkUser.publicMetadata?.role as string | undefined) ??
+      (clerkUser.privateMetadata?.role as string | undefined) ??
+      (clerkUser.unsafeMetadata?.role as string | undefined) ??
+      'student'
+    const userRole = String(userRoleMetadata)
+    const normalizedRole = userRole.toLowerCase()
+    const userEmail =
+      clerkUser.emailAddresses?.find(addr => addr.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+      clerkUser.emailAddresses?.[0]?.emailAddress ??
+      undefined
 
     // 2. Check if user can upload videos (instructors and admins only for courses)
-    if (userRole === 'student') {
+    if (normalizedRole === 'student') {
       requestLogger.warn("Student attempted video upload", {
         userId,
         userRole
@@ -204,7 +214,7 @@ export async function POST(request: NextRequest) {
       chapter: uploadData.chapter,
       isPublic: uploadData.isPublic,
       uploadedBy: userId,
-      uploadedByEmail: session.user.email
+      uploadedByEmail: userEmail
     })
 
     requestLogger.info("Video upload submitted successfully", {
@@ -262,8 +272,8 @@ export async function GET(request: NextRequest) {
     requestLogger.info("Processing video status request")
 
     // Authentication check
-    const session = await getServerSession()
-    if (!session?.user) {
+    const { userId } = auth()
+    if (!userId) {
       return NextResponse.json(
         {
           success: false,
@@ -273,7 +283,13 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const userId = userId
+    const clerkUser = await clerkClient.users.getUser(userId)
+    const userRoleMetadata =
+      (clerkUser.publicMetadata?.role as string | undefined) ??
+      (clerkUser.privateMetadata?.role as string | undefined) ??
+      (clerkUser.unsafeMetadata?.role as string | undefined) ??
+      'student'
+    const normalizedRole = String(userRoleMetadata).toLowerCase()
 
     // Parse query parameters
     const { searchParams } = new URL(request.url)
@@ -313,7 +329,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Check ownership
-      if (job.userId !== userId && session.user.role !== 'ADMIN') {
+      if (job.userId !== userId && normalizedRole !== 'admin') {
         return NextResponse.json(
           {
             success: false,
@@ -393,8 +409,8 @@ export async function DELETE(request: NextRequest) {
 
   try {
     // Authentication check
-    const session = await getServerSession()
-    if (!session?.user) {
+    const { userId } = auth()
+    if (!userId) {
       return NextResponse.json(
         {
           success: false,
