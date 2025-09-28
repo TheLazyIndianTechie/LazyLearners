@@ -112,15 +112,19 @@ class MemoryStore {
 
 const memoryStore = new MemoryStore()
 let redisClient: Redis | null = null
-let useMemoryFallback = false
+let useMemoryFallback = isTest
 
 // Initialize Redis connection
-try {
-  redisClient = getRedisConfig()
-  console.log('Redis: Initialized with production client')
-} catch (error) {
-  console.warn('Redis: Failed to initialize, using memory fallback:', error)
-  useMemoryFallback = true
+if (isTest) {
+  console.log('Redis: Test mode using memory fallback')
+} else {
+  try {
+    redisClient = getRedisConfig()
+    console.log('Redis: Initialized with production client')
+  } catch (error) {
+    console.warn('Redis: Failed to initialize, using memory fallback:', error)
+    useMemoryFallback = true
+  }
 }
 
 class RedisService {

@@ -6,10 +6,11 @@ import { z } from "zod"
 
 const updateLessonSchema = z.object({
   title: z.string().min(1).max(200).optional(),
-  type: z.enum(["VIDEO", "TEXT", "QUIZ"]).optional(),
+  type: z.enum(["VIDEO", "INTERACTIVE", "QUIZ", "PROJECT", "READING"]).optional(),
   content: z.string().optional(),
   duration: z.number().min(0).optional(),
   videoUrl: z.string().optional(),
+  description: z.string().max(2000).optional(),
 })
 
 export async function GET(

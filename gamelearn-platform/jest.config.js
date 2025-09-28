@@ -18,7 +18,7 @@ const customJestConfig = {
 
   // Transform ES modules
   transformIgnorePatterns: [
-    'node_modules/(?!(next-auth|@clerk|@auth|jose)/)',
+    'node_modules/(?!(next-auth|@auth|\\@clerk|jose)/)',
   ],
 
   // Module name mapping for path aliases

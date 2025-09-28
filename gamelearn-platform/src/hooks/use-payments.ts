@@ -11,6 +11,8 @@ export interface CheckoutSessionData {
   sessionId: string
   checkoutUrl: string
   paymentId: string
+  returnUrl?: string
+  courseTitle?: string
 }
 
 export interface PaymentStatus {
@@ -34,6 +36,7 @@ export function usePayments() {
       quantity?: number
       returnUrl?: string
       discountCode?: string
+      courseName?: string
     }
   ): Promise<CheckoutSessionData | null> => {
     setIsLoading(true)
@@ -60,7 +63,7 @@ export function usePayments() {
         throw new Error(result.error || 'Failed to create checkout session')
       }
 
-      return result.data
+      return result.data as CheckoutSessionData
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
       setError(errorMessage)
@@ -105,6 +108,7 @@ export function usePayments() {
     options?: {
       quantity?: number
       discountCode?: string
+      courseName?: string
     }
   ): Promise<void> => {
     const returnUrl = `${window.location.origin}/courses/${courseId}/success`
@@ -120,6 +124,9 @@ export function usePayments() {
         paymentId: checkoutSession.paymentId,
         courseId,
         customer,
+        courseTitle: options?.courseName || checkoutSession.courseTitle,
+        returnUrl: checkoutSession.returnUrl || returnUrl,
+        sessionId: checkoutSession.sessionId,
         timestamp: new Date().toISOString(),
       }))
 

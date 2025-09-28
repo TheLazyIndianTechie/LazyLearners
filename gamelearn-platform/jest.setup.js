@@ -92,6 +92,15 @@ global.FormData = class FormData {
   }
 }
 
+// Polyfill ResizeObserver for components relying on it in tests
+if (typeof global.ResizeObserver === 'undefined') {
+  global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+}
+
 // Mock console methods to reduce test noise
 const originalError = console.error
 beforeAll(() => {
@@ -165,11 +174,6 @@ global.testHelpers = {
     ...overrides,
   }),
 }
-
-// Set up fake timers for tests that need them
-jest.useFakeTimers({
-  doNotFake: ['nextTick', 'setImmediate'],
-})
 
 // Clean up after each test
 afterEach(() => {

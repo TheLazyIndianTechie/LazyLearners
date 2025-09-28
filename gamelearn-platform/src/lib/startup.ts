@@ -178,6 +178,10 @@ async function initializeProductionServices(): Promise<void> {
   }
 
   // Verify HTTPS is configured
+  if (!env.APP_URL?.startsWith('https://')) {
+    logger.warn('APP_URL should use HTTPS in production')
+  }
+
   if (!env.NEXTAUTH_URL?.startsWith('https://')) {
     logger.warn('NEXTAUTH_URL should use HTTPS in production')
   }

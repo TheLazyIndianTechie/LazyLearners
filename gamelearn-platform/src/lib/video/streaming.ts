@@ -47,7 +47,7 @@ export const STREAMING_CONFIG = {
   security: {
     enableTokenAuth: true,
     tokenExpiry: 3600, // 1 hour
-    allowedOrigins: [env.APP_URL, env.NEXTAUTH_URL].filter(Boolean),
+    allowedOrigins: [env.APP_URL, env.CDN_URL].filter(Boolean),
     maxConcurrentSessions: 3,
     geoRestrictions: false
   }

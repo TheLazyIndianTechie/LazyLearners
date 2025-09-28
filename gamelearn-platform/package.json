@@ -48,8 +48,10 @@
     "security:dashboard": "curl -s http://localhost:3000/api/monitoring/database | jq ."
   },
   "dependencies": {
-    "@auth/prisma-adapter": "^2.10.0",
     "@clerk/nextjs": "^6.32.2",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@prisma/client": "^6.16.2",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -82,6 +84,7 @@
     "react-dom": "19.1.0",
     "react-player": "^3.3.3",
     "react-resizable-panels": "^3.0.6",
+    "recharts": "^3.2.1",
     "sonner": "^2.0.7",
     "svix": "^1.76.1",
     "tailwind-merge": "^3.3.1",

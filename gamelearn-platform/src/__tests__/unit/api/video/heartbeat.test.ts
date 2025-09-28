@@ -33,7 +33,7 @@ jest.mock('@/lib/video/streaming', () => ({
 describe('/api/video/heartbeat', () => {
   let POST: any
   let GET: any
-  let getServerSession: any
+  let authMock: jest.Mock
   let processVideoHeartbeat: any
   let trackVideoEvent: any
   let videoStreaming: any
@@ -45,8 +45,8 @@ describe('/api/video/heartbeat', () => {
     GET = heartbeatRoute.GET
 
     // Import mocked functions
-    const nextAuth = await import('next-auth/next')
-    getServerSession = nextAuth.getServerSession
+    const clerkServer = await import('@clerk/nextjs/server')
+    authMock = clerkServer.auth as jest.Mock
 
     const streaming = await import('@/lib/video/streaming')
     processVideoHeartbeat = streaming.processVideoHeartbeat
@@ -58,14 +58,7 @@ describe('/api/video/heartbeat', () => {
     jest.clearAllMocks()
 
     // Default mock implementations
-    getServerSession.mockResolvedValue({
-      user: {
-        id: 'user123',
-        email: 'student@lazygamedevs.com',
-        name: 'Test Student',
-        role: 'student',
-      },
-    })
+    authMock.mockReturnValue({ userId: 'user123' })
   })
 
   describe('POST /api/video/heartbeat', () => {
@@ -270,7 +263,7 @@ describe('/api/video/heartbeat', () => {
     })
 
     test('should reject unauthenticated requests', async () => {
-      getServerSession.mockResolvedValue(null)
+      authMock.mockReturnValue({ userId: null })
 
       const request = createMockRequest({ sessionId: 'session123' })
       const response = await POST(request)
@@ -503,7 +496,7 @@ describe('/api/video/heartbeat', () => {
     })
 
     test('should reject unauthenticated requests', async () => {
-      getServerSession.mockResolvedValue(null)
+      authMock.mockReturnValue({ userId: null })
 
       const request = createMockRequest({ sessionId: 'session123' })
       const response = await GET(request)
@@ -581,7 +574,9 @@ describe('/api/video/heartbeat', () => {
     })
 
     test('should handle session errors', async () => {
-      getServerSession.mockRejectedValue(new Error('Session error'))
+      authMock.mockImplementation(() => {
+        throw new Error('Session error')
+      })
 
       const request = {
         headers: new Headers(),

@@ -50,8 +50,15 @@ async function main() {
       password: hashedPassword,
       role: 'STUDENT',
       bio: 'Aspiring indie game developer with a passion for 2D platformers',
-      skills: '["Unity", "C#", "Pixel Art", "Game Design"]',
       location: 'San Francisco, CA',
+      skills: {
+        create: [
+          { skill: 'Unity' },
+          { skill: 'C#' },
+          { skill: 'Pixel Art' },
+          { skill: 'Game Design' },
+        ],
+      },
     },
   })
 
@@ -62,8 +69,15 @@ async function main() {
       password: hashedPassword,
       role: 'STUDENT',
       bio: 'Computer science student interested in VR development',
-      skills: '["Unreal Engine", "C++", "VR", "3D Modeling"]',
       location: 'Toronto, Canada',
+      skills: {
+        create: [
+          { skill: 'Unreal Engine' },
+          { skill: 'C++' },
+          { skill: 'VR' },
+          { skill: '3D Modeling' },
+        ],
+      },
     },
   })
 
@@ -74,8 +88,15 @@ async function main() {
       password: hashedPassword,
       role: 'STUDENT',
       bio: 'Mobile game developer focusing on casual games',
-      skills: '["Unity", "Mobile Development", "UI/UX", "Monetization"]',
       location: 'Barcelona, Spain',
+      skills: {
+        create: [
+          { skill: 'Unity' },
+          { skill: 'Mobile Development' },
+          { skill: 'UI/UX' },
+          { skill: 'Monetization' },
+        ],
+      },
     },
   })
 
@@ -87,9 +108,17 @@ async function main() {
       password: hashedPassword,
       role: 'INSTRUCTOR',
       bio: 'Senior Unity developer with 12+ years in the gaming industry. Former lead developer at EA and Ubisoft.',
-      skills: '["Unity", "C#", "Game Architecture", "Performance Optimization", "Team Leadership"]',
       website: 'https://johnsmith.dev',
       location: 'Austin, TX',
+      skills: {
+        create: [
+          { skill: 'Unity' },
+          { skill: 'C#' },
+          { skill: 'Game Architecture' },
+          { skill: 'Performance Optimization' },
+          { skill: 'Team Leadership' },
+        ],
+      },
     },
   })
 
@@ -100,9 +129,17 @@ async function main() {
       password: hashedPassword,
       role: 'INSTRUCTOR',
       bio: 'Unreal Engine expert and technical artist with AAA game development experience at Epic Games.',
-      skills: '["Unreal Engine", "C++", "Blueprints", "Technical Art", "Shaders"]',
       website: 'https://emmawilson.dev',
       location: 'Seattle, WA',
+      skills: {
+        create: [
+          { skill: 'Unreal Engine' },
+          { skill: 'C++' },
+          { skill: 'Blueprints' },
+          { skill: 'Technical Art' },
+          { skill: 'Shaders' },
+        ],
+      },
     },
   })
 
@@ -113,9 +150,17 @@ async function main() {
       password: hashedPassword,
       role: 'INSTRUCTOR',
       bio: 'Game design consultant and indie developer with multiple successful mobile games.',
-      skills: '["Game Design", "Level Design", "Monetization", "Analytics", "User Research"]',
       website: 'https://davidpark.games',
       location: 'Seoul, South Korea',
+      skills: {
+        create: [
+          { skill: 'Game Design' },
+          { skill: 'Level Design' },
+          { skill: 'Monetization' },
+          { skill: 'Analytics' },
+          { skill: 'User Research' },
+        ],
+      },
     },
   })
 
@@ -126,9 +171,17 @@ async function main() {
       password: hashedPassword,
       role: 'INSTRUCTOR',
       bio: 'Open-source game development advocate and Godot Engine contributor.',
-      skills: '["Godot", "GDScript", "Python", "Open Source", "Indie Development"]',
       website: 'https://lisaanderson.dev',
       location: 'Portland, OR',
+      skills: {
+        create: [
+          { skill: 'Godot' },
+          { skill: 'GDScript' },
+          { skill: 'Python' },
+          { skill: 'Open Source' },
+          { skill: 'Indie Development' },
+        ],
+      },
     },
   })
 
@@ -146,9 +199,27 @@ async function main() {
       engine: 'UNITY',
       difficulty: 'BEGINNER',
       duration: 2400, // 40 hours
-      requirements: '["Basic computer skills", "Windows or Mac computer"]',
-      objectives: '["Master Unity interface", "Build complete games", "Publish to app stores"]',
-      tags: '["Unity", "C#", "Game Development", "Beginner"]',
+      requirements: {
+        create: [
+          { requirement: 'Basic computer skills', order: 1 },
+          { requirement: 'Windows or Mac computer', order: 2 },
+        ],
+      },
+      objectives: {
+        create: [
+          { objective: 'Master Unity interface', order: 1 },
+          { objective: 'Build complete games', order: 2 },
+          { objective: 'Publish to app stores', order: 3 },
+        ],
+      },
+      tags: {
+        create: [
+          { tag: 'Unity' },
+          { tag: 'C#' },
+          { tag: 'Game Development' },
+          { tag: 'Beginner' },
+        ],
+      },
       instructorId: instructorUnity.id,
       modules: {
         create: [
@@ -223,9 +294,29 @@ async function main() {
       engine: 'UNREAL',
       difficulty: 'INTERMEDIATE',
       duration: 3600, // 60 hours
-      requirements: '["Basic programming knowledge", "Powerful PC/Mac", "16GB RAM recommended"]',
-      objectives: '["Master UE5 features", "Create photorealistic environments", "Build complete games"]',
-      tags: '["Unreal Engine", "UE5", "Blueprints", "C++", "Advanced"]',
+      requirements: {
+        create: [
+          { requirement: 'Basic programming knowledge', order: 1 },
+          { requirement: 'Powerful PC/Mac', order: 2 },
+          { requirement: '16GB RAM recommended', order: 3 },
+        ],
+      },
+      objectives: {
+        create: [
+          { objective: 'Master UE5 features', order: 1 },
+          { objective: 'Create photorealistic environments', order: 2 },
+          { objective: 'Build complete games', order: 3 },
+        ],
+      },
+      tags: {
+        create: [
+          { tag: 'Unreal Engine' },
+          { tag: 'UE5' },
+          { tag: 'Blueprints' },
+          { tag: 'C++' },
+          { tag: 'Advanced' },
+        ],
+      },
       instructorId: instructorUnreal.id,
       modules: {
         create: [
@@ -299,9 +390,28 @@ async function main() {
       category: 'GAME_DESIGN',
       difficulty: 'BEGINNER',
       duration: 1800, // 30 hours
-      requirements: '["Creative mindset", "Basic understanding of games"]',
-      objectives: '["Understand game design principles", "Create game documents", "Design balanced gameplay"]',
-      tags: '["Game Design", "Level Design", "UX", "Psychology", "Theory"]',
+      requirements: {
+        create: [
+          { requirement: 'Creative mindset', order: 1 },
+          { requirement: 'Basic understanding of games', order: 2 },
+        ],
+      },
+      objectives: {
+        create: [
+          { objective: 'Understand game design principles', order: 1 },
+          { objective: 'Create game documents', order: 2 },
+          { objective: 'Design balanced gameplay', order: 3 },
+        ],
+      },
+      tags: {
+        create: [
+          { tag: 'Game Design' },
+          { tag: 'Level Design' },
+          { tag: 'UX' },
+          { tag: 'Psychology' },
+          { tag: 'Theory' },
+        ],
+      },
       instructorId: instructorDesign.id,
       modules: {
         create: [
@@ -357,9 +467,30 @@ async function main() {
       engine: 'GODOT',
       difficulty: 'BEGINNER',
       duration: 2000, // 33 hours
-      requirements: '["Basic programming concepts", "Any computer"]',
-      objectives: '["Master Godot 4", "Learn GDScript", "Build complete games", "Publish indie games"]',
-      tags: '["Godot", "GDScript", "Open Source", "Indie", "2D", "3D"]',
+      requirements: {
+        create: [
+          { requirement: 'Basic programming concepts', order: 1 },
+          { requirement: 'Any computer', order: 2 },
+        ],
+      },
+      objectives: {
+        create: [
+          { objective: 'Master Godot 4', order: 1 },
+          { objective: 'Learn GDScript', order: 2 },
+          { objective: 'Build complete games', order: 3 },
+          { objective: 'Publish indie games', order: 4 },
+        ],
+      },
+      tags: {
+        create: [
+          { tag: 'Godot' },
+          { tag: 'GDScript' },
+          { tag: 'Open Source' },
+          { tag: 'Indie' },
+          { tag: '2D' },
+          { tag: '3D' },
+        ],
+      },
       instructorId: instructorGodot.id,
       modules: {
         create: [
@@ -415,9 +546,31 @@ async function main() {
       engine: 'UNITY',
       difficulty: 'INTERMEDIATE',
       duration: 2800, // 47 hours
-      requirements: '["Unity basics", "C# programming", "Mobile device for testing"]',
-      objectives: '["Build mobile games", "Implement monetization", "Optimize performance", "Publish to stores"]',
-      tags: '["Mobile", "Unity", "iOS", "Android", "Monetization", "Publishing"]',
+      requirements: {
+        create: [
+          { requirement: 'Unity basics', order: 1 },
+          { requirement: 'C# programming', order: 2 },
+          { requirement: 'Mobile device for testing', order: 3 },
+        ],
+      },
+      objectives: {
+        create: [
+          { objective: 'Build mobile games', order: 1 },
+          { objective: 'Implement monetization', order: 2 },
+          { objective: 'Optimize performance', order: 3 },
+          { objective: 'Publish to stores', order: 4 },
+        ],
+      },
+      tags: {
+        create: [
+          { tag: 'Mobile' },
+          { tag: 'Unity' },
+          { tag: 'iOS' },
+          { tag: 'Android' },
+          { tag: 'Monetization' },
+          { tag: 'Publishing' },
+        ],
+      },
       instructorId: instructorUnity.id,
       modules: {
         create: [
@@ -598,8 +751,16 @@ async function main() {
             webglBuild: '/games/space-shooter',
             sourceCode: 'https://github.com/alex-thompson/space-shooter',
             liveDemo: 'https://alex-games.itch.io/space-shooter',
-            tags: '["Unity", "2D", "Space", "Shooter", "Retro"]',
             featured: true,
+            tags: {
+              create: [
+                { tag: 'Unity' },
+                { tag: '2D' },
+                { tag: 'Space' },
+                { tag: 'Shooter' },
+                { tag: 'Retro' },
+              ],
+            },
           },
           {
             title: 'Pixel Platformer',
@@ -608,7 +769,15 @@ async function main() {
             engine: 'UNITY',
             webglBuild: '/games/pixel-platformer',
             sourceCode: 'https://github.com/alex-thompson/pixel-platformer',
-            tags: '["Unity", "2D", "Platformer", "Pixel Art", "Indie"]',
+            tags: {
+              create: [
+                { tag: 'Unity' },
+                { tag: '2D' },
+                { tag: 'Platformer' },
+                { tag: 'Pixel Art' },
+                { tag: 'Indie' },
+              ],
+            },
           },
         ],
       },
@@ -628,8 +797,15 @@ async function main() {
             thumbnail: '/api/placeholder/300/200',
             engine: 'UNREAL',
             sourceCode: 'https://github.com/sarah-chen/vr-escape',
-            tags: '["Unreal Engine", "VR", "Puzzle", "Photorealistic"]',
             featured: true,
+            tags: {
+              create: [
+                { tag: 'Unreal Engine' },
+                { tag: 'VR' },
+                { tag: 'Puzzle' },
+                { tag: 'Photorealistic' },
+              ],
+            },
           },
         ],
       },
@@ -643,10 +819,17 @@ async function main() {
         title: 'Best practices for Unity performance optimization?',
         content: 'I\'m working on a mobile game and experiencing frame drops. What are your go-to optimization techniques?',
         category: 'Unity',
-        tags: '["Unity", "Performance", "Mobile", "Optimization"]',
         authorId: studentUser1.id,
         likes: 12,
         views: 89,
+        tags: {
+          create: [
+            { tag: 'Unity' },
+            { tag: 'Performance' },
+            { tag: 'Mobile' },
+            { tag: 'Optimization' },
+          ],
+        },
         replies: {
           create: [
             {
@@ -668,10 +851,17 @@ async function main() {
         title: 'Godot vs Unity for 2D games?',
         content: 'I\'m starting a new 2D project and torn between Godot and Unity. What are the pros and cons?',
         category: 'General',
-        tags: '["Godot", "Unity", "2D", "Comparison"]',
         authorId: studentUser2.id,
         likes: 24,
         views: 156,
+        tags: {
+          create: [
+            { tag: 'Godot' },
+            { tag: 'Unity' },
+            { tag: '2D' },
+            { tag: 'Comparison' },
+          ],
+        },
         replies: {
           create: [
             {

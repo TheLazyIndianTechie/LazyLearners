@@ -56,6 +56,7 @@ export function PurchaseButton({
     try {
       await purchaseCourse(courseId, customer, {
         discountCode: discountCode || undefined,
+        courseName,
       })
     } catch (err) {
       console.error('Purchase failed:', err)

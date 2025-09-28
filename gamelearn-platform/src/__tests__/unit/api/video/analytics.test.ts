@@ -20,6 +20,11 @@ jest.mock('@/lib/logger', () => ({
 
 jest.mock('@clerk/nextjs/server', () => ({
   auth: jest.fn(),
+  clerkClient: {
+    users: {
+      getUser: jest.fn(),
+    },
+  },
 }))
 
 jest.mock('@/lib/video/streaming', () => ({
@@ -33,7 +38,8 @@ jest.mock('@/lib/video/streaming', () => ({
 describe('/api/video/analytics', () => {
   let POST: any
   let GET: any
-  let getServerSession: any
+  let authMock: jest.Mock
+  let getUserMock: jest.Mock
   let trackVideoEvent: any
   let getVideoAnalytics: any
   let videoStreaming: any
@@ -45,8 +51,9 @@ describe('/api/video/analytics', () => {
     GET = analyticsRoute.GET
 
     // Import mocked functions
-    const nextAuth = await import('next-auth/next')
-    getServerSession = nextAuth.getServerSession
+    const clerkServer = await import('@clerk/nextjs/server')
+    authMock = clerkServer.auth as jest.Mock
+    getUserMock = clerkServer.clerkClient.users.getUser as jest.Mock
 
     const streaming = await import('@/lib/video/streaming')
     trackVideoEvent = streaming.trackVideoEvent
@@ -58,13 +65,19 @@ describe('/api/video/analytics', () => {
     jest.clearAllMocks()
 
     // Default mock implementations
-    getServerSession.mockResolvedValue({
-      user: {
-        id: 'user123',
-        email: 'instructor@lazygamedevs.com',
-        name: 'Test Instructor',
-        role: 'INSTRUCTOR',
-      },
+    authMock.mockReturnValue({ userId: 'user123' })
+    getUserMock.mockResolvedValue({
+      id: 'user123',
+      emailAddresses: [
+        {
+          id: 'email_1',
+          emailAddress: 'instructor@lazygamedevs.com',
+        },
+      ],
+      primaryEmailAddressId: 'email_1',
+      publicMetadata: { role: 'INSTRUCTOR' },
+      privateMetadata: {},
+      unsafeMetadata: {},
     })
   })
 
@@ -279,7 +292,7 @@ describe('/api/video/analytics', () => {
     })
 
     test('should reject unauthenticated requests', async () => {
-      getServerSession.mockResolvedValue(null)
+      authMock.mockReturnValue({ userId: null })
 
       const request = createMockRequest({ sessionId: 'session123' })
       const response = await POST(request)
@@ -544,7 +557,7 @@ describe('/api/video/analytics', () => {
     })
 
     test('should reject unauthenticated requests', async () => {
-      getServerSession.mockResolvedValue(null)
+      authMock.mockReturnValue({ userId: null })
 
       const request = createMockRequest({ videoId: 'video123' })
       const response = await GET(request)
@@ -599,8 +612,19 @@ describe('/api/video/analytics', () => {
 
     test('should handle different user roles', async () => {
       // Test admin access
-      getServerSession.mockResolvedValueOnce({
-        user: { id: 'admin123', role: 'ADMIN' },
+      authMock.mockReturnValueOnce({ userId: 'admin123' })
+      getUserMock.mockResolvedValueOnce({
+        id: 'admin123',
+        emailAddresses: [
+          {
+            id: 'email_admin',
+            emailAddress: 'admin@lazygamedevs.com',
+          },
+        ],
+        primaryEmailAddressId: 'email_admin',
+        publicMetadata: { role: 'ADMIN' },
+        privateMetadata: {},
+        unsafeMetadata: {},
       })
 
       const request = createMockRequest({ videoId: 'video123' })
@@ -610,8 +634,19 @@ describe('/api/video/analytics', () => {
     })
 
     test('should handle student access', async () => {
-      getServerSession.mockResolvedValue({
-        user: { id: 'student123', role: 'student' },
+      authMock.mockReturnValue({ userId: 'student123' })
+      getUserMock.mockResolvedValue({
+        id: 'student123',
+        emailAddresses: [
+          {
+            id: 'email_student',
+            emailAddress: 'student@lazygamedevs.com',
+          },
+        ],
+        primaryEmailAddressId: 'email_student',
+        publicMetadata: { role: 'student' },
+        privateMetadata: {},
+        unsafeMetadata: {},
       })
 
       const request = createMockRequest({ videoId: 'video123' })
@@ -696,7 +731,9 @@ describe('/api/video/analytics', () => {
     })
 
     test('should handle session errors', async () => {
-      getServerSession.mockRejectedValue(new Error('Session error'))
+      authMock.mockImplementation(() => {
+        throw new Error('Session error')
+      })
 
       const request = {
         headers: new Headers(),

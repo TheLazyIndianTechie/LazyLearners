@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createRequestLogger } from "@/lib/logger"
-import { auth } from "@clerk/nextjs/server"
+import { auth, clerkClient } from "@clerk/nextjs/server"
 
 import {
   videoStreaming,
@@ -204,8 +204,15 @@ export async function GET(request: NextRequest) {
 
     const { videoId, courseId, timeRange, aggregation, metrics, includeEvents } = validationResult.data
 
+    const clerkUser = await clerkClient.users.getUser(userId)
+    const trustedRole =
+      (clerkUser.publicMetadata?.role as string | undefined) ??
+      (clerkUser.privateMetadata?.role as string | undefined) ??
+      'STUDENT'
+    const userRole = trustedRole.toUpperCase()
+
     // 3. Verify access permissions
-    if (videoId && !await verifyVideoAnalyticsAccess(userId, session.user.role, videoId)) {
+    if (videoId && !await verifyVideoAnalyticsAccess(userId, userRole, videoId)) {
       return NextResponse.json(
         {
           success: false,
@@ -252,7 +259,8 @@ export async function GET(request: NextRequest) {
     requestLogger.info("Video analytics retrieved", {
       videoId,
       courseId,
-      userId: userId,
+      userId,
+      userRole,
       timeRange,
       metrics,
       dataPoints: Object.keys(analyticsData).length
@@ -355,18 +363,20 @@ async function verifyVideoAnalyticsAccess(
   videoId: string
 ): Promise<boolean> {
   try {
+    const normalizedRole = userRole.toUpperCase()
+
     // Admins can see all analytics
-    if (userRole === 'ADMIN') {
+    if (normalizedRole === 'ADMIN') {
       return true
     }
 
     // Instructors can see analytics for their own videos
-    if (userRole === 'INSTRUCTOR') {
+    if (normalizedRole === 'INSTRUCTOR') {
       return await isVideoOwner(userId, videoId)
     }
 
     // Students can see basic analytics for enrolled courses
-    if (userRole === 'student') {
+    if (normalizedRole === 'STUDENT') {
       return await isUserEnrolledInVideo(userId, videoId)
     }
 

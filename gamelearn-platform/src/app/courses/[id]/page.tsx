@@ -8,6 +8,7 @@ import Image from "next/image"
 import { SiteLayout } from "@/components/layout/site-layout"
 import { SimpleVideoPlayer } from "@/components/video/simple-video-player"
 import { QuizCard } from "@/components/quiz/quiz-card"
+import { PurchaseButton } from "@/components/payments/purchase-button"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -254,6 +255,8 @@ export default function CoursePage({ params }: CoursePageProps) {
   const [isEnrolled, setIsEnrolled] = useState(false)
   const [currentLesson, setCurrentLesson] = useState(mockCourse.modules[0].lessons[0])
   const [progress, setProgress] = useState(15) // Mock progress
+  const coursePriceCents = Math.max(0, Math.round(mockCourse.price * 100))
+  const isPaidCourse = coursePriceCents > 0
 
   // Check if user is enrolled (mock logic)
   useEffect(() => {
@@ -265,6 +268,11 @@ export default function CoursePage({ params }: CoursePageProps) {
   const handleEnroll = async () => {
     if (!isSignedIn) {
       router.push("/auth/signin")
+      return
+    }
+
+    if (isPaidCourse) {
+      console.warn("Attempted to enroll paid course without purchase")
       return
     }
 
@@ -551,12 +559,31 @@ export default function CoursePage({ params }: CoursePageProps) {
                         <p className="text-blue-600 text-sm mb-4">
                           Enroll in this course to access quizzes, assignments, and earn certificates.
                         </p>
-                        <Button
-                          onClick={handleEnroll}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          Enroll Now
-                        </Button>
+                        {isPaidCourse ? (
+                          isSignedIn ? (
+                            <PurchaseButton
+                              courseId={params.id}
+                              courseName={mockCourse.title}
+                              price={coursePriceCents}
+                              currency="USD"
+                              className="w-full"
+                            />
+                          ) : (
+                            <Button
+                              onClick={() => router.push(`/auth/signin?callbackUrl=/courses/${params.id}`)}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              Sign in to Purchase
+                            </Button>
+                          )
+                        ) : (
+                          <Button
+                            onClick={handleEnroll}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            Enroll Now
+                          </Button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -581,13 +608,34 @@ export default function CoursePage({ params }: CoursePageProps) {
                   </div>
 
                   {!isEnrolled ? (
-                    <Button
-                      onClick={handleEnroll}
-                      className="w-full mb-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-                      size="lg"
-                    >
-                      Enroll Now
-                    </Button>
+                    isPaidCourse ? (
+                      isSignedIn ? (
+                        <PurchaseButton
+                          courseId={params.id}
+                          courseName={mockCourse.title}
+                          price={coursePriceCents}
+                          currency="USD"
+                          className="w-full mb-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                          size="lg"
+                        />
+                      ) : (
+                        <Button
+                          onClick={() => router.push(`/auth/signin?callbackUrl=/courses/${params.id}`)}
+                          className="w-full mb-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                          size="lg"
+                        >
+                          Sign in to Purchase
+                        </Button>
+                      )
+                    ) : (
+                      <Button
+                        onClick={handleEnroll}
+                        className="w-full mb-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                        size="lg"
+                      >
+                        Enroll Now
+                      </Button>
+                    )
                   ) : (
                     <Button
                       onClick={() => handleLessonSelect(mockCourse.modules[0].lessons[0])}

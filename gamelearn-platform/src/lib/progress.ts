@@ -4,11 +4,10 @@ export interface LessonProgress {
   id: string
   userId: string
   lessonId: string
-  progress: number
+  completionPercentage: number
   timeSpent: number
   completed: boolean
-  completedAt?: Date
-  lastWatched?: Date
+  lastAccessed: Date
 }
 
 export interface CourseProgress {
@@ -16,48 +15,52 @@ export interface CourseProgress {
   userId: string
   totalLessons: number
   completedLessons: number
-  progress: number
+  completionPercentage: number
   timeSpent: number
   lastAccessed?: Date
+  certificateEligible: boolean
 }
 
 export async function updateLessonProgress(
   userId: string,
+  courseId: string,
   lessonId: string,
-  progress: number,
+  completionPercentage: number,
   timeSpent: number = 0
 ) {
   try {
-    const existingProgress = await prisma.progress.findFirst({
+    const existingProgress = await prisma.progress.findUnique({
       where: {
-        userId,
-        lessonId,
+        userId_courseId_lessonId: {
+          userId,
+          courseId,
+          lessonId,
+        },
       },
     })
 
-    const isCompleted = progress >= 90
+    const isCompleted = completionPercentage >= 90
 
     if (existingProgress) {
       return await prisma.progress.update({
         where: { id: existingProgress.id },
         data: {
-          progress: Math.max(existingProgress.progress, progress),
+          completionPercentage: Math.max(existingProgress.completionPercentage, completionPercentage),
           timeSpent: existingProgress.timeSpent + timeSpent,
           completed: isCompleted || existingProgress.completed,
-          completedAt: isCompleted && !existingProgress.completed ? new Date() : existingProgress.completedAt,
-          lastWatched: new Date(),
+          lastAccessed: new Date(),
         },
       })
     } else {
       return await prisma.progress.create({
         data: {
           userId,
+          courseId,
           lessonId,
-          progress,
+          completionPercentage,
           timeSpent,
           completed: isCompleted,
-          completedAt: isCompleted ? new Date() : null,
-          lastWatched: new Date(),
+          lastAccessed: new Date(),
         },
       })
     }
@@ -69,13 +72,17 @@ export async function updateLessonProgress(
 
 export async function getLessonProgress(
   userId: string,
+  courseId: string,
   lessonId: string
 ): Promise<LessonProgress | null> {
   try {
-    const progress = await prisma.progress.findFirst({
+    const progress = await prisma.progress.findUnique({
       where: {
-        userId,
-        lessonId,
+        userId_courseId_lessonId: {
+          userId,
+          courseId,
+          lessonId,
+        },
       },
     })
 
@@ -95,8 +102,10 @@ export async function getCourseProgress(
       where: { id: courseId },
       include: {
         modules: {
+          orderBy: { order: "asc" },
           include: {
             lessons: {
+              orderBy: { order: "asc" },
               include: {
                 progress: {
                   where: { userId },
@@ -119,8 +128,9 @@ export async function getCourseProgress(
         userId,
         totalLessons: 0,
         completedLessons: 0,
-        progress: 0,
+        completionPercentage: 0,
         timeSpent: 0,
+        certificateEligible: false,
       }
     }
 
@@ -130,7 +140,7 @@ export async function getCourseProgress(
 
     const totalProgress = allLessons.reduce((sum, lesson) => {
       const lessonProgress = lesson.progress[0]
-      return sum + (lessonProgress?.progress || 0)
+      return sum + (lessonProgress?.completionPercentage || 0)
     }, 0)
 
     const totalTimeSpent = allLessons.reduce((sum, lesson) => {
@@ -141,16 +151,20 @@ export async function getCourseProgress(
     const averageProgress = totalProgress / totalLessons
     const lastAccessed = allLessons
       .flatMap(lesson => lesson.progress)
-      .sort((a, b) => new Date(b.lastWatched || 0).getTime() - new Date(a.lastWatched || 0).getTime())[0]?.lastWatched
+      .sort((a, b) => new Date(b.lastAccessed).getTime() - new Date(a.lastAccessed).getTime())[0]?.lastAccessed
+
+    // Certificate eligibility: 80% of lessons completed
+    const certificateEligible = (completedLessons / totalLessons) >= 0.8
 
     return {
       courseId,
       userId,
       totalLessons,
       completedLessons,
-      progress: Math.round(averageProgress),
+      completionPercentage: Math.round(averageProgress),
       timeSpent: totalTimeSpent,
       lastAccessed,
+      certificateEligible,
     }
   } catch (error) {
     console.error("Error fetching course progress:", error)
@@ -167,8 +181,10 @@ export async function getUserEnrolledCourses(userId: string) {
           include: {
             instructor: true,
             modules: {
+              orderBy: { order: "asc" },
               include: {
                 lessons: {
+                  orderBy: { order: "asc" },
                   include: {
                     progress: {
                       where: { userId },
@@ -193,10 +209,11 @@ export async function getUserEnrolledCourses(userId: string) {
 
       const totalProgress = allLessons.reduce((sum, lesson) => {
         const lessonProgress = lesson.progress[0]
-        return sum + (lessonProgress?.progress || 0)
+        return sum + (lessonProgress?.completionPercentage || 0)
       }, 0)
 
       const averageProgress = totalLessons > 0 ? totalProgress / totalLessons : 0
+      const certificateEligible = totalLessons > 0 && (completedLessons / totalLessons) >= 0.8
 
       return {
         ...course,
@@ -204,6 +221,7 @@ export async function getUserEnrolledCourses(userId: string) {
         progress: Math.round(averageProgress),
         completedLessons,
         totalLessons,
+        certificateEligible,
       }
     })
   } catch (error) {
@@ -212,8 +230,119 @@ export async function getUserEnrolledCourses(userId: string) {
   }
 }
 
-export async function markLessonCompleted(userId: string, lessonId: string) {
-  return await updateLessonProgress(userId, lessonId, 100)
+export async function markLessonCompleted(userId: string, courseId: string, lessonId: string) {
+  return await updateLessonProgress(userId, courseId, lessonId, 100)
+}
+
+// Certificate generation functionality
+export async function generateCertificate(userId: string, courseId: string) {
+  try {
+    // Check if user has completed enough of the course (80% threshold)
+    const courseProgress = await getCourseProgress(userId, courseId)
+
+    if (!courseProgress || !courseProgress.certificateEligible) {
+      throw new Error("Course completion requirements not met for certificate generation")
+    }
+
+    // Check if certificate already exists
+    const existingCertificate = await prisma.certification.findFirst({
+      where: {
+        userId,
+        name: `Course Completion: ${courseId}`,
+      },
+    })
+
+    if (existingCertificate) {
+      return existingCertificate
+    }
+
+    // Get course and user details for certificate
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: { instructor: true },
+    })
+
+    if (!course) {
+      throw new Error("Course not found")
+    }
+
+    // Generate unique credential ID
+    const credentialId = `CERT-${courseId.slice(0, 8)}-${userId.slice(0, 8)}-${Date.now()}`
+
+    const certificate = await prisma.certification.create({
+      data: {
+        userId,
+        name: `Course Completion: ${course.title}`,
+        description: `Certificate of completion for ${course.title} in ${course.category} category`,
+        issuer: "GameLearn Platform",
+        credentialId,
+        badgeUrl: `/api/certificates/${credentialId}/badge`,
+        verificationUrl: `/api/certificates/${credentialId}/verify`,
+        issuedAt: new Date(),
+        // Certificates for game development courses don't expire
+        expiresAt: null,
+      },
+    })
+
+    // Update enrollment status to completed
+    await prisma.enrollment.updateMany({
+      where: {
+        userId,
+        courseId,
+      },
+      data: {
+        status: "COMPLETED",
+        completedAt: new Date(),
+      },
+    })
+
+    return certificate
+  } catch (error) {
+    console.error("Error generating certificate:", error)
+    throw error
+  }
+}
+
+export async function getUserCertificates(userId: string) {
+  try {
+    return await prisma.certification.findMany({
+      where: { userId },
+      orderBy: { issuedAt: "desc" },
+    })
+  } catch (error) {
+    console.error("Error fetching user certificates:", error)
+    return []
+  }
+}
+
+export async function verifyCertificate(credentialId: string) {
+  try {
+    const certificate = await prisma.certification.findUnique({
+      where: { credentialId },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    })
+
+    if (!certificate) {
+      return null
+    }
+
+    // Check if certificate has expired
+    if (certificate.expiresAt && new Date() > certificate.expiresAt) {
+      return { ...certificate, expired: true }
+    }
+
+    return { ...certificate, expired: false }
+  } catch (error) {
+    console.error("Error verifying certificate:", error)
+    return null
+  }
 }
 
 export async function getNextLesson(userId: string, courseId: string, currentLessonId: string) {

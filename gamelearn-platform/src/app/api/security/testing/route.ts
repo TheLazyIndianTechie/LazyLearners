@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createRequestLogger } from "@/lib/logger"
 import { auth, clerkClient } from "@clerk/nextjs/server"
+import { createHash } from "crypto"
 
 import {
   securityTestRunner,
@@ -104,12 +105,18 @@ export async function GET(request: NextRequest) {
       (clerkUser.publicMetadata?.role as string | undefined) ??
       'student'
     const role = String(roleClaim).toLowerCase()
-    void role
     const email =
       clerkUser.emailAddresses?.find(addr => addr.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
       clerkUser.emailAddresses?.[0]?.emailAddress ??
       undefined
-    void email
+
+    const emailHash = email ? createHash('sha256').update(email).digest('hex') : undefined
+
+    requestLogger.info("Security testing access", {
+      userId,
+      userRole: role,
+      emailHash
+    })
 
     // For now, allowing all authenticated users - in production, restrict to security admins
     // if (!['ADMIN', 'SECURITY_ADMIN'].includes(session.user.role)) {

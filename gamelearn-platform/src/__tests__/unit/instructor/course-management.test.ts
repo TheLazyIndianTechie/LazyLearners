@@ -1,4 +1,6 @@
 import { NextRequest } from "next/server";
+import { auth } from "@clerk/nextjs/server";
+
 import { GET, PUT, DELETE } from "@/app/api/courses/[id]/route";
 import { POST } from "@/app/api/courses/route";
 import { prisma } from "@/lib/prisma";
@@ -7,6 +9,11 @@ import { ZodError } from "zod";
 // Mock dependencies
 jest.mock("@clerk/nextjs/server", () => ({
   auth: jest.fn(),
+  clerkClient: {
+    users: {
+      getUser: jest.fn(),
+    },
+  },
 }));
 
 jest.mock("@/lib/prisma", () => ({
@@ -23,37 +30,58 @@ jest.mock("@/lib/prisma", () => ({
     enrollment: {
       count: jest.fn(),
     },
+    review: {
+      aggregate: jest.fn(),
+      findMany: jest.fn(),
+    },
   },
 }));
 
-const mockAuth = require("@clerk/nextjs/server").auth as jest.MockedFunction<any>;
+const mockAuth = auth as jest.Mock;
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
+
+const setAuthUser = (userId: string | null) => {
+  if (userId) {
+    mockAuth.mockReturnValue({ userId })
+  } else {
+    mockAuth.mockReturnValue({ userId: null })
+  }
+}
+
+const createCourseRequest = (body: any): NextRequest => ({
+  url: "http://localhost:3000/api/courses",
+  method: "POST",
+  headers: new Headers({ "content-type": "application/json" }),
+  json: async () => body,
+} as unknown as NextRequest)
+
+const createUpdateRequest = (id: string, body: any): NextRequest => ({
+  url: `http://localhost:3000/api/courses/${id}`,
+  method: "PUT",
+  headers: new Headers({ "content-type": "application/json" }),
+  json: async () => body,
+} as unknown as NextRequest)
+
+const createDeleteRequest = (id: string): NextRequest => ({
+  url: `http://localhost:3000/api/courses/${id}`,
+  method: "DELETE",
+  headers: new Headers(),
+} as unknown as NextRequest)
+
+const createGetRequest = (url: string): NextRequest => ({
+  url,
+  method: "GET",
+  headers: new Headers(),
+} as unknown as NextRequest)
 
 describe("Instructor Course Management", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setAuthUser("instructor-1");
+    mockPrisma.user.findUnique.mockResolvedValue({ role: "INSTRUCTOR" });
+    mockPrisma.review.aggregate.mockResolvedValue({ _avg: { rating: 0 } });
+    mockPrisma.review.findMany.mockResolvedValue([]);
   });
-
-  const mockInstructorUser = {
-    id: "instructor-1",
-    name: "Jane Instructor",
-    email: "jane@example.com",
-    role: "INSTRUCTOR",
-  };
-
-  const mockAdminUser = {
-    id: "admin-1",
-    name: "Admin User",
-    email: "admin@example.com",
-    role: "ADMIN",
-  };
-
-  const mockStudentUser = {
-    id: "student-1",
-    name: "Student User",
-    email: "student@example.com",
-    role: "STUDENT",
-  };
 
   const mockCourseData = {
     id: "course-1",
@@ -66,9 +94,16 @@ describe("Instructor Course Management", () => {
     engine: "UNITY",
     difficulty: "BEGINNER",
     duration: 40,
-    requirements: JSON.stringify(["Basic programming knowledge"]),
-    objectives: JSON.stringify(["Build your first game"]),
-    tags: JSON.stringify(["unity", "beginner"]),
+    requirements: [
+      { requirement: "Basic programming knowledge", order: 0 },
+    ],
+    objectives: [
+      { objective: "Build your first game", order: 0 },
+    ],
+    tags: [
+      { tag: "unity" },
+      { tag: "beginner" },
+    ],
     instructorId: "instructor-1",
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -79,7 +114,16 @@ describe("Instructor Course Management", () => {
       image: null,
       bio: "Experienced Unity developer",
     },
-    modules: [],
+    modules: [
+      {
+        id: "module-1",
+        title: "Introduction",
+        description: "Start here",
+        order: 0,
+        duration: 10,
+        _count: { lessons: 5 },
+      },
+    ],
     reviews: [
       { rating: 5, user: { id: "user1", name: "User 1", image: null } },
       { rating: 4, user: { id: "user2", name: "User 2", image: null } },
@@ -87,22 +131,11 @@ describe("Instructor Course Management", () => {
     _count: {
       enrollments: 150,
       reviews: 2,
+      modules: 1,
     },
   };
 
   describe("POST /api/courses - Create Course", () => {
-    const createCourseRequest = (body: any): NextRequest => {
-      const request = new NextRequest("http://localhost:3000/api/courses", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-      // Mock the json method for testing
-      (request as any).json = jest.fn().mockResolvedValue(body);
-      return request;
-    };
 
     describe("Successful course creation", () => {
       it("should create course for instructor", async () => {
@@ -123,14 +156,13 @@ describe("Instructor Course Management", () => {
           id: "new-course-1",
           ...courseData,
           instructorId: "instructor-1",
-          requirements: JSON.stringify(courseData.requirements),
-          objectives: JSON.stringify(courseData.objectives),
-          tags: JSON.stringify(courseData.tags),
+          requirements: courseData.requirements?.map((req, index) => ({ requirement: req, order: index })) ?? [],
+          objectives: courseData.objectives?.map((obj, index) => ({ objective: obj, order: index })) ?? [],
+          tags: courseData.tags?.map(tag => ({ tag })) ?? [],
           instructor: mockCourseData.instructor,
           modules: [],
         };
 
-        mockAuth.mockReturnValue({ userId: "instructor-1" });
         mockPrisma.user.findUnique.mockResolvedValue({ role: "INSTRUCTOR" });
         mockPrisma.course.create.mockResolvedValue(createdCourse);
 
@@ -156,13 +188,16 @@ describe("Instructor Course Management", () => {
           duration: 30,
         };
 
-        mockAuth.mockResolvedValue({ userId: "admin-1" });
+        setAuthUser("admin-1");
         mockPrisma.user.findUnique.mockResolvedValue({ role: "ADMIN" });
         mockPrisma.course.create.mockResolvedValue({
           id: "admin-course-1",
           ...courseData,
           instructorId: "admin-1",
-          instructor: { id: "admin-1", name: "Admin User" },
+          requirements: [],
+          objectives: [],
+          tags: [],
+          instructor: { id: "admin-1", name: "Admin User", email: "admin@example.com", image: null },
           modules: [],
         });
 
@@ -188,14 +223,14 @@ describe("Instructor Course Management", () => {
           duration: 10,
         };
 
-        mockAuth.mockReturnValue({ userId: "instructor-1" });
+        setAuthUser("instructor-1");
         mockPrisma.user.findUnique.mockResolvedValue({ role: "INSTRUCTOR" });
         mockPrisma.course.create.mockResolvedValue({
           id: "minimal-course-1",
           ...minimalCourseData,
-          requirements: null,
-          objectives: null,
-          tags: null,
+          requirements: [],
+          objectives: [],
+          tags: [],
           instructor: mockCourseData.instructor,
           modules: [],
         });
@@ -213,7 +248,7 @@ describe("Instructor Course Management", () => {
 
     describe("Authentication and authorization", () => {
       it("should reject unauthenticated requests", async () => {
-        mockAuth.mockResolvedValue(null);
+        setAuthUser(null);
 
         const request = createCourseRequest({
           title: "Test Course",
@@ -232,7 +267,7 @@ describe("Instructor Course Management", () => {
       });
 
       it("should reject student course creation", async () => {
-        mockAuth.mockReturnValue({ userId: "student-1" });
+        setAuthUser("student-1");
         mockPrisma.user.findUnique.mockResolvedValue({ role: "STUDENT" });
 
         const request = createCourseRequest({
@@ -313,8 +348,6 @@ describe("Instructor Course Management", () => {
 
       validationTestCases.forEach(({ name, data }) => {
         it(name, async () => {
-          mockAuth.mockReturnValue({ userId: "instructor-1" });
-
           const request = createCourseRequest(data);
           const response = await POST(request);
           const responseData = await response.json();
@@ -328,15 +361,6 @@ describe("Instructor Course Management", () => {
   });
 
   describe("PUT /api/courses/[id] - Update Course", () => {
-    const createUpdateRequest = (id: string, body: any): NextRequest => {
-      return new NextRequest(`http://localhost:3000/api/courses/${id}`, {
-        method: "PUT",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-    };
 
     describe("Successful course updates", () => {
       it("should update course by instructor", async () => {
@@ -346,7 +370,6 @@ describe("Instructor Course Management", () => {
           published: true,
         };
 
-        mockAuth.mockReturnValue({ userId: "instructor-1" });
         mockPrisma.course.findUnique.mockResolvedValue(mockCourseData);
         mockPrisma.user.findUnique.mockResolvedValue({ role: "INSTRUCTOR" });
         mockPrisma.course.update.mockResolvedValue({
@@ -367,7 +390,7 @@ describe("Instructor Course Management", () => {
       it("should update course by admin", async () => {
         const updateData = { title: "Admin Updated Course" };
 
-        mockAuth.mockResolvedValue({ userId: "admin-1" });
+        setAuthUser("admin-1");
         mockPrisma.course.findUnique.mockResolvedValue(mockCourseData);
         mockPrisma.user.findUnique.mockResolvedValue({ role: "ADMIN" });
         mockPrisma.course.update.mockResolvedValue({
@@ -389,21 +412,34 @@ describe("Instructor Course Management", () => {
           tags: ["updated", "tags"],
         };
 
-        mockAuth.mockReturnValue({ userId: "instructor-1" });
         mockPrisma.course.findUnique.mockResolvedValue(mockCourseData);
         mockPrisma.user.findUnique.mockResolvedValue({ role: "INSTRUCTOR" });
-        mockPrisma.course.update.mockResolvedValue(mockCourseData);
+        mockPrisma.course.update.mockResolvedValue({
+          ...mockCourseData,
+          requirements: updateData.requirements.map((value, index) => ({ requirement: value, order: index })),
+          objectives: updateData.objectives.map((value, index) => ({ objective: value, order: index })),
+          tags: updateData.tags.map(tag => ({ tag })),
+        });
 
         const request = createUpdateRequest("course-1", updateData);
         await PUT(request, { params: { id: "course-1" } });
 
         expect(mockPrisma.course.update).toHaveBeenCalledWith({
           where: { id: "course-1" },
-          data: {
-            requirements: JSON.stringify(updateData.requirements),
-            objectives: JSON.stringify(updateData.objectives),
-            tags: JSON.stringify(updateData.tags),
-          },
+          data: expect.objectContaining({
+            tags: {
+              deleteMany: {},
+              create: updateData.tags.map(tag => ({ tag })),
+            },
+            objectives: {
+              deleteMany: {},
+              create: updateData.objectives.map((value, index) => ({ objective: value, order: index })),
+            },
+            requirements: {
+              deleteMany: {},
+              create: updateData.requirements.map((value, index) => ({ requirement: value, order: index })),
+            },
+          }),
           include: expect.any(Object),
         });
       });
@@ -412,9 +448,7 @@ describe("Instructor Course Management", () => {
     describe("Authorization checks", () => {
       it("should prevent non-owner from updating course", async () => {
         // Mock different instructor
-        mockAuth.mockResolvedValue({ userId: "different-instructor" });
-
-        mockGetServerSession.mockResolvedValue(differentInstructorSession);
+        setAuthUser("different-instructor");
         mockPrisma.course.findUnique.mockResolvedValue(mockCourseData);
         mockPrisma.user.findUnique.mockResolvedValue({ role: "INSTRUCTOR" });
 
@@ -428,7 +462,6 @@ describe("Instructor Course Management", () => {
       });
 
       it("should return 404 for non-existent course", async () => {
-        mockAuth.mockReturnValue({ userId: "instructor-1" });
         mockPrisma.course.findUnique.mockResolvedValue(null);
 
         const request = createUpdateRequest("non-existent", { title: "Test" });
@@ -442,15 +475,10 @@ describe("Instructor Course Management", () => {
   });
 
   describe("DELETE /api/courses/[id] - Delete Course", () => {
-    const createDeleteRequest = (id: string): NextRequest => {
-      return new NextRequest(`http://localhost:3000/api/courses/${id}`, {
-        method: "DELETE",
-      });
-    };
 
     describe("Successful course deletion", () => {
       it("should delete course with no enrollments", async () => {
-        mockAuth.mockReturnValue({ userId: "instructor-1" });
+        setAuthUser("instructor-1");
         mockPrisma.course.findUnique.mockResolvedValue({
           instructorId: "instructor-1",
         });
@@ -470,7 +498,7 @@ describe("Instructor Course Management", () => {
       });
 
       it("should allow admin to delete any course", async () => {
-        mockAuth.mockResolvedValue({ userId: "admin-1" });
+        setAuthUser("admin-1");
         mockPrisma.course.findUnique.mockResolvedValue({
           instructorId: "different-instructor",
         });
@@ -488,7 +516,6 @@ describe("Instructor Course Management", () => {
 
     describe("Deletion restrictions", () => {
       it("should prevent deletion of course with enrollments", async () => {
-        mockAuth.mockReturnValue({ userId: "instructor-1" });
         mockPrisma.course.findUnique.mockResolvedValue({
           instructorId: "instructor-1",
         });
@@ -506,9 +533,7 @@ describe("Instructor Course Management", () => {
 
       it("should prevent non-owner from deleting course", async () => {
         // Mock different instructor
-        mockAuth.mockResolvedValue({ userId: "different-instructor" });
-
-        mockGetServerSession.mockResolvedValue(differentInstructorSession);
+        setAuthUser("different-instructor");
         mockPrisma.course.findUnique.mockResolvedValue({
           instructorId: "instructor-1",
         });
@@ -524,7 +549,6 @@ describe("Instructor Course Management", () => {
       });
 
       it("should return 404 for non-existent course", async () => {
-        mockAuth.mockReturnValue({ userId: "instructor-1" });
         mockPrisma.course.findUnique.mockResolvedValue(null);
 
         const request = createDeleteRequest("non-existent");
@@ -540,8 +564,9 @@ describe("Instructor Course Management", () => {
   describe("GET /api/courses/[id] - Get Course Details", () => {
     it("should return course with formatted data", async () => {
       mockPrisma.course.findUnique.mockResolvedValue(mockCourseData);
+      mockPrisma.review.aggregate.mockResolvedValue({ _avg: { rating: 4.5 } });
 
-      const request = new NextRequest("http://localhost:3000/api/courses/course-1");
+      const request = createGetRequest("http://localhost:3000/api/courses/course-1");
       const response = await GET(request, { params: { id: "course-1" } });
       const data = await response.json();
 
@@ -559,7 +584,7 @@ describe("Instructor Course Management", () => {
     it("should return 404 for non-existent course", async () => {
       mockPrisma.course.findUnique.mockResolvedValue(null);
 
-      const request = new NextRequest("http://localhost:3000/api/courses/non-existent");
+      const request = createGetRequest("http://localhost:3000/api/courses/non-existent");
       const response = await GET(request, { params: { id: "non-existent" } });
       const data = await response.json();
 
@@ -575,8 +600,9 @@ describe("Instructor Course Management", () => {
       };
 
       mockPrisma.course.findUnique.mockResolvedValue(courseWithNoReviews);
+      mockPrisma.review.aggregate.mockResolvedValue({ _avg: { rating: null } });
 
-      const request = new NextRequest("http://localhost:3000/api/courses/course-1");
+      const request = createGetRequest("http://localhost:3000/api/courses/course-1");
       const response = await GET(request, { params: { id: "course-1" } });
       const data = await response.json();
 
@@ -588,19 +614,16 @@ describe("Instructor Course Management", () => {
 
   describe("Error handling", () => {
     it("should handle database errors gracefully", async () => {
-      mockAuth.mockResolvedValue({ userId: "instructor-1" });
+      setAuthUser("instructor-1");
       mockPrisma.course.findUnique.mockRejectedValue(new Error("Database connection failed"));
 
-      const request = new NextRequest("http://localhost:3000/api/courses", {
-        method: "POST",
-        body: JSON.stringify({
-          title: "Test Course",
-          description: "Test",
-          price: 50,
-          category: "UNITY_DEVELOPMENT",
-          difficulty: "BEGINNER",
-          duration: 10,
-        }),
+      const request = createCourseRequest({
+        title: "Test Course",
+        description: "Test",
+        price: 50,
+        category: "UNITY_DEVELOPMENT",
+        difficulty: "BEGINNER",
+        duration: 10,
       });
 
       const response = await POST(request);

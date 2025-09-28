@@ -28,7 +28,8 @@ jest.mock('@/lib/config/env', () => ({
   env: {
     CDN_URL: 'https://test-cdn.lazygamedevs.com',
     APP_URL: 'http://localhost:3000',
-    NEXTAUTH_URL: 'http://localhost:3000',
+    CLERK_SECRET_KEY: 'sk_test_dummy',
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_dummy',
   },
 }))
 

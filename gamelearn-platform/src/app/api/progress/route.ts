@@ -13,6 +13,10 @@ const progressUpdateSchema = z.object({
   timeSpent: z.number().min(0).optional(),
 })
 
+const courseProgressSchema = z.object({
+  courseId: z.string().cuid(),
+})
+
 export async function POST(request: NextRequest) {
   try {
     const { userId } = auth()
@@ -43,6 +47,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Get existing progress to ensure we don't decrease completion
+    const existingProgress = await prisma.progress.findUnique({
+      where: {
+        userId_courseId_lessonId: {
+          userId: userId,
+          courseId: courseId,
+          lessonId: lessonId,
+        }
+      }
+    })
+
+    const finalCompletionPercentage = existingProgress
+      ? Math.max(existingProgress.completionPercentage, completionPercentage)
+      : completionPercentage
+
     // Create or update progress record
     const progressData = await prisma.progress.upsert({
       where: {
@@ -53,18 +72,19 @@ export async function POST(request: NextRequest) {
         }
       },
       update: {
-        completionPercentage,
-        completed: completed || completionPercentage >= 90,
-        timeSpent: timeSpent || 0,
-        updatedAt: new Date(),
+        completionPercentage: finalCompletionPercentage,
+        completed: completed || finalCompletionPercentage >= 90,
+        timeSpent: (existingProgress?.timeSpent || 0) + (timeSpent || 0),
+        lastAccessed: new Date(),
       },
       create: {
         userId: userId,
         courseId: courseId,
         lessonId: lessonId,
-        completionPercentage,
-        completed: completed || completionPercentage >= 90,
+        completionPercentage: finalCompletionPercentage,
+        completed: completed || finalCompletionPercentage >= 90,
         timeSpent: timeSpent || 0,
+        lastAccessed: new Date(),
       }
     })
 

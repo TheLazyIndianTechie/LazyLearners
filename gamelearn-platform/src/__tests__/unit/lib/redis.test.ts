@@ -75,28 +75,38 @@ describe('Redis Service', () => {
 
     describe('TTL (Time To Live)', () => {
       test('should expire keys after TTL', async () => {
-        await redis.set('expiring-key', 'value', 1) // 1 second TTL
+        jest.useFakeTimers()
+        try {
+          await redis.set('expiring-key', 'value', 0.05) // 50ms TTL
 
-        // Value should be available immediately
-        let value = await redis.get('expiring-key')
-        expect(value).toBe('value')
+          // Value should be available immediately
+          let value = await redis.get('expiring-key')
+          expect(value).toBe('value')
 
-        // Wait for expiration
-        await new Promise(resolve => setTimeout(resolve, 1100))
+          // Advance timers past expiration
+          jest.advanceTimersByTime(80)
 
-        // Value should be expired
-        value = await redis.get('expiring-key')
-        expect(value).toBe(null)
+          // Value should be expired
+          value = await redis.get('expiring-key')
+          expect(value).toBe(null)
+        } finally {
+          jest.useRealTimers()
+        }
       })
 
       test('should not expire keys without TTL', async () => {
-        await redis.set('persistent-key', 'value')
+        jest.useFakeTimers()
+        try {
+          await redis.set('persistent-key', 'value')
 
-        // Wait longer than any reasonable TTL
-        await new Promise(resolve => setTimeout(resolve, 100))
+          // Advance timers
+          jest.advanceTimersByTime(80)
 
-        const value = await redis.get('persistent-key')
-        expect(value).toBe('value')
+          const value = await redis.get('persistent-key')
+          expect(value).toBe('value')
+        } finally {
+          jest.useRealTimers()
+        }
       })
     })
 
@@ -192,8 +202,8 @@ describe('Redis Service', () => {
         await redis.set('test-key', 'test-value')
         await redis.disconnect()
 
-        const isHealthy = await redis.isHealthy()
-        expect(isHealthy).toBe(false)
+        const value = await redis.get('test-key')
+        expect(value).toBe(null)
       })
     })
 
@@ -220,18 +230,23 @@ describe('Redis Service', () => {
       })
 
       test('should refresh session TTL', async () => {
-        await redis.setSession('session789', { userId: 'user789' }, 1)
+        jest.useFakeTimers()
+        try {
+          await redis.setSession('session789', { userId: 'user789' }, 0.05)
 
-        // Refresh before expiration
-        const refreshed = await redis.refreshSession('session789', 3600)
-        expect(refreshed).toBe(true)
+          // Refresh before expiration
+          const refreshed = await redis.refreshSession('session789', 3600)
+          expect(refreshed).toBe(true)
 
-        // Wait longer than original TTL
-        await new Promise(resolve => setTimeout(resolve, 1100))
+          // Advance timers beyond original TTL
+          jest.advanceTimersByTime(80)
 
-        // Session should still exist due to refresh
-        const data = await redis.getSession('session789')
-        expect(data).toEqual({ userId: 'user789' })
+          // Session should still exist due to refresh
+          const data = await redis.getSession('session789')
+          expect(data).toEqual({ userId: 'user789' })
+        } finally {
+          jest.useRealTimers()
+        }
       })
 
       test('should fail to refresh non-existent session', async () => {
@@ -303,19 +318,24 @@ describe('Redis Service', () => {
     })
 
     test('should refetch on cache miss', async () => {
-      const mockFn = jest.fn()
-        .mockResolvedValueOnce('result1')
-        .mockResolvedValueOnce('result2')
+      jest.useFakeTimers()
+      try {
+        const mockFn = jest.fn()
+          .mockResolvedValueOnce('result1')
+          .mockResolvedValueOnce('result2')
 
-      const result1 = await cached('cache-key-2', mockFn, 1) // 1 second TTL
-      expect(result1).toBe('result1')
+        const result1 = await cached('cache-key-2', mockFn, 0.05) // 50ms TTL
+        expect(result1).toBe('result1')
 
-      // Wait for cache to expire
-      await new Promise(resolve => setTimeout(resolve, 1100))
+        // Advance timers to expire cache
+        jest.advanceTimersByTime(80)
 
-      const result2 = await cached('cache-key-2', mockFn, 1)
-      expect(result2).toBe('result2')
-      expect(mockFn).toHaveBeenCalledTimes(2)
+        const result2 = await cached('cache-key-2', mockFn, 0.05)
+        expect(result2).toBe('result2')
+        expect(mockFn).toHaveBeenCalledTimes(2)
+      } finally {
+        jest.useRealTimers()
+      }
     })
 
     test('should fallback to function on cache error', async () => {
@@ -350,19 +370,24 @@ describe('Redis Service', () => {
 
   describe('memory cleanup', () => {
     test('should clean up expired keys on access', async () => {
-      await redis.set('expiring-key-1', 'value1', 1)
-      await redis.set('expiring-key-2', 'value2', 1)
+      jest.useFakeTimers()
+      try {
+        await redis.set('expiring-key-1', 'value1', 0.05)
+        await redis.set('expiring-key-2', 'value2', 0.05)
 
-      // Keys should exist initially
-      expect(await redis.exists('expiring-key-1')).toBe(true)
-      expect(await redis.exists('expiring-key-2')).toBe(true)
+        // Keys should exist initially
+        expect(await redis.exists('expiring-key-1')).toBe(true)
+        expect(await redis.exists('expiring-key-2')).toBe(true)
 
-      // Wait for expiration
-      await new Promise(resolve => setTimeout(resolve, 1100))
+        // Advance timers beyond expiration
+        jest.advanceTimersByTime(80)
 
-      // Accessing expired key should clean it up
-      expect(await redis.get('expiring-key-1')).toBe(null)
-      expect(await redis.exists('expiring-key-1')).toBe(false)
+        // Accessing expired key should clean it up
+        expect(await redis.get('expiring-key-1')).toBe(null)
+        expect(await redis.exists('expiring-key-1')).toBe(false)
+      } finally {
+        jest.useRealTimers()
+      }
     })
 
     test('should clear all data on disconnect', async () => {

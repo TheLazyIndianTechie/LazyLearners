@@ -140,9 +140,16 @@ export class EnvironmentValidator {
   private validateSecuritySettings(): void {
     const securityIssues: string[] = []
 
-    // Check NextAuth secret strength
-    if (env.NEXTAUTH_SECRET && env.NEXTAUTH_SECRET.length < 32) {
-      securityIssues.push('NEXTAUTH_SECRET should be at least 32 characters for security')
+    // Check Clerk secret format
+    const hasValidClerkSecret = typeof env.CLERK_SECRET_KEY === 'string' && env.CLERK_SECRET_KEY.startsWith('sk_') && env.CLERK_SECRET_KEY.length > 20
+    if (!hasValidClerkSecret) {
+      securityIssues.push('CLERK_SECRET_KEY should start with "sk_" and be longer than 20 characters')
+    }
+
+    // Check Clerk publishable key format
+    const hasValidClerkPublishableKey = typeof env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY === 'string' && env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith('pk_') && env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.length > 20
+    if (!hasValidClerkPublishableKey) {
+      securityIssues.push('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY should start with "pk_" and be longer than 20 characters')
     }
 
     // Check if encryption key is set for sensitive data
@@ -156,8 +163,8 @@ export class EnvironmentValidator {
     }
 
     // Check if HTTPS is enforced
-    if (isProduction && !env.NEXTAUTH_URL?.startsWith('https://')) {
-      securityIssues.push('NEXTAUTH_URL should use HTTPS in production')
+    if (isProduction && !env.APP_URL?.startsWith('https://')) {
+      securityIssues.push('APP_URL should use HTTPS in production')
     }
 
     if (securityIssues.length > 0) {
@@ -225,7 +232,7 @@ export class EnvironmentValidator {
       services: {
         database: !!env.DATABASE_URL,
         redis: !!(env.REDIS_URL || env.REDIS_HOST),
-        auth: !!env.NEXTAUTH_SECRET,
+        auth: !!env.CLERK_SECRET_KEY,
         monitoring: !!(env.SENTRY_DSN || env.DATADOG_API_KEY),
       },
       security: {

@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { GET, POST } from "@/app/api/progress/route";
 import { prisma } from "@/lib/prisma";
 import { ZodError } from "zod";
@@ -6,6 +7,11 @@ import { ZodError } from "zod";
 // Mock dependencies
 jest.mock("@clerk/nextjs/server", () => ({
   auth: jest.fn(),
+  clerkClient: {
+    users: {
+      getUser: jest.fn(),
+    },
+  },
 }));
 
 jest.mock("@/lib/prisma", () => ({
@@ -21,22 +27,50 @@ jest.mock("@/lib/prisma", () => ({
   },
 }));
 
-const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>;
+const mockAuth = auth as jest.Mock;
+const mockGetUser = clerkClient.users.getUser as jest.Mock;
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
 
 describe("/api/progress", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuth.mockReturnValue({ userId: "user-1" });
+    mockGetUser.mockResolvedValue({
+      id: "user-1",
+      emailAddresses: [
+        {
+          id: "user-1-email",
+          emailAddress: "john@example.com",
+        },
+      ],
+      primaryEmailAddressId: "user-1-email",
+      publicMetadata: { role: "STUDENT" },
+      privateMetadata: {},
+      unsafeMetadata: {},
+    });
   });
 
-  const mockSession = {
-    user: {
-      id: "user-1",
-      name: "John Doe",
-      email: "john@example.com",
-      role: "STUDENT",
-    },
-    expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+  const setAuthUser = (options: { id: string | null; email?: string; role?: string }) => {
+    const { id, email = "john@example.com", role = "STUDENT" } = options;
+    mockAuth.mockReturnValue({ userId: id });
+
+    if (id) {
+      mockGetUser.mockResolvedValue({
+        id,
+        emailAddresses: [
+          {
+            id: `${id}-email`,
+            emailAddress: email,
+          },
+        ],
+        primaryEmailAddressId: `${id}-email`,
+        publicMetadata: { role },
+        privateMetadata: {},
+        unsafeMetadata: {},
+      });
+    } else {
+      mockGetUser.mockResolvedValue(null);
+    }
   };
 
   describe("POST /api/progress - Update progress", () => {
@@ -78,7 +112,6 @@ describe("/api/progress", () => {
           updatedAt: new Date(),
         };
 
-        mockGetServerSession.mockResolvedValue(mockSession);
         mockPrisma.enrollment.findFirst.mockResolvedValue(mockEnrollment);
         mockPrisma.progress.upsert.mockResolvedValue(mockProgressResult);
 
@@ -121,7 +154,6 @@ describe("/api/progress", () => {
           completionPercentage: 95,
         };
 
-        mockGetServerSession.mockResolvedValue(mockSession);
         mockPrisma.enrollment.findFirst.mockResolvedValue({ id: "enrollment-1" });
         mockPrisma.progress.upsert.mockResolvedValue({
           id: "progress-1",
@@ -152,7 +184,6 @@ describe("/api/progress", () => {
           completionPercentage: 25,
         };
 
-        mockGetServerSession.mockResolvedValue(mockSession);
         mockPrisma.enrollment.findFirst.mockResolvedValue({ id: "enrollment-1" });
         mockPrisma.progress.upsert.mockResolvedValue({ id: "progress-1" });
 
@@ -178,7 +209,6 @@ describe("/api/progress", () => {
           completed: false,
         };
 
-        mockGetServerSession.mockResolvedValue(mockSession);
         mockPrisma.enrollment.findFirst.mockResolvedValue({ id: "enrollment-1" });
         mockPrisma.progress.upsert.mockResolvedValue({ id: "progress-1" });
 
@@ -199,7 +229,7 @@ describe("/api/progress", () => {
 
     describe("Authentication and authorization", () => {
       it("should return 401 for unauthenticated requests", async () => {
-        mockGetServerSession.mockResolvedValue(null);
+        setAuthUser({ id: null });
 
         const request = createProgressRequest({
           courseId: "cuid_course_1",
@@ -215,7 +245,6 @@ describe("/api/progress", () => {
       });
 
       it("should return 403 when user is not enrolled", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
         mockPrisma.enrollment.findFirst.mockResolvedValue(null);
 
         const request = createProgressRequest({
@@ -284,8 +313,6 @@ describe("/api/progress", () => {
 
       validationTestCases.forEach(({ name, data, expectedError }) => {
         it(name, async () => {
-          mockGetServerSession.mockResolvedValue(mockSession);
-
           const request = createProgressRequest(data);
           const response = await POST(request);
           const responseData = await response.json();
@@ -300,7 +327,6 @@ describe("/api/progress", () => {
         const testCases = [0, 100];
 
         for (const percentage of testCases) {
-          mockGetServerSession.mockResolvedValue(mockSession);
           mockPrisma.enrollment.findFirst.mockResolvedValue({ id: "enrollment-1" });
           mockPrisma.progress.upsert.mockResolvedValue({ id: "progress-1" });
 
@@ -318,7 +344,6 @@ describe("/api/progress", () => {
 
     describe("Error handling", () => {
       it("should handle database errors gracefully", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
         mockPrisma.enrollment.findFirst.mockRejectedValue(new Error("Database connection failed"));
 
         const request = createProgressRequest({
@@ -334,8 +359,6 @@ describe("/api/progress", () => {
       });
 
       it("should handle malformed JSON", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
-
         const request = new NextRequest("http://localhost:3000/api/progress", {
           method: "POST",
           headers: {
@@ -376,7 +399,6 @@ describe("/api/progress", () => {
           updatedAt: new Date(),
         };
 
-        mockGetServerSession.mockResolvedValue(mockSession);
         mockPrisma.progress.findUnique.mockResolvedValue(mockProgress);
 
         const request = createProgressGetRequest({
@@ -401,7 +423,6 @@ describe("/api/progress", () => {
       });
 
       it("should return null when no progress exists for lesson", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
         mockPrisma.progress.findUnique.mockResolvedValue(null);
 
         const request = createProgressGetRequest({
@@ -448,7 +469,6 @@ describe("/api/progress", () => {
           },
         ];
 
-        mockGetServerSession.mockResolvedValue(mockSession);
         mockPrisma.progress.findMany.mockResolvedValue(mockProgressList);
 
         const request = createProgressGetRequest({ courseId: "cuid_course_1" });
@@ -479,7 +499,6 @@ describe("/api/progress", () => {
       });
 
       it("should return empty array when no progress exists for course", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
         mockPrisma.progress.findMany.mockResolvedValue([]);
 
         const request = createProgressGetRequest({ courseId: "cuid_course_1" });
@@ -494,7 +513,7 @@ describe("/api/progress", () => {
 
     describe("Authentication and validation", () => {
       it("should return 401 for unauthenticated requests", async () => {
-        mockGetServerSession.mockResolvedValue(null);
+        setAuthUser({ id: null });
 
         const request = createProgressGetRequest({ courseId: "cuid_course_1" });
         const response = await GET(request);
@@ -506,7 +525,6 @@ describe("/api/progress", () => {
       });
 
       it("should return 400 when courseId is missing", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
 
         const request = createProgressGetRequest({});
         const response = await GET(request);
@@ -518,7 +536,6 @@ describe("/api/progress", () => {
       });
 
       it("should handle lessonId without courseId", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
 
         const request = createProgressGetRequest({ lessonId: "cuid_lesson_1" });
         const response = await GET(request);
@@ -531,7 +548,6 @@ describe("/api/progress", () => {
 
     describe("Error handling", () => {
       it("should handle database errors gracefully", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
         mockPrisma.progress.findMany.mockRejectedValue(new Error("Database connection failed"));
 
         const request = createProgressGetRequest({ courseId: "cuid_course_1" });
@@ -543,7 +559,6 @@ describe("/api/progress", () => {
       });
 
       it("should handle findUnique database errors", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
         mockPrisma.progress.findUnique.mockRejectedValue(new Error("Database error"));
 
         const request = createProgressGetRequest({

@@ -11,6 +11,11 @@ import { NextRequest } from 'next/server'
 // Mock dependencies
 jest.mock('@clerk/nextjs/server', () => ({
   auth: jest.fn(),
+  clerkClient: {
+    users: {
+      getUser: jest.fn(),
+    },
+  },
 }))
 
 jest.mock('@/lib/logger', () => ({
@@ -29,8 +34,13 @@ jest.mock('@/lib/security/monitoring', () => ({
 }))
 
 describe('CRITICAL: Video Streaming User Journey', () => {
-  let getServerSession: any
-  let mockSession: any
+  let authMock: jest.Mock
+  let getUserMock: jest.Mock
+  let defaultUser: {
+    id: string
+    email: string
+    role: string
+  }
 
   beforeAll(async () => {
     // Set up test environment
@@ -39,23 +49,34 @@ describe('CRITICAL: Video Streaming User Journey', () => {
     process.env.APP_URL = 'http://localhost:3000'
 
     // Import mocked functions
-    const nextAuth = await import('next-auth/next')
-    getServerSession = nextAuth.getServerSession
+    const clerkServer = await import('@clerk/nextjs/server')
+    authMock = clerkServer.auth as jest.Mock
+    getUserMock = clerkServer.clerkClient.users.getUser as jest.Mock
 
     // Create a realistic user session
-    mockSession = {
-      user: {
-        id: 'user-123',
-        email: 'student@lazygamedevs.com',
-        name: 'Test Student',
-        role: 'STUDENT',
-      },
+    defaultUser = {
+      id: 'user-123',
+      email: 'student@lazygamedevs.com',
+      role: 'STUDENT',
     }
   })
 
   beforeEach(() => {
     jest.clearAllMocks()
-    getServerSession.mockResolvedValue(mockSession)
+    authMock.mockReturnValue({ userId: defaultUser.id })
+    getUserMock.mockResolvedValue({
+      id: defaultUser.id,
+      emailAddresses: [
+        {
+          id: 'email_default',
+          emailAddress: defaultUser.email,
+        },
+      ],
+      primaryEmailAddressId: 'email_default',
+      publicMetadata: { role: defaultUser.role },
+      privateMetadata: {},
+      unsafeMetadata: {},
+    })
   })
 
   describe('Complete User Journey: Browse → Enroll → Watch Video', () => {
@@ -276,8 +297,7 @@ describe('CRITICAL: Video Streaming User Journey', () => {
   describe('Edge Cases and Error Scenarios', () => {
     test('CRITICAL: Proper error handling for unauthenticated users', async () => {
       // Remove authentication
-      getServerSession.mockResolvedValue(null)
-
+      authMock.mockReturnValue({ userId: null })
       const { GET: streamGET } = await import('@/app/api/video/stream/route')
 
       const request = new NextRequest(

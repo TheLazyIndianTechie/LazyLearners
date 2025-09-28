@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { GET, POST } from "@/app/api/enrollment/route";
 import { enrollUserInCourse, getUserEnrollments } from "@/lib/payment";
 import { prisma } from "@/lib/prisma";
@@ -21,7 +22,7 @@ jest.mock("@/lib/prisma", () => ({
   },
 }));
 
-const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>;
+const mockAuth = auth as jest.Mock;
 const mockEnrollUserInCourse = enrollUserInCourse as jest.MockedFunction<typeof enrollUserInCourse>;
 const mockGetUserEnrollments = getUserEnrollments as jest.MockedFunction<typeof getUserEnrollments>;
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
@@ -29,17 +30,8 @@ const mockPrisma = prisma as jest.Mocked<typeof prisma>;
 describe("/api/enrollment", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuth.mockReturnValue({ userId: "user-1" });
   });
-
-  const mockSession = {
-    user: {
-      id: "user-1",
-      name: "John Doe",
-      email: "john@example.com",
-      role: "STUDENT",
-    },
-    expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-  };
 
   describe("GET /api/enrollment - Get user enrollments", () => {
     it("should return user enrollments for authenticated user", async () => {
@@ -72,7 +64,6 @@ describe("/api/enrollment", () => {
         },
       ];
 
-      mockGetServerSession.mockResolvedValue(mockSession);
       mockGetUserEnrollments.mockResolvedValue(mockEnrollments);
 
       const request = new NextRequest("http://localhost:3000/api/enrollment");
@@ -88,7 +79,7 @@ describe("/api/enrollment", () => {
     });
 
     it("should return 401 for unauthenticated requests", async () => {
-      mockGetServerSession.mockResolvedValue(null);
+      mockAuth.mockReturnValue({ userId: null });
 
       const request = new NextRequest("http://localhost:3000/api/enrollment");
       const response = await GET(request);
@@ -100,7 +91,7 @@ describe("/api/enrollment", () => {
     });
 
     it("should handle database errors gracefully", async () => {
-      mockGetServerSession.mockResolvedValue(mockSession);
+      mockAuth.mockReturnValue({ userId: "user-1" });
       mockGetUserEnrollments.mockRejectedValue(new Error("Database connection failed"));
 
       const request = new NextRequest("http://localhost:3000/api/enrollment");
@@ -112,7 +103,7 @@ describe("/api/enrollment", () => {
     });
 
     it("should return empty array when user has no enrollments", async () => {
-      mockGetServerSession.mockResolvedValue(mockSession);
+      mockAuth.mockReturnValue({ userId: "user-1" });
       mockGetUserEnrollments.mockResolvedValue([]);
 
       const request = new NextRequest("http://localhost:3000/api/enrollment");
@@ -146,7 +137,7 @@ describe("/api/enrollment", () => {
           completed: false,
         };
 
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
         mockPrisma.course.findUnique.mockResolvedValue({
           id: "course-1",
           price: 0,
@@ -178,7 +169,7 @@ describe("/api/enrollment", () => {
       });
 
       it("should handle enrollment when course price is 0", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
         mockPrisma.course.findUnique.mockResolvedValue({
           id: "course-1",
           price: 0.00,
@@ -216,7 +207,7 @@ describe("/api/enrollment", () => {
 
     describe("Paid course enrollment", () => {
       it("should reject enrollment in paid course without payment", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
         mockPrisma.course.findUnique.mockResolvedValue({
           id: "course-1",
           price: 99.99,
@@ -246,7 +237,7 @@ describe("/api/enrollment", () => {
       });
 
       it("should handle courses with high prices", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
         mockPrisma.course.findUnique.mockResolvedValue({
           id: "course-1",
           price: 999.99,
@@ -277,7 +268,7 @@ describe("/api/enrollment", () => {
 
     describe("Authentication and authorization", () => {
       it("should return 401 for unauthenticated requests", async () => {
-        mockGetServerSession.mockResolvedValue(null);
+      mockAuth.mockReturnValue({ userId: null });
 
         const request = createEnrollmentRequest({ courseId: "course-1" });
         const response = await POST(request);
@@ -289,13 +280,7 @@ describe("/api/enrollment", () => {
       });
 
       it("should handle session without user ID", async () => {
-        mockGetServerSession.mockResolvedValue({
-          user: {
-            name: "John Doe",
-            email: "john@example.com",
-          },
-          expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        });
+      mockAuth.mockReturnValue({ userId: undefined });
 
         const request = createEnrollmentRequest({ courseId: "course-1" });
         const response = await POST(request);
@@ -308,7 +293,7 @@ describe("/api/enrollment", () => {
 
     describe("Input validation", () => {
       it("should return 400 for missing courseId", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
 
         const request = createEnrollmentRequest({});
         const response = await POST(request);
@@ -320,7 +305,7 @@ describe("/api/enrollment", () => {
       });
 
       it("should return 400 for null courseId", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
 
         const request = createEnrollmentRequest({ courseId: null });
         const response = await POST(request);
@@ -331,7 +316,7 @@ describe("/api/enrollment", () => {
       });
 
       it("should return 400 for empty string courseId", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
 
         const request = createEnrollmentRequest({ courseId: "" });
         const response = await POST(request);
@@ -344,7 +329,7 @@ describe("/api/enrollment", () => {
 
     describe("Course validation", () => {
       it("should return 404 for non-existent course", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
         mockPrisma.course.findUnique.mockResolvedValue(null);
 
         const request = createEnrollmentRequest({ courseId: "non-existent" });
@@ -357,7 +342,7 @@ describe("/api/enrollment", () => {
       });
 
       it("should query course with correct parameters", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
         mockPrisma.course.findUnique.mockResolvedValue({
           id: "course-1",
           price: 0,
@@ -397,7 +382,7 @@ describe("/api/enrollment", () => {
 
     describe("Enrollment process", () => {
       it("should handle enrollment failure", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
         mockPrisma.course.findUnique.mockResolvedValue({
           id: "course-1",
           price: 0,
@@ -427,7 +412,7 @@ describe("/api/enrollment", () => {
       });
 
       it("should handle enrollment service errors", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
         mockPrisma.course.findUnique.mockResolvedValue({
           id: "course-1",
           price: 0,
@@ -459,7 +444,7 @@ describe("/api/enrollment", () => {
 
     describe("Edge cases", () => {
       it("should handle malformed JSON request", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
 
         const request = new NextRequest("http://localhost:3000/api/enrollment", {
           method: "POST",
@@ -477,7 +462,7 @@ describe("/api/enrollment", () => {
       });
 
       it("should handle database connection errors", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
         mockPrisma.course.findUnique.mockRejectedValue(new Error("Database connection failed"));
 
         const request = createEnrollmentRequest({ courseId: "course-1" });
@@ -489,7 +474,7 @@ describe("/api/enrollment", () => {
       });
 
       it("should handle courses with decimal prices", async () => {
-        mockGetServerSession.mockResolvedValue(mockSession);
+        mockAuth.mockReturnValue({ userId: "user-1" });
         mockPrisma.course.findUnique.mockResolvedValue({
           id: "course-1",
           price: 29.99,

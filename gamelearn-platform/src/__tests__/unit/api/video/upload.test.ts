@@ -20,6 +20,11 @@ jest.mock('@/lib/logger', () => ({
 
 jest.mock('@clerk/nextjs/server', () => ({
   auth: jest.fn(),
+  clerkClient: {
+    users: {
+      getUser: jest.fn(),
+    },
+  },
 }))
 
 jest.mock('@/lib/video/processing', () => ({
@@ -42,7 +47,8 @@ describe('/api/video/upload', () => {
   let POST: any
   let GET: any
   let DELETE: any
-  let getServerSession: any
+  let authMock: jest.Mock
+  let getUserMock: jest.Mock
   let submitVideo: any
   let getVideoJob: any
   let getUserVideoJobs: any
@@ -57,8 +63,9 @@ describe('/api/video/upload', () => {
     DELETE = uploadRoute.DELETE
 
     // Import mocked functions
-    const nextAuth = await import('next-auth/next')
-    getServerSession = nextAuth.getServerSession
+    const clerkServer = await import('@clerk/nextjs/server')
+    authMock = clerkServer.auth as jest.Mock
+    getUserMock = clerkServer.clerkClient.users.getUser as jest.Mock
 
     const processing = await import('@/lib/video/processing')
     submitVideo = processing.submitVideo
@@ -75,13 +82,19 @@ describe('/api/video/upload', () => {
 
     // Default mock implementations
     validateFileUpload.mockResolvedValue({ isValid: true, errors: [] })
-    getServerSession.mockResolvedValue({
-      user: {
-        id: 'user123',
-        email: 'instructor@lazygamedevs.com',
-        name: 'Test Instructor',
-        role: 'INSTRUCTOR',
-      },
+    authMock.mockReturnValue({ userId: 'user123' })
+    getUserMock.mockResolvedValue({
+      id: 'user123',
+      emailAddresses: [
+        {
+          id: 'email_1',
+          emailAddress: 'instructor@lazygamedevs.com',
+        },
+      ],
+      primaryEmailAddressId: 'email_1',
+      publicMetadata: { role: 'INSTRUCTOR' },
+      privateMetadata: {},
+      unsafeMetadata: {},
     })
   })
 
@@ -159,7 +172,7 @@ describe('/api/video/upload', () => {
     })
 
     test('should reject unauthenticated requests', async () => {
-      getServerSession.mockResolvedValue(null)
+      authMock.mockReturnValue({ userId: null })
 
       const formData = createMockFormData()
       const request = createMockRequest(formData)
@@ -173,11 +186,19 @@ describe('/api/video/upload', () => {
     })
 
     test('should reject student uploads', async () => {
-      getServerSession.mockResolvedValue({
-        user: {
-          id: 'student123',
-          role: 'student',
-        },
+      authMock.mockReturnValue({ userId: 'student123' })
+      getUserMock.mockResolvedValue({
+        id: 'student123',
+        emailAddresses: [
+          {
+            id: 'email_student',
+            emailAddress: 'student@lazygamedevs.com',
+          },
+        ],
+        primaryEmailAddressId: 'email_student',
+        publicMetadata: { role: 'student' },
+        privateMetadata: {},
+        unsafeMetadata: {},
       })
 
       const formData = createMockFormData()
@@ -426,7 +447,7 @@ describe('/api/video/upload', () => {
     })
 
     test('should reject unauthenticated requests', async () => {
-      getServerSession.mockResolvedValue(null)
+      authMock.mockReturnValue({ userId: null })
 
       const request = createMockRequest()
       const response = await GET(request)
@@ -457,8 +478,19 @@ describe('/api/video/upload', () => {
       }
 
       getVideoJob.mockResolvedValue(otherUserJob)
-      getServerSession.mockResolvedValue({
-        user: { id: 'user123', role: 'INSTRUCTOR' },
+      authMock.mockReturnValue({ userId: 'user123' })
+      getUserMock.mockResolvedValue({
+        id: 'user123',
+        emailAddresses: [
+          {
+            id: 'email_instructor',
+            emailAddress: 'instructor@lazygamedevs.com',
+          },
+        ],
+        primaryEmailAddressId: 'email_instructor',
+        publicMetadata: { role: 'INSTRUCTOR' },
+        privateMetadata: {},
+        unsafeMetadata: {},
       })
 
       const request = createMockRequest({ jobId: 'job123' })
@@ -478,8 +510,19 @@ describe('/api/video/upload', () => {
       }
 
       getVideoJob.mockResolvedValue(otherUserJob)
-      getServerSession.mockResolvedValue({
-        user: { id: 'admin123', role: 'ADMIN' },
+      authMock.mockReturnValue({ userId: 'admin123' })
+      getUserMock.mockResolvedValue({
+        id: 'admin123',
+        emailAddresses: [
+          {
+            id: 'email_admin',
+            emailAddress: 'admin@lazygamedevs.com',
+          },
+        ],
+        primaryEmailAddressId: 'email_admin',
+        publicMetadata: { role: 'ADMIN' },
+        privateMetadata: {},
+        unsafeMetadata: {},
       })
 
       const request = createMockRequest({ jobId: 'job123' })
@@ -527,7 +570,7 @@ describe('/api/video/upload', () => {
     })
 
     test('should reject unauthenticated requests', async () => {
-      getServerSession.mockResolvedValue(null)
+      authMock.mockReturnValue({ userId: null })
 
       const request = createMockRequest({ jobId: 'job123' })
       const response = await DELETE(request)
@@ -602,7 +645,9 @@ describe('/api/video/upload', () => {
     })
 
     test('should handle session errors', async () => {
-      getServerSession.mockRejectedValue(new Error('Session error'))
+      authMock.mockImplementation(() => {
+        throw new Error('Session error')
+      })
 
       const formData = new FormData()
       const request = {

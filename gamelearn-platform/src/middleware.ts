@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { withAuth } from "next-auth/middleware"
-import { getToken } from "next-auth/jwt"
+import { authMiddleware } from "@clerk/nextjs"
 
 // Configuration
 const RATE_LIMITS = {
@@ -109,7 +108,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   return response
 }
 
-async function middleware(req: NextRequest) {
+async function handleRequest(req: NextRequest) {
   const { pathname } = req.nextUrl
 
   // Generate correlation ID for tracing
@@ -202,7 +201,8 @@ async function middleware(req: NextRequest) {
     const allowedOrigins = [
       `https://${host}`,
       `http://${host}`, // For development
-      process.env.NEXTAUTH_URL,
+      process.env.APP_URL,
+      process.env.NEXT_PUBLIC_APP_URL,
       ...(process.env.ALLOWED_ORIGINS?.split(",") || [])
     ].filter(Boolean)
 
@@ -294,64 +294,53 @@ async function middleware(req: NextRequest) {
   return response
 }
 
-// Authentication middleware wrapper
-export default withAuth(
-  middleware,
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        const { pathname } = req.nextUrl
+const PUBLIC_ROUTES = [
+  "/",
+  "/courses",
+  "/auth/signin",
+  "/auth/signup",
+  "/auth/error",
+  "/api/auth",
+  "/api/health"
+]
 
-        // Public routes that don't require authentication
-        const publicRoutes = [
-          "/",
-          "/courses",
-          "/auth/signin",
-          "/auth/signup",
-          "/auth/error",
-          "/api/auth",
-          "/api/health"
-        ]
+const PROTECTED_ROUTES = [
+  "/dashboard",
+  "/instructor",
+  "/checkout",
+  "/portfolio/create"
+]
 
-        // Check if the route is public
-        if (publicRoutes.some(route => pathname.startsWith(route))) {
-          return true
-        }
+const PROTECTED_API_ROUTES = [
+  "/api/payment",
+  "/api/progress",
+  "/api/enrollment",
+  "/api/cart",
+  "/api/collaboration"
+]
 
-        // API routes that require authentication
-        if (pathname.startsWith("/api/")) {
-          const protectedApiRoutes = [
-            "/api/payment",
-            "/api/progress",
-            "/api/enrollment",
-            "/api/cart",
-            "/api/collaboration"
-          ]
+export default authMiddleware({
+  publicRoutes: PUBLIC_ROUTES,
+  async afterAuth(auth, req) {
+    const { pathname } = req.nextUrl
 
-          if (protectedApiRoutes.some(route => pathname.startsWith(route))) {
-            return !!token
-          }
+    if (!auth.userId) {
+      if (pathname.startsWith("/api/") && PROTECTED_API_ROUTES.some(route => pathname.startsWith(route))) {
+        const unauthorizedResponse = NextResponse.json(
+          { error: "Unauthorized" },
+          { status: 401 }
+        )
+        return addSecurityHeaders(unauthorizedResponse)
+      }
 
-          return true // Allow other API routes
-        }
+      if (PROTECTED_ROUTES.some(route => pathname.startsWith(route))) {
+        return auth.redirectToSignIn({ returnBackUrl: req.nextUrl.href })
+      }
+    }
 
-        // Protected pages that require authentication
-        const protectedRoutes = [
-          "/dashboard",
-          "/instructor",
-          "/checkout",
-          "/portfolio/create"
-        ]
-
-        if (protectedRoutes.some(route => pathname.startsWith(route))) {
-          return !!token
-        }
-
-        return true // Allow other routes
-      },
-    },
+    return handleRequest(req)
   }
-)
+})
 
 // Configure which routes this middleware runs on
 export const config = {

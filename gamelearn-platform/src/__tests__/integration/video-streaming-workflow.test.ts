@@ -19,6 +19,11 @@ jest.mock('@/lib/logger', () => ({
 
 jest.mock('@clerk/nextjs/server', () => ({
   auth: jest.fn(),
+  clerkClient: {
+    users: {
+      getUser: jest.fn(),
+    },
+  },
 }))
 
 jest.mock('@/lib/security/monitoring', () => ({
@@ -30,8 +35,13 @@ jest.mock('@/lib/security/file-validation', () => ({
 }))
 
 describe('Video Streaming Workflow Integration', () => {
-  let getServerSession: any
-  let mockSession: any
+  let authMock: jest.Mock
+  let getUserMock: jest.Mock
+  let defaultUser: {
+    id: string
+    email: string
+    role: string
+  }
 
   beforeAll(async () => {
     // Set up test environment
@@ -40,23 +50,34 @@ describe('Video Streaming Workflow Integration', () => {
     process.env.APP_URL = 'http://localhost:3000'
 
     // Import mocked functions
-    const nextAuth = await import('next-auth/next')
-    getServerSession = nextAuth.getServerSession
+    const clerkServer = await import('@clerk/nextjs/server')
+    authMock = clerkServer.auth as jest.Mock
+    getUserMock = clerkServer.clerkClient.users.getUser as jest.Mock
 
     // Default session setup
-    mockSession = {
-      user: {
-        id: 'instructor123',
-        email: 'instructor@lazygamedevs.com',
-        name: 'Test Instructor',
-        role: 'INSTRUCTOR',
-      },
+    defaultUser = {
+      id: 'instructor123',
+      email: 'instructor@lazygamedevs.com',
+      role: 'INSTRUCTOR',
     }
   })
 
   beforeEach(() => {
     jest.clearAllMocks()
-    getServerSession.mockResolvedValue(mockSession)
+    authMock.mockReturnValue({ userId: defaultUser.id })
+    getUserMock.mockResolvedValue({
+      id: defaultUser.id,
+      emailAddresses: [
+        {
+          id: 'email_default',
+          emailAddress: defaultUser.email,
+        },
+      ],
+      primaryEmailAddressId: 'email_default',
+      publicMetadata: { role: defaultUser.role },
+      privateMetadata: {},
+      unsafeMetadata: {},
+    })
   })
 
   describe('Complete Video Upload and Streaming Workflow', () => {
@@ -453,7 +474,7 @@ describe('Video Streaming Workflow Integration', () => {
   describe('Security and Access Control', () => {
     test('should enforce authentication across all endpoints', async () => {
       // Set no session
-      getServerSession.mockResolvedValue(null)
+      authMock.mockReturnValue({ userId: null })
 
       const endpoints = [
         { module: '@/app/api/video/upload/route', method: 'POST' },
@@ -480,11 +501,19 @@ describe('Video Streaming Workflow Integration', () => {
 
     test('should enforce role-based access for video upload', async () => {
       // Set student session
-      getServerSession.mockResolvedValue({
-        user: {
-          id: 'student123',
-          role: 'student',
-        },
+      authMock.mockReturnValue({ userId: 'student123' })
+      getUserMock.mockResolvedValue({
+        id: 'student123',
+        emailAddresses: [
+          {
+            id: 'email_student',
+            emailAddress: 'student@lazygamedevs.com',
+          },
+        ],
+        primaryEmailAddressId: 'email_student',
+        publicMetadata: { role: 'student' },
+        privateMetadata: {},
+        unsafeMetadata: {},
       })
 
       const { POST: uploadPOST } = await import('@/app/api/video/upload/route')
@@ -502,8 +531,19 @@ describe('Video Streaming Workflow Integration', () => {
 
     test('should prevent access to other users sessions', async () => {
       // Create session as user1
-      getServerSession.mockResolvedValue({
-        user: { id: 'user1', role: 'INSTRUCTOR' },
+      authMock.mockReturnValue({ userId: 'user1' })
+      getUserMock.mockResolvedValue({
+        id: 'user1',
+        emailAddresses: [
+          {
+            id: 'email_user1',
+            emailAddress: 'user1@lazygamedevs.com',
+          },
+        ],
+        primaryEmailAddressId: 'email_user1',
+        publicMetadata: { role: 'INSTRUCTOR' },
+        privateMetadata: {},
+        unsafeMetadata: {},
       })
 
       const { POST: streamPOST } = await import('@/app/api/video/stream/route')
@@ -522,8 +562,19 @@ describe('Video Streaming Workflow Integration', () => {
       const sessionId = streamData.data.sessionId
 
       // Switch to user2
-      getServerSession.mockResolvedValue({
-        user: { id: 'user2', role: 'INSTRUCTOR' },
+      authMock.mockReturnValue({ userId: 'user2' })
+      getUserMock.mockResolvedValue({
+        id: 'user2',
+        emailAddresses: [
+          {
+            id: 'email_user2',
+            emailAddress: 'user2@lazygamedevs.com',
+          },
+        ],
+        primaryEmailAddressId: 'email_user2',
+        publicMetadata: { role: 'INSTRUCTOR' },
+        privateMetadata: {},
+        unsafeMetadata: {},
       })
 
       // Try to access user1's session

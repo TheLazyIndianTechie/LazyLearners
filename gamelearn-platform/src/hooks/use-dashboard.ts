@@ -45,7 +45,7 @@ export function useDashboard() {
 
   useEffect(() => {
     async function fetchDashboardData() {
-      if (!user?.id) {
+      if (!isSignedIn || !user?.id) {
         setLoading(false)
         return
       }
@@ -67,10 +67,8 @@ export function useDashboard() {
       }
     }
 
-    if (status !== "loading") {
-      fetchDashboardData()
-    }
-  }, [user?.id, status])
+    fetchDashboardData()
+  }, [isSignedIn, user?.id])
 
   const refetch = async () => {
     if (!user?.id) return

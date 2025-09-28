@@ -1,6 +1,7 @@
 APP_URL=https://gamelearn-platform-aka9ffa4b-thelazyindiantechies-projects.vercel.app
-NEXTAUTH_URL=https://gamelearn-platform-aka9ffa4b-thelazyindiantechies-projects.vercel.app
-NEXTAUTH_SECRET=staging-nextauth-secret-key-for-gamelearn-platform-at-least-32-chars
+CLERK_SECRET_KEY=<REPLACE_WITH_CLERK_SECRET_KEY_FROM_SECRET_MANAGER>
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<REPLACE_WITH_CLERK_PUBLISHABLE_KEY_FROM_SECRET_MANAGER>
+CLERK_WEBHOOK_SECRET=<REPLACE_WITH_CLERK_WEBHOOK_SECRET_FROM_SECRET_MANAGER>
 JWT_SECRET=staging-jwt-secret-key-for-gamelearn-platform-minimum-32-characters
 ENCRYPTION_KEY=staging-encryption-key-for-gamelearn-platform-data-protection-32-chars
 DATABASE_URL=file:./staging.db

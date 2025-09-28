@@ -1,10 +1,16 @@
 import { NextRequest } from "next/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { GET } from "@/app/api/courses/[id]/modules/[moduleId]/lessons/[lessonId]/route";
 import { prisma } from "@/lib/prisma";
 
 // Mock dependencies
 jest.mock("@clerk/nextjs/server", () => ({
   auth: jest.fn(),
+  clerkClient: {
+    users: {
+      getUser: jest.fn(),
+    },
+  },
 }));
 
 jest.mock("@/lib/prisma", () => ({
@@ -18,33 +24,38 @@ jest.mock("@/lib/prisma", () => ({
   },
 }));
 
-const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>;
+const mockAuth = auth as jest.Mock;
+const mockGetUser = clerkClient.users.getUser as jest.Mock;
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
 
 describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setAuthUser({ id: "instructor-1", email: "jane@example.com", role: "INSTRUCTOR" });
   });
 
-  const mockInstructorSession = {
-    user: {
-      id: "instructor-1",
-      name: "Jane Instructor",
-      email: "jane@example.com",
-      role: "INSTRUCTOR",
-    },
-    expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-  };
+const setAuthUser = (options: { id: string | null; email?: string; role?: string }) => {
+  const { id, email = "user@example.com", role = "INSTRUCTOR" } = options;
+  mockAuth.mockReturnValue({ userId: id });
 
-  const mockStudentSession = {
-    user: {
-      id: "student-1",
-      name: "John Student",
-      email: "john@example.com",
-      role: "STUDENT",
-    },
-    expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-  };
+  if (id) {
+    mockGetUser.mockResolvedValue({
+      id,
+      emailAddresses: [
+        {
+          id: `${id}-email`,
+          emailAddress: email,
+        },
+      ],
+      primaryEmailAddressId: `${id}-email`,
+      publicMetadata: { role },
+      privateMetadata: {},
+      unsafeMetadata: {},
+    });
+  } else {
+    mockGetUser.mockResolvedValue(null);
+  }
+};
 
   const mockCourse = {
     id: "course-1",
@@ -73,7 +84,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
 
   describe("Successful lesson access", () => {
     it("should return lesson for course instructor", async () => {
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockResolvedValue(mockCourse);
       mockPrisma.lesson.findFirst.mockResolvedValue(mockLesson);
 
@@ -89,7 +99,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
     });
 
     it("should verify instructor ownership", async () => {
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockResolvedValue(mockCourse);
       mockPrisma.lesson.findFirst.mockResolvedValue(mockLesson);
 
@@ -105,7 +114,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
     });
 
     it("should verify lesson belongs to correct module and course", async () => {
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockResolvedValue(mockCourse);
       mockPrisma.lesson.findFirst.mockResolvedValue(mockLesson);
 
@@ -131,7 +139,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
         content: "This is a text lesson with detailed explanations.",
       };
 
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockResolvedValue(mockCourse);
       mockPrisma.lesson.findFirst.mockResolvedValue(textLesson);
 
@@ -161,7 +168,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
         }),
       };
 
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockResolvedValue(mockCourse);
       mockPrisma.lesson.findFirst.mockResolvedValue(quizLesson);
 
@@ -177,7 +183,7 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
 
   describe("Authentication and authorization", () => {
     it("should return 401 for unauthenticated requests", async () => {
-      mockGetServerSession.mockResolvedValue(null);
+      setAuthUser({ id: null });
 
       const request = new NextRequest("http://localhost:3000/api/courses/course-1/modules/module-1/lessons/lesson-1");
       const response = await GET(request, { params: mockParams });
@@ -189,15 +195,7 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
     });
 
     it("should return 404 when instructor doesn't own the course", async () => {
-      const differentInstructorSession = {
-        ...mockInstructorSession,
-        user: {
-          ...mockInstructorSession.user,
-          id: "different-instructor",
-        },
-      };
-
-      mockGetServerSession.mockResolvedValue(differentInstructorSession);
+      setAuthUser({ id: "different-instructor", email: "jane@example.com", role: "INSTRUCTOR" });
       mockPrisma.course.findFirst.mockResolvedValue(null);
 
       const request = new NextRequest("http://localhost:3000/api/courses/course-1/modules/module-1/lessons/lesson-1");
@@ -210,17 +208,7 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
     });
 
     it("should check course ownership for admin users", async () => {
-      const adminSession = {
-        user: {
-          id: "admin-1",
-          name: "Admin User",
-          email: "admin@example.com",
-          role: "ADMIN",
-        },
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      };
-
-      mockGetServerSession.mockResolvedValue(adminSession);
+      setAuthUser({ id: "admin-1", email: "admin@example.com", role: "ADMIN" });
       mockPrisma.course.findFirst.mockResolvedValue(null);
 
       const request = new NextRequest("http://localhost:3000/api/courses/course-1/modules/module-1/lessons/lesson-1");
@@ -238,7 +226,7 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
     });
 
     it("should restrict access for students", async () => {
-      mockGetServerSession.mockResolvedValue(mockStudentSession);
+      setAuthUser({ id: "student-1", email: "john@example.com", role: "STUDENT" });
       mockPrisma.course.findFirst.mockResolvedValue(null);
 
       const request = new NextRequest("http://localhost:3000/api/courses/course-1/modules/module-1/lessons/lesson-1");
@@ -252,7 +240,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
 
   describe("Resource validation", () => {
     it("should return 404 when lesson doesn't exist", async () => {
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockResolvedValue(mockCourse);
       mockPrisma.lesson.findFirst.mockResolvedValue(null);
 
@@ -265,7 +252,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
     });
 
     it("should return 404 when lesson belongs to wrong module", async () => {
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockResolvedValue(mockCourse);
       mockPrisma.lesson.findFirst.mockResolvedValue(null);
 
@@ -293,7 +279,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
     });
 
     it("should return 404 when lesson belongs to wrong course", async () => {
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockResolvedValue(mockCourse);
       mockPrisma.lesson.findFirst.mockResolvedValue(null);
 
@@ -331,7 +316,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
       ];
 
       for (const params of testParams) {
-        mockGetServerSession.mockResolvedValue(mockInstructorSession);
         mockPrisma.course.findFirst.mockResolvedValue({
           id: params.id,
           instructorId: "instructor-1",
@@ -351,7 +335,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
 
   describe("Error handling", () => {
     it("should handle course database errors", async () => {
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockRejectedValue(new Error("Database connection failed"));
 
       const request = new NextRequest("http://localhost:3000/api/courses/course-1/modules/module-1/lessons/lesson-1");
@@ -363,7 +346,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
     });
 
     it("should handle lesson database errors", async () => {
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockResolvedValue(mockCourse);
       mockPrisma.lesson.findFirst.mockRejectedValue(new Error("Database error"));
 
@@ -376,7 +358,9 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
     });
 
     it("should handle authentication service errors", async () => {
-      mockGetServerSession.mockRejectedValue(new Error("Auth service unavailable"));
+      mockAuth.mockImplementation(() => {
+        throw new Error("Auth service unavailable");
+      });
 
       const request = new NextRequest("http://localhost:3000/api/courses/course-1/modules/module-1/lessons/lesson-1");
       const response = await GET(request, { params: mockParams });
@@ -395,7 +379,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
         videoUrl: null,
       };
 
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockResolvedValue(mockCourse);
       mockPrisma.lesson.findFirst.mockResolvedValue(emptyLesson);
 
@@ -414,7 +397,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
         duration: 0,
       };
 
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockResolvedValue(mockCourse);
       mockPrisma.lesson.findFirst.mockResolvedValue(zeroDurationLesson);
 
@@ -432,7 +414,6 @@ describe("/api/courses/[id]/modules/[moduleId]/lessons/[lessonId] - GET", () => 
         content: '{"incomplete": json',
       };
 
-      mockGetServerSession.mockResolvedValue(mockInstructorSession);
       mockPrisma.course.findFirst.mockResolvedValue(mockCourse);
       mockPrisma.lesson.findFirst.mockResolvedValue(malformedLesson);
 

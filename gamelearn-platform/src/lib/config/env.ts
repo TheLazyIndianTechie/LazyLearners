@@ -18,8 +18,9 @@ const redisSchema = z.object({
 })
 
 const authSchema = z.object({
-  NEXTAUTH_SECRET: z.string().min(32, 'NEXTAUTH_SECRET must be at least 32 characters'),
-  NEXTAUTH_URL: z.string().url('Invalid NEXTAUTH_URL'),
+  CLERK_SECRET_KEY: z.string().min(1, 'CLERK_SECRET_KEY is required'),
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1, 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is required'),
+  CLERK_WEBHOOK_SECRET: z.string().optional(),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters').optional(),
   SESSION_TIMEOUT: z.coerce.number().min(300).max(86400).default(3600), // 5min to 24hrs
 })
@@ -136,9 +137,9 @@ function validateRequiredForProduction(env: any): void {
     // Required for production
     const requiredVars = [
       'DATABASE_URL',
-      'NEXTAUTH_SECRET',
+      'CLERK_SECRET_KEY',
+      'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
       'JWT_SECRET',
-      'NEXTAUTH_URL',
       'APP_URL'
     ]
 
@@ -262,8 +263,12 @@ export const redisConfig = {
 
 // Auth configuration
 export const authConfig = {
-  secret: env.NEXTAUTH_SECRET,
-  url: env.NEXTAUTH_URL,
+  clerk: {
+    secretKey: env.CLERK_SECRET_KEY,
+    publishableKey: env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    webhookSecret: env.CLERK_WEBHOOK_SECRET,
+  },
+  jwtSecret: env.JWT_SECRET,
   sessionTimeout: env.SESSION_TIMEOUT,
   providers: {
     google: {
@@ -412,7 +417,7 @@ export function generateConfigReport(): {
     services: {
       database: !!env.DATABASE_URL,
       redis: !!(env.REDIS_URL || env.REDIS_HOST),
-      auth: !!env.NEXTAUTH_SECRET,
+      auth: !!env.CLERK_SECRET_KEY,
       dodoPayments: !!env.DODO_API_KEY,
       stripe: !!env.STRIPE_SECRET_KEY,
       paypal: !!env.PAYPAL_CLIENT_ID,

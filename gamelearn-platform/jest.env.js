@@ -8,8 +8,9 @@ process.env.DATABASE_URL = 'sqlite://test.db'
 process.env.REDIS_URL = 'redis://localhost:6379/test'
 
 // Authentication configuration
-process.env.NEXTAUTH_SECRET = 'test-secret-key-for-jwt-signing'
-process.env.NEXTAUTH_URL = 'http://localhost:3000'
+process.env.CLERK_SECRET_KEY = 'sk_test_dummy_clerk_secret_key'
+process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'pk_test_dummy_clerk_publishable_key'
+process.env.CLERK_WEBHOOK_SECRET = 'whsec_test_clerk_webhook'
 
 // Application URLs
 process.env.APP_URL = 'http://localhost:3000'
