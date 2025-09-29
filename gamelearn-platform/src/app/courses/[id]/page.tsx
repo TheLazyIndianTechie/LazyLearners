@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -246,24 +246,106 @@ const mockQuizzes: Quiz[] = [
 ]
 
 interface CoursePageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default function CoursePage({ params }: CoursePageProps) {
+  const { id } = use(params)
   const { isSignedIn, user } = useUser()
   const router = useRouter()
   const [isEnrolled, setIsEnrolled] = useState(false)
+  const [course, setCourse] = useState(mockCourse) // Start with mock data, will be replaced by real data
   const [currentLesson, setCurrentLesson] = useState(mockCourse.modules[0].lessons[0])
   const [progress, setProgress] = useState(15) // Mock progress
-  const coursePriceCents = Math.max(0, Math.round(mockCourse.price * 100))
+  const [isLoadingCourse, setIsLoadingCourse] = useState(true)
+  const coursePriceCents = Math.max(0, Math.round(course.price * 100))
   const isPaidCourse = coursePriceCents > 0
 
-  // Check if user is enrolled (mock logic)
+  // Fetch course data
   useEffect(() => {
-    if (isSignedIn) {
-      setIsEnrolled(true) // Mock enrollment check
+    const fetchCourse = async () => {
+      if (!id) return
+
+      try {
+        setIsLoadingCourse(true)
+        const response = await fetch(`/api/courses/${id}?includeLessons=true`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.data) {
+            // Transform the API data to match our component expectations
+            const transformedCourse = {
+              ...data.data,
+              instructor: {
+                ...data.data.instructor,
+                avatar: data.data.instructor.image || '/api/placeholder/80/80',
+                role: 'instructor' as const,
+                enrolledCourses: [],
+                createdCourses: [data.data.id],
+                portfolio: {} as any,
+                certifications: [],
+                createdAt: new Date(),
+                updatedAt: new Date()
+              },
+              category: data.data.category.toLowerCase().replace('_', '-'),
+              engine: data.data.engine.toLowerCase(),
+              difficulty: data.data.difficulty.toLowerCase(),
+              modules: data.data.modules?.map((module: any) => ({
+                ...module,
+                lessons: module.lessons?.map((lesson: any) => {
+                  const content = lesson.content ? JSON.parse(lesson.content) : {}
+                  return {
+                    ...lesson,
+                    type: lesson.type.toLowerCase(),
+                    videoUrl: lesson.videoUrl,
+                    isCompleted: false,
+                    isFree: content.isFree || false
+                  }
+                }) || []
+              })) || [],
+              isPublished: data.data.published,
+              tags: data.data.tags || []
+            }
+
+            setCourse(transformedCourse)
+            // Update current lesson if course data changed
+            if (transformedCourse.modules?.[0]?.lessons?.[0]) {
+              setCurrentLesson(transformedCourse.modules[0].lessons[0])
+            }
+          }
+        } else {
+          // If course not found in API, keep using mock data for development
+          console.log('Course not found in API, using mock data')
+        }
+      } catch (error) {
+        console.error('Error fetching course:', error)
+        // Continue with mock data on error
+      } finally {
+        setIsLoadingCourse(false)
+      }
     }
-  }, [isSignedIn])
+
+    fetchCourse()
+  }, [id])
+
+  // Check if user is enrolled
+  useEffect(() => {
+    const checkEnrollment = async () => {
+      if (!isSignedIn || !id) return
+
+      try {
+        const response = await fetch(`/api/enrollment?courseId=${id}`)
+        if (response.ok) {
+          const data = await response.json()
+          setIsEnrolled(!!data.enrollment)
+        }
+      } catch (error) {
+        console.error('Error checking enrollment:', error)
+        setIsEnrolled(false)
+      }
+    }
+
+    checkEnrollment()
+  }, [isSignedIn, id])
 
   const handleEnroll = async () => {
     if (!isSignedIn) {
@@ -277,13 +359,13 @@ export default function CoursePage({ params }: CoursePageProps) {
     }
 
     try {
-      const response = await fetch('/api/enrollments', {
+      const response = await fetch('/api/enrollment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          courseId: mockCourse.id
+          courseId: id
         }),
       })
 
@@ -323,7 +405,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                 url={currentLesson.videoUrl}
                 title={currentLesson.title}
                 lessonId={currentLesson.id}
-                courseId={params.id}
+                courseId={id}
                 onProgress={(progress) => {
                   console.log("Video progress:", progress)
                 }}
@@ -343,35 +425,35 @@ export default function CoursePage({ params }: CoursePageProps) {
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <div className="flex items-start gap-4 mb-4">
                   <Avatar className="w-16 h-16">
-                    <AvatarImage src={mockCourse.instructor.avatar} alt={mockCourse.instructor.name} />
+                    <AvatarImage src={course.instructor.avatar} alt={course.instructor.name} />
                     <AvatarFallback>
-                      {mockCourse.instructor.name.split(' ').map(n => n[0]).join('')}
+                      {course.instructor.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{mockCourse.title}</h1>
-                    <p className="text-gray-600 mb-3">{mockCourse.description}</p>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{course.title}</h1>
+                    <p className="text-gray-600 mb-3">{course.description}</p>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span>By {mockCourse.instructor.name}</span>
+                      <span>By {course.instructor.name}</span>
                       <span>•</span>
                       <div className="flex items-center gap-1">
                         <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span>{mockCourse.rating}</span>
-                        <span>({mockCourse.reviewCount.toLocaleString()} reviews)</span>
+                        <span>{course.rating}</span>
+                        <span>({course.reviewCount.toLocaleString()} reviews)</span>
                       </div>
                       <span>•</span>
                       <div className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
-                        <span>{mockCourse.enrollmentCount.toLocaleString()} students</span>
+                        <span>{course.enrollmentCount?.toLocaleString() || '0'} students</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge className="bg-black text-white">Unity</Badge>
-                  <Badge variant="outline">Beginner</Badge>
-                  <Badge variant="outline">{formatDuration(mockCourse.duration)}</Badge>
+                  <Badge className="bg-black text-white">{course.engine.charAt(0).toUpperCase() + course.engine.slice(1)}</Badge>
+                  <Badge variant="outline">{course.difficulty.charAt(0).toUpperCase() + course.difficulty.slice(1)}</Badge>
+                  <Badge variant="outline">{formatDuration(course.duration)}</Badge>
                   <Badge variant="outline">Certificate</Badge>
                 </div>
 
@@ -408,7 +490,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
                 <TabsContent value="curriculum" className="p-6">
                   <div className="space-y-4">
-                    {mockCourse.modules.map((module) => (
+                    {course.modules.map((module) => (
                       <Card key={module.id}>
                         <CardHeader>
                           <CardTitle className="flex items-center justify-between">
@@ -466,10 +548,10 @@ export default function CoursePage({ params }: CoursePageProps) {
                         What you'll learn
                       </h3>
                       <ul className="space-y-2">
-                        {mockCourse.objectives.map((objective, index) => (
+                        {(Array.isArray(course.objectives) ? course.objectives : []).map((objective, index) => (
                           <li key={index} className="flex items-start gap-2">
                             <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-gray-700">{objective}</span>
+                            <span className="text-gray-700">{typeof objective === 'string' ? objective : objective.objective}</span>
                           </li>
                         ))}
                       </ul>
@@ -480,10 +562,10 @@ export default function CoursePage({ params }: CoursePageProps) {
                         Requirements
                       </h3>
                       <ul className="space-y-2">
-                        {mockCourse.requirements.map((requirement, index) => (
+                        {(Array.isArray(course.requirements) ? course.requirements : []).map((requirement, index) => (
                           <li key={index} className="flex items-start gap-2">
                             <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                            <span className="text-gray-700">{requirement}</span>
+                            <span className="text-gray-700">{typeof requirement === 'string' ? requirement : requirement.requirement}</span>
                           </li>
                         ))}
                       </ul>
@@ -494,14 +576,14 @@ export default function CoursePage({ params }: CoursePageProps) {
                 <TabsContent value="instructor" className="p-6">
                   <div className="flex items-start gap-4">
                     <Avatar className="w-20 h-20">
-                      <AvatarImage src={mockCourse.instructor.avatar} alt={mockCourse.instructor.name} />
+                      <AvatarImage src={course.instructor.avatar} alt={course.instructor.name} />
                       <AvatarFallback>
-                        {mockCourse.instructor.name.split(' ').map(n => n[0]).join('')}
+                        {course.instructor.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="text-xl font-semibold">{mockCourse.instructor.name}</h3>
-                      <p className="text-gray-600 mb-3">{mockCourse.instructor.bio}</p>
+                      <h3 className="text-xl font-semibold">{course.instructor.name}</h3>
+                      <p className="text-gray-600 mb-3">{course.instructor.bio || 'Experienced instructor'}</p>
                       <div className="flex items-center gap-4 text-sm text-gray-500">
                         <div className="flex items-center gap-1">
                           <Star className="w-4 h-4 text-yellow-400 fill-current" />
@@ -562,15 +644,15 @@ export default function CoursePage({ params }: CoursePageProps) {
                         {isPaidCourse ? (
                           isSignedIn ? (
                             <PurchaseButton
-                              courseId={params.id}
-                              courseName={mockCourse.title}
+                              courseId={id}
+                              courseName={course.title}
                               price={coursePriceCents}
                               currency="USD"
                               className="w-full"
                             />
                           ) : (
                             <Button
-                              onClick={() => router.push(`/auth/signin?callbackUrl=/courses/${params.id}`)}
+                              onClick={() => router.push(`/auth/signin?callbackUrl=/courses/${id}`)}
                               className="bg-blue-600 hover:bg-blue-700"
                             >
                               Sign in to Purchase
@@ -598,9 +680,9 @@ export default function CoursePage({ params }: CoursePageProps) {
                 <CardContent className="p-6">
                   <div className="text-center mb-6">
                     <div className="text-3xl font-bold text-gray-900 mb-2">
-                      {mockCourse.price === 0 ? "Free" : `$${mockCourse.price}`}
+                      {course.price === 0 ? "Free" : `$${course.price}`}
                     </div>
-                    {mockCourse.price > 0 && (
+                    {course.price > 0 && (
                       <div className="text-sm text-gray-500 line-through">
                         $149.99
                       </div>
@@ -611,8 +693,8 @@ export default function CoursePage({ params }: CoursePageProps) {
                     isPaidCourse ? (
                       isSignedIn ? (
                         <PurchaseButton
-                          courseId={params.id}
-                          courseName={mockCourse.title}
+                          courseId={id}
+                          courseName={course.title}
                           price={coursePriceCents}
                           currency="USD"
                           className="w-full mb-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
@@ -620,7 +702,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                         />
                       ) : (
                         <Button
-                          onClick={() => router.push(`/auth/signin?callbackUrl=/courses/${params.id}`)}
+                          onClick={() => router.push(`/auth/signin?callbackUrl=/courses/${id}`)}
                           className="w-full mb-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
                           size="lg"
                         >
@@ -638,7 +720,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                     )
                   ) : (
                     <Button
-                      onClick={() => handleLessonSelect(mockCourse.modules[0].lessons[0])}
+                      onClick={() => handleLessonSelect(course.modules[0].lessons[0])}
                       className="w-full mb-4"
                       size="lg"
                     >
@@ -649,7 +731,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-gray-500" />
-                      <span>{formatDuration(mockCourse.duration)} on-demand video</span>
+                      <span>{formatDuration(course.duration)} on-demand video</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Download className="w-4 h-4 text-gray-500" />
@@ -688,22 +770,22 @@ export default function CoursePage({ params }: CoursePageProps) {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Students</span>
-                    <span className="font-medium">{mockCourse.enrollmentCount.toLocaleString()}</span>
+                    <span className="font-medium">{course.enrollmentCount?.toLocaleString() || '0'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Rating</span>
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="font-medium">{mockCourse.rating}</span>
+                      <span className="font-medium">{course.rating}</span>
                     </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Duration</span>
-                    <span className="font-medium">{formatDuration(mockCourse.duration)}</span>
+                    <span className="font-medium">{formatDuration(course.duration)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Level</span>
-                    <span className="font-medium capitalize">{mockCourse.difficulty}</span>
+                    <span className="font-medium capitalize">{course.difficulty}</span>
                   </div>
                 </CardContent>
               </Card>

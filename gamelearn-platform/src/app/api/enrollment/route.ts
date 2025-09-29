@@ -12,8 +12,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const enrollments = await getUserEnrollments(userId)
+    const { searchParams } = new URL(request.url)
+    const courseId = searchParams.get("courseId")
 
+    if (courseId) {
+      // Check specific course enrollment
+      const enrollment = await prisma.enrollment.findFirst({
+        where: {
+          userId: userId,
+          courseId: courseId
+        }
+      })
+
+      return NextResponse.json({ enrollment })
+    }
+
+    // Get all user enrollments
+    const enrollments = await getUserEnrollments(userId)
     return NextResponse.json({ enrollments })
   } catch (error) {
     console.error("Error getting enrollments:", error)
@@ -35,7 +50,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Course ID is required" }, { status: 400 })
     }
 
-    // Check if the course is free or if the user has already paid
+    // Check if the course exists and get pricing info
     const course = await prisma.course.findUnique({
       where: { id: courseId },
       select: { price: true }
@@ -45,11 +60,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 })
     }
 
+    // For paid courses, check if user has a valid license key
     if (course.price > 0) {
-      return NextResponse.json(
-        { error: "Payment required for this course" },
-        { status: 400 }
-      )
+      const licenseKey = await prisma.licenseKey.findFirst({
+        where: {
+          userId: userId,
+          courseId: courseId,
+          status: 'ACTIVE'
+        }
+      })
+
+      if (!licenseKey) {
+        return NextResponse.json(
+          { error: "Valid license key required for this paid course. Please purchase the course first." },
+          { status: 403 }
+        )
+      }
     }
 
     const enrollment = await enrollUserInCourse(userId, courseId)

@@ -30,7 +30,7 @@ export interface Course {
   modules: Module[]
   requirements: CourseRequirement[]
   objectives: CourseObjective[]
-  tags: CourseTag[]
+  tags: CourseTag[] | string[]
   isPublished: boolean
   createdAt: Date
   updatedAt: Date

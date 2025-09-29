@@ -44,6 +44,7 @@ export async function GET(
     const { id } = context.params
     const { searchParams } = new URL(request.url)
     const includeReviews = searchParams.get('includeReviews') === 'true'
+    const includeLessons = searchParams.get('includeLessons') === 'true'
 
     // Get course with basic info and counts
     const course = await prisma.course.findUnique({
@@ -65,8 +66,15 @@ export async function GET(
           orderBy: { order: 'asc' }
         },
         tags: true,
-        // Get modules with lesson counts but not all lesson data
-        modules: {
+        // Get modules with or without lessons based on query param
+        modules: includeLessons ? {
+          include: {
+            lessons: {
+              orderBy: { order: 'asc' }
+            }
+          },
+          orderBy: { order: 'asc' }
+        } : {
           select: {
             id: true,
             title: true,
@@ -138,7 +146,7 @@ export async function GET(
       totalLessons: course.modules.reduce((sum, module) => sum + module._count.lessons, 0)
     }
 
-    return NextResponse.json({ course: formattedCourse })
+    return NextResponse.json({ success: true, data: formattedCourse })
   } catch (error) {
     console.error('Failed to fetch course:', error)
     return NextResponse.json(
