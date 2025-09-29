@@ -1,0 +1,267 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "G GameLearn" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e7] [cursor=pointer]: G
+          - generic [ref=e8] [cursor=pointer]: GameLearn
+        - navigation [ref=e9]:
+          - link "Courses" [active] [ref=e10] [cursor=pointer]:
+            - /url: /courses
+          - link "Features" [ref=e11] [cursor=pointer]:
+            - /url: /features
+          - link "Pricing" [ref=e12] [cursor=pointer]:
+            - /url: /pricing
+          - link "About" [ref=e13] [cursor=pointer]:
+            - /url: /about
+          - link "Community" [ref=e14] [cursor=pointer]:
+            - /url: /community
+        - generic [ref=e16]:
+          - button "Sign In" [ref=e17] [cursor=pointer]
+          - button "Start Learning" [ref=e18] [cursor=pointer]
+    - main [ref=e19]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e25]: 🚀 Now supporting Unity, Unreal Engine & Godot
+          - generic [ref=e26]:
+            - heading "Master Game Development with Expert-Led Courses" [level=1] [ref=e27]:
+              - text: Master
+              - generic [ref=e28]: Game Development
+              - text: with Expert-Led Courses
+            - paragraph [ref=e29]: Learn from industry professionals, build real games, and launch your career in game development. From Unity to Unreal Engine, master the tools that power the gaming industry.
+          - generic [ref=e30]:
+            - link "Start Learning Free" [ref=e31] [cursor=pointer]:
+              - /url: /courses
+            - link "Watch Demo" [ref=e32] [cursor=pointer]:
+              - /url: /demo
+            - link "🎬 Test Video Streaming" [ref=e33] [cursor=pointer]:
+              - /url: /test/video
+          - generic [ref=e34]:
+            - generic [ref=e35]:
+              - generic [ref=e36]: 500K+
+              - generic [ref=e37]: Students Learning
+            - generic [ref=e38]:
+              - generic [ref=e39]: 5K+
+              - generic [ref=e40]: Expert Courses
+            - generic [ref=e41]:
+              - generic [ref=e42]: 50K+
+              - generic [ref=e43]: Games Created
+        - generic [ref=e44]:
+          - generic [ref=e46]:
+            - generic [ref=e48]: 🎮
+            - heading "Game Engine Integration" [level=3] [ref=e49]
+            - paragraph [ref=e50]: Direct integration with Unity, Unreal Engine, and Godot. Build and deploy games right from the browser.
+          - generic [ref=e52]:
+            - generic [ref=e54]: 👥
+            - heading "Real-time Collaboration" [level=3] [ref=e55]
+            - paragraph [ref=e56]: Work together on projects with live code sharing, voice chat, and synchronized development environments.
+          - generic [ref=e58]:
+            - generic [ref=e60]: 🏆
+            - heading "Portfolio & Certification" [level=3] [ref=e61]
+            - paragraph [ref=e62]: Showcase your games with WebGL hosting and earn industry-recognized certifications.
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - generic [ref=e67]: ⭐ Loved by Developers
+          - heading "What Our Students Say" [level=2] [ref=e68]
+          - paragraph [ref=e69]: Don't just take our word for it. Here's what game developers are saying about GameLearn Platform.
+        - generic [ref=e70]:
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - img [ref=e74]
+              - img [ref=e76]
+              - img [ref=e78]
+              - img [ref=e80]
+              - img [ref=e82]
+            - paragraph [ref=e84]: "\"GameLearn transformed my career. I went from knowing nothing about game development to releasing my first commercial game in just 8 months. The real-time collaboration features were invaluable.\""
+            - generic [ref=e85]:
+              - generic [ref=e87]: SC
+              - generic [ref=e88]:
+                - generic [ref=e89]: Sarah Chen
+                - generic [ref=e90]: Indie Game Developer at Studio Pixel
+          - generic [ref=e92]:
+            - generic [ref=e93]:
+              - img [ref=e94]
+              - img [ref=e96]
+              - img [ref=e98]
+              - img [ref=e100]
+              - img [ref=e102]
+            - paragraph [ref=e104]: "\"The quality of courses here is exceptional. I've tried many platforms, but GameLearn's interactive approach and industry-relevant projects set it apart. Highly recommended for serious developers.\""
+            - generic [ref=e105]:
+              - generic [ref=e107]: MR
+              - generic [ref=e108]:
+                - generic [ref=e109]: Marcus Rodriguez
+                - generic [ref=e110]: Lead Unity Developer at TechCorp Games
+          - generic [ref=e112]:
+            - generic [ref=e113]:
+              - img [ref=e114]
+              - img [ref=e116]
+              - img [ref=e118]
+              - img [ref=e120]
+              - img [ref=e122]
+            - paragraph [ref=e124]: "\"As a student, I appreciate the affordable pricing and comprehensive curriculum. The portfolio hosting feature helped me land my first internship at a major gaming studio.\""
+            - generic [ref=e125]:
+              - generic [ref=e127]: ET
+              - generic [ref=e128]:
+                - generic [ref=e129]: Emma Thompson
+                - generic [ref=e130]: Game Design Student at University of Arts
+          - generic [ref=e132]:
+            - generic [ref=e133]:
+              - img [ref=e134]
+              - img [ref=e136]
+              - img [ref=e138]
+              - img [ref=e140]
+              - img [ref=e142]
+            - paragraph [ref=e144]: "\"Our entire team uses GameLearn for continuous learning. The enterprise features and team management tools make it perfect for professional development programs.\""
+            - generic [ref=e145]:
+              - generic [ref=e147]: DK
+              - generic [ref=e148]:
+                - generic [ref=e149]: David Kim
+                - generic [ref=e150]: Senior Developer at Nexus Interactive
+          - generic [ref=e152]:
+            - generic [ref=e153]:
+              - img [ref=e154]
+              - img [ref=e156]
+              - img [ref=e158]
+              - img [ref=e160]
+              - img [ref=e162]
+            - paragraph [ref=e164]: "\"The Unity and Unreal courses are incredibly detailed. I learned advanced techniques that I immediately applied to my projects. The investment paid off within weeks.\""
+            - generic [ref=e165]:
+              - generic [ref=e167]: LZ
+              - generic [ref=e168]:
+                - generic [ref=e169]: Lisa Zhang
+                - generic [ref=e170]: Mobile Game Developer at AppCraft Studios
+          - generic [ref=e172]:
+            - generic [ref=e173]:
+              - img [ref=e174]
+              - img [ref=e176]
+              - img [ref=e178]
+              - img [ref=e180]
+              - img [ref=e182]
+            - paragraph [ref=e184]: "\"GameLearn's cutting-edge content keeps me updated with the latest in VR and AR development. The instructors are industry veterans who know what they're talking about.\""
+            - generic [ref=e185]:
+              - generic [ref=e187]: AJ
+              - generic [ref=e188]:
+                - generic [ref=e189]: Alex Johnson
+                - generic [ref=e190]: VR Developer at VirtReality Inc
+        - generic [ref=e191]:
+          - generic [ref=e192]:
+            - generic [ref=e193]: 4.9/5
+            - generic [ref=e194]: Average Rating
+          - generic [ref=e195]:
+            - generic [ref=e196]: 15K+
+            - generic [ref=e197]: Reviews
+          - generic [ref=e198]:
+            - generic [ref=e199]: 98%
+            - generic [ref=e200]: Completion Rate
+          - generic [ref=e201]:
+            - generic [ref=e202]: 85%
+            - generic [ref=e203]: Career Success
+      - generic [ref=e207]:
+        - generic [ref=e209]: 🎯 Start Your Journey Today
+        - generic [ref=e210]:
+          - heading "Ready to Build Your First Game?" [level=2] [ref=e211]
+          - paragraph [ref=e212]: Join thousands of developers who have already launched successful games with GameLearn Platform. Start your free account today and begin creating.
+        - generic [ref=e213]:
+          - link "Start Learning Free" [ref=e214] [cursor=pointer]:
+            - /url: /auth/signup
+            - text: Start Learning Free
+            - img
+          - link "Explore Courses" [ref=e215] [cursor=pointer]:
+            - /url: /courses
+        - generic [ref=e216]:
+          - generic [ref=e218]:
+            - img [ref=e220]
+            - heading "Instant Access" [level=3] [ref=e222]
+            - paragraph [ref=e223]: Start coding immediately with our browser-based development environment
+          - generic [ref=e225]:
+            - img [ref=e227]
+            - heading "No Risk" [level=3] [ref=e229]
+            - paragraph [ref=e230]: Start free, cancel anytime. Upgrade only when you're ready for more features
+          - generic [ref=e232]:
+            - img [ref=e234]
+            - heading "Learn Fast" [level=3] [ref=e237]
+            - paragraph [ref=e238]: Build your first game in weeks, not months, with our structured learning path
+        - generic [ref=e239]:
+          - paragraph [ref=e240]: Trusted by developers at
+          - generic [ref=e241]:
+            - generic [ref=e242]: Unity Technologies
+            - generic [ref=e243]: Epic Games
+            - generic [ref=e244]: Indie Studios
+            - generic [ref=e245]: Game Academies
+    - contentinfo [ref=e246]:
+      - generic [ref=e247]:
+        - generic [ref=e248]:
+          - generic [ref=e249]:
+            - generic [ref=e250]:
+              - generic [ref=e252]: G
+              - generic [ref=e253]: GameLearn
+            - paragraph [ref=e254]: The premier platform for game development education, combining proven learning methods with cutting-edge technology.
+          - generic [ref=e255]:
+            - heading "Platform" [level=4] [ref=e256]
+            - list [ref=e257]:
+              - listitem [ref=e258]:
+                - link "Courses" [ref=e259] [cursor=pointer]:
+                  - /url: /courses
+              - listitem [ref=e260]:
+                - link "Features" [ref=e261] [cursor=pointer]:
+                  - /url: /features
+              - listitem [ref=e262]:
+                - link "Pricing" [ref=e263] [cursor=pointer]:
+                  - /url: /pricing
+              - listitem [ref=e264]:
+                - link "Dashboard" [ref=e265] [cursor=pointer]:
+                  - /url: /dashboard
+              - listitem [ref=e266]:
+                - link "Portfolio" [ref=e267] [cursor=pointer]:
+                  - /url: /portfolio
+          - generic [ref=e268]:
+            - heading "Learning" [level=4] [ref=e269]
+            - list [ref=e270]:
+              - listitem [ref=e271]:
+                - link "Unity Development" [ref=e272] [cursor=pointer]:
+                  - /url: /courses/unity
+              - listitem [ref=e273]:
+                - link "Unreal Engine" [ref=e274] [cursor=pointer]:
+                  - /url: /courses/unreal
+              - listitem [ref=e275]:
+                - link "Godot" [ref=e276] [cursor=pointer]:
+                  - /url: /courses/godot
+              - listitem [ref=e277]:
+                - link "Game Programming" [ref=e278] [cursor=pointer]:
+                  - /url: /courses/programming
+          - generic [ref=e279]:
+            - heading "Company" [level=4] [ref=e280]
+            - list [ref=e281]:
+              - listitem [ref=e282]:
+                - link "About Us" [ref=e283] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e284]:
+                - link "Contact" [ref=e285] [cursor=pointer]:
+                  - /url: /contact
+              - listitem [ref=e286]:
+                - link "Help Center" [ref=e287] [cursor=pointer]:
+                  - /url: /help
+              - listitem [ref=e288]:
+                - link "Privacy Policy" [ref=e289] [cursor=pointer]:
+                  - /url: /privacy
+              - listitem [ref=e290]:
+                - link "Terms of Service" [ref=e291] [cursor=pointer]:
+                  - /url: /terms
+        - paragraph [ref=e293]: © 2024 GameLearn Platform. All rights reserved.
+  - generic [ref=e298] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e299] [cursor=pointer]:
+      - img [ref=e300] [cursor=pointer]
+    - generic [ref=e304] [cursor=pointer]:
+      - button "Open issues overlay" [ref=e305] [cursor=pointer]:
+        - generic [ref=e306] [cursor=pointer]:
+          - generic [ref=e307] [cursor=pointer]: "0"
+          - generic [ref=e308] [cursor=pointer]: "1"
+        - generic [ref=e309] [cursor=pointer]: Issue
+      - button "Collapse issues badge" [ref=e310] [cursor=pointer]:
+        - img [ref=e311] [cursor=pointer]
+  - alert [ref=e313]
+```

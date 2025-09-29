@@ -313,17 +313,17 @@ export class VideoStreamingService {
       return { status: 'expired' }
     }
 
+    // Calculate watch time before updating session (which resets lastActivity)
+    const timeDiff = Date.now() - session.lastActivity
+    if (timeDiff > 0 && timeDiff < 60000) { // Max 1 minute since last update
+      session.watchTime += timeDiff
+    }
+
     // Update session
     await this.updateSession(sessionId, {
       currentPosition,
       quality
     })
-
-    // Calculate watch time
-    const timeDiff = Date.now() - session.lastActivity
-    if (timeDiff > 0 && timeDiff < 60000) { // Max 1 minute since last update
-      session.watchTime += timeDiff
-    }
 
     // Quality adaptation recommendation
     const recommendedQuality = await this.getRecommendedQuality(
@@ -487,7 +487,7 @@ export class VideoStreamingService {
     return Buffer.from(JSON.stringify(payload)).toString('base64')
   }
 
-  private async getSession(sessionId: string): Promise<PlaybackSession | null> {
+  async getSession(sessionId: string): Promise<PlaybackSession | null> {
     let session = this.activeSessions.get(sessionId)
 
     if (!session) {
@@ -606,13 +606,19 @@ export class VideoStreamingService {
         }
       }
 
-      // Return mock manifest if it's a test video
+      // First, try to get from Redis (production behavior and tests)
+      const redisManifest = await redis.get(`video_manifest:${videoId}`)
+      if (redisManifest) {
+        return redisManifest
+      }
+
+      // Return mock manifest if it's a test video and no Redis data
       if (mockManifests[videoId]) {
         return mockManifests[videoId]
       }
 
-      // Otherwise try to get from Redis (production behavior)
-      return await redis.get(`video_manifest:${videoId}`)
+      // If nothing found, return null
+      return null
     } catch (error) {
       this.logger.warn('Failed to get streaming manifest', error as Error)
       return null
@@ -765,3 +771,4 @@ export const trackVideoEvent = videoStreaming.trackEvent.bind(videoStreaming)
 export const processVideoHeartbeat = videoStreaming.processHeartbeat.bind(videoStreaming)
 export const endVideoSession = videoStreaming.endSession.bind(videoStreaming)
 export const getVideoAnalytics = videoStreaming.getVideoAnalytics.bind(videoStreaming)
+export const getVideoSession = videoStreaming.getSession.bind(videoStreaming)

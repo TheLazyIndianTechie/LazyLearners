@@ -3,7 +3,7 @@ import { createRequestLogger } from "@/lib/logger"
 import { auth } from "@clerk/nextjs/server"
 
 import {
-  videoStreaming,
+  getVideoSession,
   processVideoHeartbeat,
   trackVideoEvent
 } from "@/lib/video/streaming"
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     const heartbeatData = validationResult.data
 
     // 3. Verify session ownership
-    const streamingSession = await videoStreaming.getSession?.(heartbeatData.sessionId)
+    const streamingSession = await getVideoSession(heartbeatData.sessionId)
     if (!streamingSession) {
       return NextResponse.json(
         {
@@ -227,7 +227,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get session info
-    const streamingSession = await videoStreaming.getSession?.(sessionId)
+    const streamingSession = await getVideoSession(sessionId)
     if (!streamingSession) {
       return NextResponse.json(
         {

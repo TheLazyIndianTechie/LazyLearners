@@ -22,7 +22,7 @@ process.env.VIDEO_CDN_URL = 'https://test-cdn.lazygamedevs.com/videos'
 
 // Security configuration
 process.env.ENCRYPTION_KEY = 'test-encryption-key-32-characters'
-process.env.JWT_SECRET = 'test-jwt-secret-key'
+process.env.JWT_SECRET = 'test-jwt-secret-key-minimum-32-chars-length-for-security-requirements'
 
 // Feature flags for testing
 process.env.ENABLE_VIDEO_PROCESSING = 'true'

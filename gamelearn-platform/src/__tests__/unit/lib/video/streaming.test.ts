@@ -374,6 +374,14 @@ describe('VideoStreamingService', () => {
         }
         return Promise.resolve(null)
       })
+
+      // Mock set to update our mockSession
+      redis.set.mockImplementation((key: string, value: any) => {
+        if (key === `video_session:${sessionId}`) {
+          Object.assign(mockSession, value)
+        }
+        return Promise.resolve(undefined)
+      })
     })
 
     test('should track play event', async () => {
@@ -479,10 +487,22 @@ describe('VideoStreamingService', () => {
       mockSession = {
         sessionId,
         userId: 'user123',
-        videoId: 'video123',
+        videoId: 'sample-unity-tutorial',
         startTime: Date.now(),
         lastActivity: Date.now(),
         watchTime: 0,
+        currentPosition: 0,
+        quality: '720p',
+        playbackSpeed: 1,
+        volume: 1,
+        isFullscreen: false,
+        completionPercentage: 0,
+        events: [],
+        deviceInfo: {
+          userAgent: 'test-agent',
+          platform: 'test',
+          screenResolution: '1920x1080'
+        }
       }
 
       redis.get.mockImplementation((key: string) => {
@@ -491,10 +511,18 @@ describe('VideoStreamingService', () => {
         }
         return Promise.resolve(null)
       })
+
+      // Mock set to update our mockSession
+      redis.set.mockImplementation((key: string, value: any) => {
+        if (key === `video_session:${sessionId}`) {
+          Object.assign(mockSession, value)
+        }
+        return Promise.resolve(undefined)
+      })
     })
 
     test('should process valid heartbeat', async () => {
-      const result = await processVideoHeartbeat(sessionId, 300, 15, '720p')
+      const result = await processVideoHeartbeat(sessionId, 300, 20, '720p') // High buffer triggers quality upgrade
 
       expect(result.status).toBe('ok')
       expect(result.recommendedQuality).toBeDefined()
@@ -531,6 +559,9 @@ describe('VideoStreamingService', () => {
       // Set session start time to be old
       mockSession.startTime = Date.now() - (STREAMING_CONFIG.analytics.sessionTimeout + 1000)
 
+      // Clear the active sessions cache to force reading from Redis
+      videoStreaming['activeSessions'].clear()
+
       const result = await processVideoHeartbeat(sessionId, 300, 15, '720p')
 
       expect(result.status).toBe('expired')
@@ -539,6 +570,9 @@ describe('VideoStreamingService', () => {
     test('should update watch time accurately', async () => {
       const initialWatchTime = mockSession.watchTime
       mockSession.lastActivity = Date.now() - 30000 // 30 seconds ago
+
+      // Clear the active sessions cache to force reading from Redis
+      videoStreaming['activeSessions'].clear()
 
       await processVideoHeartbeat(sessionId, 300, 15, '720p')
 

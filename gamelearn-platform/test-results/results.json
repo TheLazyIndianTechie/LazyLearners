@@ -1,0 +1,3041 @@
+{
+  "config": {
+    "configFile": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/playwright.config.ts",
+    "rootDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/global-setup.ts",
+    "globalTeardown": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 4
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "test-results/results.xml"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "Microsoft Edge",
+        "name": "Microsoft Edge",
+        "testDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "Google Chrome",
+        "name": "Google Chrome",
+        "testDir": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.55.1",
+    "workers": 4,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3000",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "user-journeys/video-streaming.spec.ts",
+      "file": "user-journeys/video-streaming.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "User Journey: Video Streaming @smoke @regression",
+          "file": "user-journeys/video-streaming.spec.ts",
+          "line": 23,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Complete journey: Browse courses → Sign in → Watch video",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 17916,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Homepage loaded successfully\n"
+                        },
+                        {
+                          "text": "✅ Course catalog is accessible\n"
+                        },
+                        {
+                          "text": "ℹ️ Course accessible without authentication or auth not yet implemented\n"
+                        },
+                        {
+                          "text": "ℹ️ Authentication not required or not implemented yet\n"
+                        },
+                        {
+                          "text": "ℹ️ Video player not found, testing API endpoint directly...\n"
+                        },
+                        {
+                          "text": "❌ Video streaming API failed: \u001b[33m404\u001b[39m\n"
+                        },
+                        {
+                          "text": "🌐 Streaming requests captured: \u001b[33m0\u001b[39m\n"
+                        },
+                        {
+                          "text": "Video streaming network activity detected: \u001b[33mfalse\u001b[39m\n"
+                        },
+                        {
+                          "text": "Stream API endpoint called: \u001b[33mfalse\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "User visits homepage",
+                          "duration": 1852
+                        },
+                        {
+                          "title": "User browses course catalog",
+                          "duration": 229
+                        },
+                        {
+                          "title": "User attempts to access course",
+                          "duration": 5361
+                        },
+                        {
+                          "title": "User signs in",
+                          "duration": 79
+                        },
+                        {
+                          "title": "User accesses video streaming",
+                          "duration": 2695
+                        },
+                        {
+                          "title": "Verify video streaming network requests",
+                          "duration": 6849
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:39:51.542Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-01d232c742602ade7282",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "Video player quality selection and controls",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 7199,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Quality selector not implemented yet\n"
+                        },
+                        {
+                          "text": "ℹ️ Play button not found or auto-playing\n"
+                        },
+                        {
+                          "text": "ℹ️ Fullscreen button not implemented yet\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test video player quality controls",
+                          "duration": 5785
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:39:51.465Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-f8576853a51b247727cf",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 220,
+              "column": 7
+            },
+            {
+              "title": "Video progress tracking and analytics",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 7155,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Video element not found for analytics testing\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Monitor video analytics requests",
+                          "duration": 5767
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:39:51.448Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-d5b1ce1d9ec2e363222a",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 259,
+              "column": 7
+            },
+            {
+              "title": "Error handling: Unauthenticated video access",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 601,
+                      "error": {
+                        "message": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+                        "stack": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5",
+                        "location": {
+                          "file": "<anonymous>",
+                          "column": 16,
+                          "line": 293
+                        }
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "<anonymous>",
+                            "column": 16,
+                            "line": 293
+                          },
+                          "message": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test unauthenticated video access",
+                          "duration": 24,
+                          "error": {
+                            "message": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+                            "stack": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5",
+                            "location": {
+                              "file": "<anonymous>",
+                              "column": 16,
+                              "line": 293
+                            }
+                          }
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:39:51.631Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-56eb7-nauthenticated-video-access-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-56eb7-nauthenticated-video-access-chromium/video.webm"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "<anonymous>",
+                        "column": 16,
+                        "line": 293
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-f7b1817a323f510d9440",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 300,
+              "column": 7
+            },
+            {
+              "title": "Mobile video streaming experience",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Mobile-specific test",
+                      "location": {
+                        "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                        "line": 320,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 3,
+                      "status": "skipped",
+                      "duration": 620,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-29T03:39:55.187Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Mobile-specific test",
+                          "location": {
+                            "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                            "line": 320,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-b1b828c956c6930b0e41",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 319,
+              "column": 7
+            },
+            {
+              "title": "Complete journey: Browse courses → Sign in → Watch video",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 7912,
+                      "error": {
+                        "message": "Error: page.goto: NS_BINDING_ABORTED\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/course/unity-fundamentals\", waiting until \"networkidle\"\u001b[22m\n",
+                        "stack": "Error: page.goto: NS_BINDING_ABORTED\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/course/unity-fundamentals\", waiting until \"networkidle\"\u001b[22m\n\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:72:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:69:16",
+                        "location": {
+                          "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                          "column": 18,
+                          "line": 72
+                        },
+                        "snippet": "  70 |       // Try to access a course directly\n  71 |       const courseUrl = `/course/${TEST_COURSE.id}`;\n> 72 |       await page.goto(courseUrl, { waitUntil: 'networkidle' });\n     |                  ^\n  73 |\n  74 |       // Check if we're redirected to sign-in or can access course\n  75 |       const currentUrl = page.url();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                            "column": 18,
+                            "line": 72
+                          },
+                          "message": "Error: page.goto: NS_BINDING_ABORTED\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/course/unity-fundamentals\", waiting until \"networkidle\"\u001b[22m\n\n\n  70 |       // Try to access a course directly\n  71 |       const courseUrl = `/course/${TEST_COURSE.id}`;\n> 72 |       await page.goto(courseUrl, { waitUntil: 'networkidle' });\n     |                  ^\n  73 |\n  74 |       // Check if we're redirected to sign-in or can access course\n  75 |       const currentUrl = page.url();\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:72:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:69:16"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "✅ Homepage loaded successfully\n"
+                        },
+                        {
+                          "text": "✅ Course catalog is accessible\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "User visits homepage",
+                          "duration": 2918
+                        },
+                        {
+                          "title": "User browses course catalog",
+                          "duration": 588
+                        },
+                        {
+                          "title": "User attempts to access course",
+                          "duration": 59,
+                          "error": {
+                            "message": "Error: page.goto: NS_BINDING_ABORTED\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/course/unity-fundamentals\", waiting until \"networkidle\"\u001b[22m\n",
+                            "stack": "Error: page.goto: NS_BINDING_ABORTED\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/course/unity-fundamentals\", waiting until \"networkidle\"\u001b[22m\n\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:72:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:69:16",
+                            "location": {
+                              "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                              "column": 18,
+                              "line": 72
+                            },
+                            "snippet": "  70 |       // Try to access a course directly\n  71 |       const courseUrl = `/course/${TEST_COURSE.id}`;\n> 72 |       await page.goto(courseUrl, { waitUntil: 'networkidle' });\n     |                  ^\n  73 |\n  74 |       // Check if we're redirected to sign-in or can access course\n  75 |       const currentUrl = page.url();"
+                          }
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:01.621Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-765fe-ses-→-Sign-in-→-Watch-video-firefox/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-765fe-ses-→-Sign-in-→-Watch-video-firefox/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-765fe-ses-→-Sign-in-→-Watch-video-firefox/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                        "column": 18,
+                        "line": 72
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-92d1faa6e32a4977d279",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "Video player quality selection and controls",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 7325,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Quality selector not implemented yet\n"
+                        },
+                        {
+                          "text": "ℹ️ Play button not found or auto-playing\n"
+                        },
+                        {
+                          "text": "ℹ️ Fullscreen button not implemented yet\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test video player quality controls",
+                          "duration": 3444
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:02.099Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-bab1daec7beb5b8d9b72",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 220,
+              "column": 7
+            },
+            {
+              "title": "Video progress tracking and analytics",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 7927,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Video element not found for analytics testing\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Monitor video analytics requests",
+                          "duration": 3033
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:10.594Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-999f1a85bf03fe15e0a1",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 259,
+              "column": 7
+            },
+            {
+              "title": "Error handling: Unauthenticated video access",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 4459,
+                      "error": {
+                        "message": "Error: page.evaluate: The operation is insecure.\n@debugger eval code line 291 > eval:1:7\nevaluate@debugger eval code:293:16\n@debugger eval code:1:44\n",
+                        "stack": "Error: page.evaluate: The operation is insecure.\n@debugger eval code line 291 > eval:1:7\nevaluate@debugger eval code:293:16\n@debugger eval code:1:44\n\n    at @debugger eval code line 291 > eval:1:7\n    at evaluate@debugger eval code:293:16\n    at @debugger eval code:1:44\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5",
+                        "location": {
+                          "file": "@debugger eval code line 291 > eval",
+                          "column": 7,
+                          "line": 1
+                        }
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "@debugger eval code line 291 > eval",
+                            "column": 7,
+                            "line": 1
+                          },
+                          "message": "Error: page.evaluate: The operation is insecure.\n@debugger eval code line 291 > eval:1:7\nevaluate@debugger eval code:293:16\n@debugger eval code:1:44\n\n    at @debugger eval code line 291 > eval:1:7\n    at evaluate@debugger eval code:293:16\n    at @debugger eval code:1:44\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test unauthenticated video access",
+                          "duration": 872,
+                          "error": {
+                            "message": "Error: page.evaluate: The operation is insecure.\n@debugger eval code line 291 > eval:1:7\nevaluate@debugger eval code:293:16\n@debugger eval code:1:44\n",
+                            "stack": "Error: page.evaluate: The operation is insecure.\n@debugger eval code line 291 > eval:1:7\nevaluate@debugger eval code:293:16\n@debugger eval code:1:44\n\n    at @debugger eval code line 291 > eval:1:7\n    at evaluate@debugger eval code:293:16\n    at @debugger eval code:1:44\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5",
+                            "location": {
+                              "file": "@debugger eval code line 291 > eval",
+                              "column": 7,
+                              "line": 1
+                            }
+                          }
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:12.009Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-56eb7-nauthenticated-video-access-firefox/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-56eb7-nauthenticated-video-access-firefox/video.webm"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "@debugger eval code line 291 > eval",
+                        "column": 7,
+                        "line": 1
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-a61259158a564ac21c66",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 300,
+              "column": 7
+            },
+            {
+              "title": "Mobile video streaming experience",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Mobile-specific test",
+                      "location": {
+                        "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                        "line": 320,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 3,
+                      "status": "skipped",
+                      "duration": 1088,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-29T03:40:20.541Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Mobile-specific test",
+                          "location": {
+                            "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                            "line": 320,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-84bbac54826ab29f64e1",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 319,
+              "column": 7
+            },
+            {
+              "title": "Complete journey: Browse courses → Sign in → Watch video",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 10,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 9119,
+                      "error": {
+                        "message": "Error: page.goto: Navigation to \"http://localhost:3000/course/unity-fundamentals\" is interrupted by another navigation to \"http://localhost:3000/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fcourses\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/course/unity-fundamentals\", waiting until \"networkidle\"\u001b[22m\n",
+                        "stack": "Error: page.goto: Navigation to \"http://localhost:3000/course/unity-fundamentals\" is interrupted by another navigation to \"http://localhost:3000/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fcourses\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/course/unity-fundamentals\", waiting until \"networkidle\"\u001b[22m\n\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:72:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:69:16",
+                        "location": {
+                          "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                          "column": 18,
+                          "line": 72
+                        },
+                        "snippet": "  70 |       // Try to access a course directly\n  71 |       const courseUrl = `/course/${TEST_COURSE.id}`;\n> 72 |       await page.goto(courseUrl, { waitUntil: 'networkidle' });\n     |                  ^\n  73 |\n  74 |       // Check if we're redirected to sign-in or can access course\n  75 |       const currentUrl = page.url();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                            "column": 18,
+                            "line": 72
+                          },
+                          "message": "Error: page.goto: Navigation to \"http://localhost:3000/course/unity-fundamentals\" is interrupted by another navigation to \"http://localhost:3000/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fcourses\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/course/unity-fundamentals\", waiting until \"networkidle\"\u001b[22m\n\n\n  70 |       // Try to access a course directly\n  71 |       const courseUrl = `/course/${TEST_COURSE.id}`;\n> 72 |       await page.goto(courseUrl, { waitUntil: 'networkidle' });\n     |                  ^\n  73 |\n  74 |       // Check if we're redirected to sign-in or can access course\n  75 |       const currentUrl = page.url();\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:72:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:69:16"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "✅ Homepage loaded successfully\n"
+                        },
+                        {
+                          "text": "✅ Course catalog is accessible\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "User visits homepage",
+                          "duration": 4690
+                        },
+                        {
+                          "title": "User browses course catalog",
+                          "duration": 256
+                        },
+                        {
+                          "title": "User attempts to access course",
+                          "duration": 598,
+                          "error": {
+                            "message": "Error: page.goto: Navigation to \"http://localhost:3000/course/unity-fundamentals\" is interrupted by another navigation to \"http://localhost:3000/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fcourses\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/course/unity-fundamentals\", waiting until \"networkidle\"\u001b[22m\n",
+                            "stack": "Error: page.goto: Navigation to \"http://localhost:3000/course/unity-fundamentals\" is interrupted by another navigation to \"http://localhost:3000/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fcourses\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/course/unity-fundamentals\", waiting until \"networkidle\"\u001b[22m\n\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:72:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:69:16",
+                            "location": {
+                              "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                              "column": 18,
+                              "line": 72
+                            },
+                            "snippet": "  70 |       // Try to access a course directly\n  71 |       const courseUrl = `/course/${TEST_COURSE.id}`;\n> 72 |       await page.goto(courseUrl, { waitUntil: 'networkidle' });\n     |                  ^\n  73 |\n  74 |       // Check if we're redirected to sign-in or can access course\n  75 |       const currentUrl = page.url();"
+                          }
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:26.382Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-765fe-ses-→-Sign-in-→-Watch-video-webkit/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-765fe-ses-→-Sign-in-→-Watch-video-webkit/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-765fe-ses-→-Sign-in-→-Watch-video-webkit/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                        "column": 18,
+                        "line": 72
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-d075a7490f672b039508",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "Video player quality selection and controls",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 11,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 8441,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Quality selector not implemented yet\n"
+                        },
+                        {
+                          "text": "ℹ️ Play button not found or auto-playing\n"
+                        },
+                        {
+                          "text": "ℹ️ Fullscreen button not implemented yet\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test video player quality controls",
+                          "duration": 4555
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:29.072Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-45de14ef4c247e02e280",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 220,
+              "column": 7
+            },
+            {
+              "title": "Video progress tracking and analytics",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 8154,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Video element not found for analytics testing\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Monitor video analytics requests",
+                          "duration": 4440
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:29.402Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-5e9269f8036db1c789c0",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 259,
+              "column": 7
+            },
+            {
+              "title": "Error handling: Unauthenticated video access",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 13,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1875,
+                      "error": {
+                        "message": "Error: page.evaluate: SecurityError: The operation is insecure.",
+                        "stack": "Error: page.evaluate: SecurityError: The operation is insecure.\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5",
+                        "location": {
+                          "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                          "column": 18,
+                          "line": 304
+                        },
+                        "snippet": "  302 |       // Clear any existing authentication\n  303 |       await page.context().clearCookies();\n> 304 |       await page.evaluate(() => localStorage.clear());\n      |                  ^\n  305 |\n  306 |       // Try to access video streaming API directly\n  307 |       const response = await page.request.get(`/api/video/stream?videoId=${TEST_COURSE.videoId}`);"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                            "column": 18,
+                            "line": 304
+                          },
+                          "message": "Error: page.evaluate: SecurityError: The operation is insecure.\n\n  302 |       // Clear any existing authentication\n  303 |       await page.context().clearCookies();\n> 304 |       await page.evaluate(() => localStorage.clear());\n      |                  ^\n  305 |\n  306 |       // Try to access video streaming API directly\n  307 |       const response = await page.request.get(`/api/video/stream?videoId=${TEST_COURSE.videoId}`);\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test unauthenticated video access",
+                          "duration": 19,
+                          "error": {
+                            "message": "Error: page.evaluate: SecurityError: The operation is insecure.",
+                            "stack": "Error: page.evaluate: SecurityError: The operation is insecure.\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5",
+                            "location": {
+                              "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                              "column": 18,
+                              "line": 304
+                            },
+                            "snippet": "  302 |       // Clear any existing authentication\n  303 |       await page.context().clearCookies();\n> 304 |       await page.evaluate(() => localStorage.clear());\n      |                  ^\n  305 |\n  306 |       // Try to access video streaming API directly\n  307 |       const response = await page.request.get(`/api/video/stream?videoId=${TEST_COURSE.videoId}`);"
+                          }
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:43.032Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-56eb7-nauthenticated-video-access-webkit/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-56eb7-nauthenticated-video-access-webkit/video.webm"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                        "column": 18,
+                        "line": 304
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-2ce2f47ab5f70634a2ee",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 300,
+              "column": 7
+            },
+            {
+              "title": "Mobile video streaming experience",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Mobile-specific test",
+                      "location": {
+                        "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                        "line": 320,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 14,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 961,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-29T03:40:48.801Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Mobile-specific test",
+                          "location": {
+                            "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                            "line": 320,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-50b3c5fb76dc166339dc",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 319,
+              "column": 7
+            },
+            {
+              "title": "Complete journey: Browse courses → Sign in → Watch video",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 15,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 13522,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m failed\n\nLocator:  locator('nav')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav')\u001b[22m\n\u001b[2m    14 × locator resolved to <nav class=\"hidden md:flex items-center space-x-6\">…</nav>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m failed\n\nLocator:  locator('nav')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav')\u001b[22m\n\u001b[2m    14 × locator resolved to <nav class=\"hidden md:flex items-center space-x-6\">…</nav>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:41:41\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:36:5",
+                        "location": {
+                          "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                          "column": 41,
+                          "line": 41
+                        },
+                        "snippet": "  39 |\n  40 |       // Check if the main navigation is present\n> 41 |       await expect(page.locator('nav')).toBeVisible();\n     |                                         ^\n  42 |\n  43 |       console.log('✅ Homepage loaded successfully');\n  44 |     });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                            "column": 41,
+                            "line": 41
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m failed\n\nLocator:  locator('nav')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav')\u001b[22m\n\u001b[2m    14 × locator resolved to <nav class=\"hidden md:flex items-center space-x-6\">…</nav>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n\n\n  39 |\n  40 |       // Check if the main navigation is present\n> 41 |       await expect(page.locator('nav')).toBeVisible();\n     |                                         ^\n  42 |\n  43 |       console.log('✅ Homepage loaded successfully');\n  44 |     });\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:41:41\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:36:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "User visits homepage",
+                          "duration": 11978,
+                          "error": {
+                            "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m failed\n\nLocator:  locator('nav')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav')\u001b[22m\n\u001b[2m    14 × locator resolved to <nav class=\"hidden md:flex items-center space-x-6\">…</nav>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n",
+                            "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m failed\n\nLocator:  locator('nav')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav')\u001b[22m\n\u001b[2m    14 × locator resolved to <nav class=\"hidden md:flex items-center space-x-6\">…</nav>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:41:41\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:36:5",
+                            "location": {
+                              "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                              "column": 41,
+                              "line": 41
+                            },
+                            "snippet": "  39 |\n  40 |       // Check if the main navigation is present\n> 41 |       await expect(page.locator('nav')).toBeVisible();\n     |                                         ^\n  42 |\n  43 |       console.log('✅ Homepage loaded successfully');\n  44 |     });"
+                          }
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:50.952Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-765fe-ses-→-Sign-in-→-Watch-video-Mobile-Chrome/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-765fe-ses-→-Sign-in-→-Watch-video-Mobile-Chrome/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-765fe-ses-→-Sign-in-→-Watch-video-Mobile-Chrome/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                        "column": 41,
+                        "line": 41
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-4d8dd82bce638ff84d2e",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "Video player quality selection and controls",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 16,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2508,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Quality selector not implemented yet\n"
+                        },
+                        {
+                          "text": "ℹ️ Play button not found or auto-playing\n"
+                        },
+                        {
+                          "text": "ℹ️ Fullscreen button not implemented yet\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test video player quality controls",
+                          "duration": 1839
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:51.185Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-5968cdd0310c30b4f44c",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 220,
+              "column": 7
+            },
+            {
+              "title": "Video progress tracking and analytics",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 17,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2398,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Video element not found for analytics testing\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Monitor video analytics requests",
+                          "duration": 1899
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:52.266Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-b0e5df25e399380abdec",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 259,
+              "column": 7
+            },
+            {
+              "title": "Error handling: Unauthenticated video access",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 16,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 420,
+                      "error": {
+                        "message": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+                        "stack": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5",
+                        "location": {
+                          "file": "<anonymous>",
+                          "column": 16,
+                          "line": 293
+                        }
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "<anonymous>",
+                            "column": 16,
+                            "line": 293
+                          },
+                          "message": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test unauthenticated video access",
+                          "duration": 33,
+                          "error": {
+                            "message": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+                            "stack": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5",
+                            "location": {
+                              "file": "<anonymous>",
+                              "column": 16,
+                              "line": 293
+                            }
+                          }
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:54.259Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-56eb7-nauthenticated-video-access-Mobile-Chrome/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-56eb7-nauthenticated-video-access-Mobile-Chrome/video.webm"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "<anonymous>",
+                        "column": 16,
+                        "line": 293
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-09efb7f34fe7b07cd441",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 300,
+              "column": 7
+            },
+            {
+              "title": "Mobile video streaming experience",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 18,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 1445,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Video player not found for mobile testing\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test mobile video experience",
+                          "duration": 984
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:55.694Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-f835fa189f5c819fa096",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 319,
+              "column": 7
+            },
+            {
+              "title": "Complete journey: Browse courses → Sign in → Watch video",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 20,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 12838,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m failed\n\nLocator:  locator('nav')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav')\u001b[22m\n\u001b[2m    13 × locator resolved to <nav class=\"hidden md:flex items-center space-x-6\">…</nav>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m failed\n\nLocator:  locator('nav')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav')\u001b[22m\n\u001b[2m    13 × locator resolved to <nav class=\"hidden md:flex items-center space-x-6\">…</nav>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:41:41\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:36:5",
+                        "location": {
+                          "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                          "column": 41,
+                          "line": 41
+                        },
+                        "snippet": "  39 |\n  40 |       // Check if the main navigation is present\n> 41 |       await expect(page.locator('nav')).toBeVisible();\n     |                                         ^\n  42 |\n  43 |       console.log('✅ Homepage loaded successfully');\n  44 |     });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                            "column": 41,
+                            "line": 41
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m failed\n\nLocator:  locator('nav')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav')\u001b[22m\n\u001b[2m    13 × locator resolved to <nav class=\"hidden md:flex items-center space-x-6\">…</nav>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n\n\n  39 |\n  40 |       // Check if the main navigation is present\n> 41 |       await expect(page.locator('nav')).toBeVisible();\n     |                                         ^\n  42 |\n  43 |       console.log('✅ Homepage loaded successfully');\n  44 |     });\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:41:41\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:36:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "User visits homepage",
+                          "duration": 11880,
+                          "error": {
+                            "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m failed\n\nLocator:  locator('nav')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav')\u001b[22m\n\u001b[2m    13 × locator resolved to <nav class=\"hidden md:flex items-center space-x-6\">…</nav>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n",
+                            "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m failed\n\nLocator:  locator('nav')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav')\u001b[22m\n\u001b[2m    13 × locator resolved to <nav class=\"hidden md:flex items-center space-x-6\">…</nav>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:41:41\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:36:5",
+                            "location": {
+                              "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                              "column": 41,
+                              "line": 41
+                            },
+                            "snippet": "  39 |\n  40 |       // Check if the main navigation is present\n> 41 |       await expect(page.locator('nav')).toBeVisible();\n     |                                         ^\n  42 |\n  43 |       console.log('✅ Homepage loaded successfully');\n  44 |     });"
+                          }
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:57.682Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-765fe-ses-→-Sign-in-→-Watch-video-Mobile-Safari/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-765fe-ses-→-Sign-in-→-Watch-video-Mobile-Safari/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-765fe-ses-→-Sign-in-→-Watch-video-Mobile-Safari/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                        "column": 41,
+                        "line": 41
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-556b7ae467cf3f0c6fbd",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "Video player quality selection and controls",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 21,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 2179,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Quality selector not implemented yet\n"
+                        },
+                        {
+                          "text": "ℹ️ Play button not found or auto-playing\n"
+                        },
+                        {
+                          "text": "ℹ️ Fullscreen button not implemented yet\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test video player quality controls",
+                          "duration": 1316
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:58.593Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-77d49ad00201dc2caaed",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 220,
+              "column": 7
+            },
+            {
+              "title": "Video progress tracking and analytics",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 22,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4055,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Video element not found for analytics testing\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Monitor video analytics requests",
+                          "duration": 2252
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:41:02.021Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-1810a081d8b3878c6f44",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 259,
+              "column": 7
+            },
+            {
+              "title": "Error handling: Unauthenticated video access",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 21,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 479,
+                      "error": {
+                        "message": "Error: page.evaluate: SecurityError: The operation is insecure.",
+                        "stack": "Error: page.evaluate: SecurityError: The operation is insecure.\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5",
+                        "location": {
+                          "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                          "column": 18,
+                          "line": 304
+                        },
+                        "snippet": "  302 |       // Clear any existing authentication\n  303 |       await page.context().clearCookies();\n> 304 |       await page.evaluate(() => localStorage.clear());\n      |                  ^\n  305 |\n  306 |       // Try to access video streaming API directly\n  307 |       const response = await page.request.get(`/api/video/stream?videoId=${TEST_COURSE.videoId}`);"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                            "column": 18,
+                            "line": 304
+                          },
+                          "message": "Error: page.evaluate: SecurityError: The operation is insecure.\n\n  302 |       // Clear any existing authentication\n  303 |       await page.context().clearCookies();\n> 304 |       await page.evaluate(() => localStorage.clear());\n      |                  ^\n  305 |\n  306 |       // Try to access video streaming API directly\n  307 |       const response = await page.request.get(`/api/video/stream?videoId=${TEST_COURSE.videoId}`);\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test unauthenticated video access",
+                          "duration": 12,
+                          "error": {
+                            "message": "Error: page.evaluate: SecurityError: The operation is insecure.",
+                            "stack": "Error: page.evaluate: SecurityError: The operation is insecure.\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5",
+                            "location": {
+                              "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                              "column": 18,
+                              "line": 304
+                            },
+                            "snippet": "  302 |       // Clear any existing authentication\n  303 |       await page.context().clearCookies();\n> 304 |       await page.evaluate(() => localStorage.clear());\n      |                  ^\n  305 |\n  306 |       // Try to access video streaming API directly\n  307 |       const response = await page.request.get(`/api/video/stream?videoId=${TEST_COURSE.videoId}`);"
+                          }
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:41:01.265Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-56eb7-nauthenticated-video-access-Mobile-Safari/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-56eb7-nauthenticated-video-access-Mobile-Safari/video.webm"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                        "column": 18,
+                        "line": 304
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-d836efb9f0227bb160f1",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 300,
+              "column": 7
+            },
+            {
+              "title": "Mobile video streaming experience",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 23,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 3250,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Video player not found for mobile testing\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test mobile video experience",
+                          "duration": 1864
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:41:06.523Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-330802a365a1ba523c7a",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 319,
+              "column": 7
+            },
+            {
+              "title": "Complete journey: Browse courses → Sign in → Watch video",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Microsoft Edge",
+                  "projectName": "Microsoft Edge",
+                  "results": [
+                    {
+                      "workerIndex": 25,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 4,
+                      "error": {
+                        "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\"",
+                        "stack": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-29T03:41:11.939Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-2e131e438353eebd983e",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "Video player quality selection and controls",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Microsoft Edge",
+                  "projectName": "Microsoft Edge",
+                  "results": [
+                    {
+                      "workerIndex": 26,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 5,
+                      "error": {
+                        "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\"",
+                        "stack": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-29T03:41:12.067Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-72f63ffe7922f85c31ce",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 220,
+              "column": 7
+            },
+            {
+              "title": "Video progress tracking and analytics",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Microsoft Edge",
+                  "projectName": "Microsoft Edge",
+                  "results": [
+                    {
+                      "workerIndex": 27,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 4,
+                      "error": {
+                        "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\"",
+                        "stack": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-29T03:41:12.213Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-919c8530b92129422984",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 259,
+              "column": 7
+            },
+            {
+              "title": "Error handling: Unauthenticated video access",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Microsoft Edge",
+                  "projectName": "Microsoft Edge",
+                  "results": [
+                    {
+                      "workerIndex": 28,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 11,
+                      "error": {
+                        "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\"",
+                        "stack": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-29T03:41:13.020Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-0c15484202f98e37d88a",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 300,
+              "column": 7
+            },
+            {
+              "title": "Mobile video streaming experience",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Microsoft Edge",
+                  "projectName": "Microsoft Edge",
+                  "results": [
+                    {
+                      "workerIndex": 29,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 9,
+                      "error": {
+                        "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\"",
+                        "stack": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-29T03:41:13.207Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-f056c809953ad6aa38fe",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 319,
+              "column": 7
+            },
+            {
+              "title": "Complete journey: Browse courses → Sign in → Watch video",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Google Chrome",
+                  "projectName": "Google Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 32,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 15065,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Homepage loaded successfully\n"
+                        },
+                        {
+                          "text": "✅ Course catalog is accessible\n"
+                        },
+                        {
+                          "text": "ℹ️ Course accessible without authentication or auth not yet implemented\n"
+                        },
+                        {
+                          "text": "ℹ️ Authentication not required or not implemented yet\n"
+                        },
+                        {
+                          "text": "ℹ️ Video player not found, testing API endpoint directly...\n"
+                        },
+                        {
+                          "text": "❌ Video streaming API failed: \u001b[33m404\u001b[39m\n"
+                        },
+                        {
+                          "text": "🌐 Streaming requests captured: \u001b[33m0\u001b[39m\n"
+                        },
+                        {
+                          "text": "Video streaming network activity detected: \u001b[33mfalse\u001b[39m\n"
+                        },
+                        {
+                          "text": "Stream API endpoint called: \u001b[33mfalse\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "User visits homepage",
+                          "duration": 3237
+                        },
+                        {
+                          "title": "User browses course catalog",
+                          "duration": 116
+                        },
+                        {
+                          "title": "User attempts to access course",
+                          "duration": 3950
+                        },
+                        {
+                          "title": "User signs in",
+                          "duration": 73
+                        },
+                        {
+                          "title": "User accesses video streaming",
+                          "duration": 2643
+                        },
+                        {
+                          "title": "Verify video streaming network requests",
+                          "duration": 3228
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:41:15.010Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-6de62d34e397961fecd5",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "Video player quality selection and controls",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Google Chrome",
+                  "projectName": "Google Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 33,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 10328,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Quality selector not implemented yet\n"
+                        },
+                        {
+                          "text": "ℹ️ Play button not found or auto-playing\n"
+                        },
+                        {
+                          "text": "ℹ️ Fullscreen button not implemented yet\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test video player quality controls",
+                          "duration": 3654
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:41:15.231Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-7f94fa5c9eb24bfafd5e",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 220,
+              "column": 7
+            },
+            {
+              "title": "Video progress tracking and analytics",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Google Chrome",
+                  "projectName": "Google Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 34,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5221,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "ℹ️ Video element not found for analytics testing\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Monitor video analytics requests",
+                          "duration": 3029
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:41:15.234Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-775ea011e08bfcd00d6a",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 259,
+              "column": 7
+            },
+            {
+              "title": "Error handling: Unauthenticated video access",
+              "ok": false,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Google Chrome",
+                  "projectName": "Google Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 35,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 4878,
+                      "error": {
+                        "message": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+                        "stack": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5",
+                        "location": {
+                          "file": "<anonymous>",
+                          "column": 16,
+                          "line": 293
+                        }
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "<anonymous>",
+                            "column": 16,
+                            "line": 293
+                          },
+                          "message": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test unauthenticated video access",
+                          "duration": 53,
+                          "error": {
+                            "message": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+                            "stack": "Error: page.evaluate: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at UtilityScript.evaluate (<anonymous>:293:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:304:18\n    at /Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts:301:5",
+                            "location": {
+                              "file": "<anonymous>",
+                              "column": 16,
+                              "line": 293
+                            }
+                          }
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:41:16.311Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-56eb7-nauthenticated-video-access-Google-Chrome/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/test-results/user-journeys-video-stream-56eb7-nauthenticated-video-access-Google-Chrome/video.webm"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "<anonymous>",
+                        "column": 16,
+                        "line": 293
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-fcef98576c3395fffd89",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 300,
+              "column": 7
+            },
+            {
+              "title": "Mobile video streaming experience",
+              "ok": true,
+              "tags": [
+                "smoke",
+                "regression"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Mobile-specific test",
+                      "location": {
+                        "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                        "line": 320,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "Google Chrome",
+                  "projectName": "Google Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 34,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 711,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-29T03:41:28.615Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Mobile-specific test",
+                          "location": {
+                            "file": "/Users/vinayvidyasagar/Dev/LazyGameDevs/LazyLearners/gamelearn-platform/tests/e2e/user-journeys/video-streaming.spec.ts",
+                            "line": 320,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-f7d8b53a05412b15caa8",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 319,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Video Streaming Edge Cases",
+          "file": "user-journeys/video-streaming.spec.ts",
+          "line": 350,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Handle invalid video IDs gracefully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 3512,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Properly handling invalid video IDs: \u001b[33m404\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test invalid video ID handling",
+                          "duration": 2438
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:39:56.666Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-7084fb02fa060914b9c0",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 351,
+              "column": 7
+            },
+            {
+              "title": "Handle network interruptions during streaming",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 7950,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test network resilience",
+                          "duration": 5696
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:39:59.249Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-b65fe512a4f1107b29bd",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 364,
+              "column": 7
+            },
+            {
+              "title": "Handle invalid video IDs gracefully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 2781,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Properly handling invalid video IDs: \u001b[33m404\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test invalid video ID handling",
+                          "duration": 1392
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:21.696Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-a39caa67fbde07015fca",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 351,
+              "column": 7
+            },
+            {
+              "title": "Handle network interruptions during streaming",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 9992,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test network resilience",
+                          "duration": 7349
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:24.840Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-89a3dee39ba5d69d0540",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 364,
+              "column": 7
+            },
+            {
+              "title": "Handle invalid video IDs gracefully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 1204,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Properly handling invalid video IDs: \u001b[33m404\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test invalid video ID handling",
+                          "duration": 622
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:47.814Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-e2a063d43efd0a9e3a8f",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 351,
+              "column": 7
+            },
+            {
+              "title": "Handle network interruptions during streaming",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 11,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 6365,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test network resilience",
+                          "duration": 5438
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:48.123Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-678f849dad9eae48d1e1",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 364,
+              "column": 7
+            },
+            {
+              "title": "Handle invalid video IDs gracefully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 19,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 403,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Properly handling invalid video IDs: \u001b[33m404\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test invalid video ID handling",
+                          "duration": 130
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:55.888Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-4b62c87672717b89684e",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 351,
+              "column": 7
+            },
+            {
+              "title": "Handle network interruptions during streaming",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 17,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5683,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test network resilience",
+                          "duration": 4998
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:40:55.018Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-69506b8facac6e82f8e3",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 364,
+              "column": 7
+            },
+            {
+              "title": "Handle invalid video IDs gracefully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 24,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 1982,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Properly handling invalid video IDs: \u001b[33m404\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test invalid video ID handling",
+                          "duration": 903
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:41:08.504Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-c79b60bd42c55b1405cb",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 351,
+              "column": 7
+            },
+            {
+              "title": "Handle network interruptions during streaming",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 22,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6115,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test network resilience",
+                          "duration": 5527
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:41:07.329Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-b8751d285c5519edb3bf",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 364,
+              "column": 7
+            },
+            {
+              "title": "Handle invalid video IDs gracefully",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Microsoft Edge",
+                  "projectName": "Microsoft Edge",
+                  "results": [
+                    {
+                      "workerIndex": 30,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 8,
+                      "error": {
+                        "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\"",
+                        "stack": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-29T03:41:13.382Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-6c728f48230873b5f8bd",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 351,
+              "column": 7
+            },
+            {
+              "title": "Handle network interruptions during streaming",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Microsoft Edge",
+                  "projectName": "Microsoft Edge",
+                  "results": [
+                    {
+                      "workerIndex": 31,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 8,
+                      "error": {
+                        "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\"",
+                        "stack": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Chromium distribution 'msedge' is not found at /Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\nRun \"npx playwright install msedge\""
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-29T03:41:14.850Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-e382fab4fe8b847798de",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 364,
+              "column": 7
+            },
+            {
+              "title": "Handle invalid video IDs gracefully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Google Chrome",
+                  "projectName": "Google Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 36,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 1476,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Properly handling invalid video IDs: \u001b[33m404\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test invalid video ID handling",
+                          "duration": 578
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:41:31.876Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-de816f9db8ef2969b966",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 351,
+              "column": 7
+            },
+            {
+              "title": "Handle network interruptions during streaming",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Google Chrome",
+                  "projectName": "Google Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 34,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6879,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Test network resilience",
+                          "duration": 6383
+                        }
+                      ],
+                      "startTime": "2025-09-29T03:41:29.393Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "23c32cb79815bea1fce7-05174d33d282613a637f",
+              "file": "user-journeys/video-streaming.spec.ts",
+              "line": 364,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-09-29T03:39:15.456Z",
+    "duration": 143268.17,
+    "expected": 28,
+    "skipped": 4,
+    "unexpected": 17,
+    "flaky": 0
+  }
+}
