@@ -71,7 +71,14 @@
       "mcp__chrome-devtools__fill",
       "mcp__jam__analyzeVideo",
       "mcp__chrome-devtools__list_pages",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "mcp__chrome-devtools__wait_for",
+      "mcp__chrome-devtools__fill_form",
+      "Bash(xargs ps:*)",
+      "mcp__chrome-devtools__select_page",
+      "mcp__chrome-devtools__resize_page",
+      "mcp__chrome-devtools__take_screenshot",
+      "Bash(rm:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
