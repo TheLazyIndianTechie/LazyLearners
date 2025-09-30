@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '@clerk/nextjs'
 import { SiteLayout } from '@/components/layout/site-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -41,6 +42,7 @@ const POLL_INTERVAL_MS = 3000
 const MAX_ATTEMPTS = 5
 
 export default function CoursePurchaseSuccessPage({ params }: { params: { id: string } }) {
+  const { getToken } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -91,8 +93,12 @@ export default function CoursePurchaseSuccessPage({ params }: { params: { id: st
 
     const verifyPayment = async () => {
       try {
+        const token = await getToken()
         const response = await fetch(`/api/payments/status/${storedPaymentId}`, {
           cache: 'no-store',
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
         })
         const result = await response.json()
 

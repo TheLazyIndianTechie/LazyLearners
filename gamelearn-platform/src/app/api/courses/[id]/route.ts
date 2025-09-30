@@ -32,7 +32,7 @@ const updateCourseSchema = z.object({
 })
 
 interface RouteParams {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 // GET /api/courses/[id] - Get specific course with optimized queries
@@ -41,7 +41,7 @@ export async function GET(
   context: RouteParams
 ) {
   try {
-    const { id } = context.params
+    const { id } = await context.params
     const { searchParams } = new URL(request.url)
     const includeReviews = searchParams.get('includeReviews') === 'true'
     const includeLessons = searchParams.get('includeLessons') === 'true'
@@ -162,7 +162,7 @@ export async function PUT(
   context: RouteParams
 ) {
   try {
-    const { id } = context.params
+    const { id } = await context.params
     const { userId } = await auth()
 
     if (!userId) {
@@ -296,7 +296,7 @@ export async function DELETE(
   context: RouteParams
 ) {
   try {
-    const { id } = context.params
+    const { id } = await context.params
     const { userId } = await auth()
 
     if (!userId) {

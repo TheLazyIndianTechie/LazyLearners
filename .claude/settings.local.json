@@ -60,7 +60,17 @@
       "mcp__jam__getNetworkRequests",
       "mcp__jam__getUserEvents",
       "mcp__vercel__get_deployment",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:jam.dev)",
+      "mcp__chrome-devtools__new_page",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__list_console_messages",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__fill",
+      "mcp__jam__analyzeVideo",
+      "mcp__chrome-devtools__list_pages"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -1,12 +1,13 @@
 import { NextRequest } from "next/server"
 
 interface Params {
-  params: { width: string; height: string }
+  params: Promise<{ width: string; height: string }>
 }
 
 export async function GET(_req: NextRequest, { params }: Params) {
-  const width = Math.max(1, Math.min(4096, parseInt(params.width, 10) || 400))
-  const height = Math.max(1, Math.min(4096, parseInt(params.height, 10) || 225))
+  const { width: widthParam, height: heightParam } = await params
+  const width = Math.max(1, Math.min(4096, parseInt(widthParam, 10) || 400))
+  const height = Math.max(1, Math.min(4096, parseInt(heightParam, 10) || 225))
 
   const bg = "#e5e7eb" // Tailwind gray-200
   const fg = "#6b7280" // Tailwind gray-500

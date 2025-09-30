@@ -24,10 +24,24 @@ function generateEncryptionKey() {
   return crypto.randomBytes(32).toString('hex');
 }
 
+function generateClerkSecretKey() {
+  return `sk_live_${crypto.randomBytes(24).toString('hex')}`;
+}
+
+function generateClerkPublishableKey() {
+  return `pk_live_${crypto.randomBytes(24).toString('hex')}`;
+}
+
+function generateClerkWebhookSecret() {
+  return `whsec_${crypto.randomBytes(24).toString('hex')}`;
+}
+
 console.log('🔐 Generating secure secrets for production...\n');
 
 const secrets = {
-  NEXTAUTH_SECRET: generateBase64Secret(32),
+  CLERK_SECRET_KEY: generateClerkSecretKey(),
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: generateClerkPublishableKey(),
+  CLERK_WEBHOOK_SECRET: generateClerkWebhookSecret(),
   JWT_SECRET: generateJWT(),
   ENCRYPTION_KEY: generateEncryptionKey(),
   SESSION_SECRET: generateSecret(32),
@@ -35,14 +49,14 @@ const secrets = {
 };
 
 console.log('📋 Environment Variables (copy these to Vercel Dashboard):');
-console.log('=' * 60);
+console.log('='.repeat(60));
 
 Object.entries(secrets).forEach(([key, value]) => {
   console.log(`${key}=${value}`);
 });
 
 console.log('\n📝 Vercel CLI Commands:');
-console.log('=' * 60);
+console.log('='.repeat(60));
 
 Object.entries(secrets).forEach(([key, value]) => {
   console.log(`npx vercel env add ${key} production`);
@@ -50,8 +64,8 @@ Object.entries(secrets).forEach(([key, value]) => {
 });
 
 console.log('🔗 Production URLs:');
-console.log('=' * 60);
-console.log('NEXTAUTH_URL=https://gamelearn-platform-k6t2ug2a1-thelazyindiantechies-projects.vercel.app');
+console.log('='.repeat(60));
+console.log('APP_URL=https://gamelearn-platform-k6t2ug2a1-thelazyindiantechies-projects.vercel.app');
 console.log('VERCEL_URL=https://gamelearn-platform-k6t2ug2a1-thelazyindiantechies-projects.vercel.app');
 
 console.log('\n✅ Next Steps:');

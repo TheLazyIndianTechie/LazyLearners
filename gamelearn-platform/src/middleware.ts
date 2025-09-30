@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { authMiddleware } from "@clerk/nextjs"
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 
 // Configuration
 const RATE_LIMITS = {
@@ -134,7 +134,7 @@ async function handleRequest(req: NextRequest) {
 
   if (pathname.startsWith("/api/auth/")) {
     rateLimitType = "auth"
-  } else if (pathname.startsWith("/api/payment/")) {
+  } else if (pathname.startsWith("/api/payments/")) {
     rateLimitType = "payment"
   } else if (pathname.startsWith("/api/")) {
     rateLimitType = "api"
@@ -297,49 +297,54 @@ async function handleRequest(req: NextRequest) {
 const PUBLIC_ROUTES = [
   "/",
   "/courses",
+  "/courses/(.*)",
   "/auth/signin",
   "/auth/signup",
   "/auth/error",
-  "/api/auth",
+  "/api/auth/(.*)",
   "/api/health"
 ]
 
 const PROTECTED_ROUTES = [
   "/dashboard",
-  "/instructor",
+  "/instructor/(.*)",
   "/checkout",
   "/portfolio/create"
 ]
 
 const PROTECTED_API_ROUTES = [
-  "/api/payment",
-  "/api/progress",
-  "/api/enrollment",
-  "/api/cart",
-  "/api/collaboration"
+  "/api/payments/(.*)",
+  "/api/progress/(.*)",
+  "/api/enrollment/(.*)",
+  "/api/cart/(.*)",
+  "/api/collaboration/(.*)"
 ]
 
-export default authMiddleware({
-  publicRoutes: PUBLIC_ROUTES,
-  async afterAuth(auth, req) {
-    const { pathname } = req.nextUrl
+const isPublicRoute = createRouteMatcher(PUBLIC_ROUTES)
+const isProtectedRoute = createRouteMatcher(PROTECTED_ROUTES)
+const isProtectedAPIRoute = createRouteMatcher(PROTECTED_API_ROUTES)
 
-    if (!auth.userId) {
-      if (pathname.startsWith("/api/") && PROTECTED_API_ROUTES.some(route => pathname.startsWith(route))) {
-        const unauthorizedResponse = NextResponse.json(
-          { error: "Unauthorized" },
-          { status: 401 }
-        )
-        return addSecurityHeaders(unauthorizedResponse)
-      }
+export default clerkMiddleware(async (auth, req) => {
+  const { pathname } = req.nextUrl
 
-      if (PROTECTED_ROUTES.some(route => pathname.startsWith(route))) {
-        return auth.redirectToSignIn({ returnBackUrl: req.nextUrl.href })
-      }
+  // Handle protected API routes
+  if (isProtectedAPIRoute(req)) {
+    const { userId } = auth()
+    if (!userId) {
+      const unauthorizedResponse = NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
+      return addSecurityHeaders(unauthorizedResponse)
     }
-
-    return handleRequest(req)
   }
+
+  // Handle protected routes
+  if (isProtectedRoute(req)) {
+    auth().protect()
+  }
+
+  return handleRequest(req)
 })
 
 // Configure which routes this middleware runs on

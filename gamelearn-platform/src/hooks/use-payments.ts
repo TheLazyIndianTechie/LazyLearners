@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useAuth } from '@clerk/nextjs'
 import { toast } from 'sonner'
 
 export interface PaymentCustomer {
@@ -26,6 +27,7 @@ export interface PaymentStatus {
 }
 
 export function usePayments() {
+  const { getToken } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -43,10 +45,12 @@ export function usePayments() {
     setError(null)
 
     try {
+      const token = await getToken()
       const response = await fetch('/api/payments/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         body: JSON.stringify({
           courseId,
@@ -72,14 +76,19 @@ export function usePayments() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [getToken])
 
   const getPaymentStatus = useCallback(async (paymentId: string): Promise<PaymentStatus | null> => {
     setIsLoading(true)
     setError(null)
 
     try {
-      const response = await fetch(`/api/payments/status/${paymentId}`)
+      const token = await getToken()
+      const response = await fetch(`/api/payments/status/${paymentId}`, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      })
       const result = await response.json()
 
       if (!response.ok || !result.success) {
@@ -95,12 +104,12 @@ export function usePayments() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [getToken])
 
   const redirectToCheckout = useCallback((checkoutUrl: string) => {
     // Redirect to Dodo Payments checkout page
     window.location.href = checkoutUrl
-  }, [])
+  }, [getToken])
 
   const purchaseCourse = useCallback(async (
     courseId: string,
@@ -136,7 +145,7 @@ export function usePayments() {
 
   const clearError = useCallback(() => {
     setError(null)
-  }, [])
+  }, [getToken])
 
   return {
     isLoading,

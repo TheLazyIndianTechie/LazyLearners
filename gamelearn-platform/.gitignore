@@ -48,3 +48,6 @@ session.txt
 session.log
 *this-session-*.txt
 *session-logs*
+
+# clerk configuration (can include secrets)
+/.clerk/
