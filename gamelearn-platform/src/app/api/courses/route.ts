@@ -129,22 +129,31 @@ export async function GET(request: NextRequest) {
       ratings.map(r => [r.courseId, r._avg.rating || 0])
     )
 
-    // Get module and lesson counts efficiently
-    const moduleCounts = await prisma.module.groupBy({
-      by: ['courseId'],
+    // Get lesson counts efficiently by course using a simpler approach
+    const lessonCountsMap = new Map<string, number>()
+
+    // Aggregate lesson counts by course using the modules
+    const modulesWithLessonCounts = await prisma.module.findMany({
       where: {
         courseId: {
           in: courseIds
         }
       },
-      _count: {
-        lessons: true
+      select: {
+        courseId: true,
+        _count: {
+          select: {
+            lessons: true
+          }
+        }
       }
     })
 
-    const moduleCountsMap = new Map(
-      moduleCounts.map(m => [m.courseId, m._count.lessons])
-    )
+    // Aggregate lesson counts by course
+    modulesWithLessonCounts.forEach(module => {
+      const currentCount = lessonCountsMap.get(module.courseId) || 0
+      lessonCountsMap.set(module.courseId, currentCount + module._count.lessons)
+    })
 
     // Format response with optimized data
     const formattedCourses = courses.map(course => {
@@ -157,7 +166,7 @@ export async function GET(request: NextRequest) {
         reviewCount: course._count.reviews,
         enrollmentCount: course._count.enrollments,
         moduleCount: course._count.modules,
-        lessonCount: moduleCountsMap.get(course.id) || 0,
+        lessonCount: lessonCountsMap.get(course.id) || 0,
       }
     })
 
