@@ -70,7 +70,8 @@
       "mcp__chrome-devtools__navigate_page",
       "mcp__chrome-devtools__fill",
       "mcp__jam__analyzeVideo",
-      "mcp__chrome-devtools__list_pages"
+      "mcp__chrome-devtools__list_pages",
+      "Bash(cat:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
