@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, use } from "react"
-import { useUser } from "@clerk/nextjs"
+import { useUser, useAuth } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -252,6 +252,7 @@ interface CoursePageProps {
 export default function CoursePage({ params }: CoursePageProps) {
   const { id } = use(params)
   const { isSignedIn, user } = useUser()
+  const { getToken } = useAuth()
   const router = useRouter()
   const [isEnrolled, setIsEnrolled] = useState(false)
   const [course, setCourse] = useState(mockCourse) // Start with mock data, will be replaced by real data
@@ -268,7 +269,12 @@ export default function CoursePage({ params }: CoursePageProps) {
 
       try {
         setIsLoadingCourse(true)
-        const response = await fetch(`/api/courses/${id}?includeLessons=true`)
+        const token = await getToken()
+        const response = await fetch(`/api/courses/${id}?includeLessons=true`, {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        })
         if (response.ok) {
           const data = await response.json()
           if (data.success && data.data) {
@@ -333,7 +339,12 @@ export default function CoursePage({ params }: CoursePageProps) {
       if (!isSignedIn || !id) return
 
       try {
-        const response = await fetch(`/api/enrollment?courseId=${id}`)
+        const token = await getToken()
+        const response = await fetch(`/api/enrollment?courseId=${id}`, {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        })
         if (response.ok) {
           const data = await response.json()
           setIsEnrolled(!!data.enrollment)
@@ -359,10 +370,12 @@ export default function CoursePage({ params }: CoursePageProps) {
     }
 
     try {
+      const token = await getToken()
       const response = await fetch('/api/enrollment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         body: JSON.stringify({
           courseId: id
