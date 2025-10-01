@@ -445,8 +445,8 @@ export default function CoursePage({ params }: CoursePageProps) {
                   </Avatar>
                   <div className="flex-1">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">{course.title}</h1>
-                    <p className="text-gray-600 mb-3">{course.description}</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <p className="text-slate-700 mb-3">{course.description}</p>
+                    <div className="flex items-center gap-4 text-sm text-slate-600">
                       <span>By {course.instructor.name}</span>
                       <span>•</span>
                       <div className="flex items-center gap-1">
@@ -517,11 +517,13 @@ export default function CoursePage({ params }: CoursePageProps) {
                             {module.lessons.map((lesson) => (
                               <div
                                 key={lesson.id}
-                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                                className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
                                   currentLesson.id === lesson.id
                                     ? 'bg-blue-50 border border-blue-200'
-                                    : 'hover:bg-gray-50'
-                                } ${!isEnrolled && !lesson.isFree ? 'opacity-50' : ''}`}
+                                    : !isEnrolled && !lesson.isFree
+                                    ? 'bg-slate-50 cursor-not-allowed'
+                                    : 'hover:bg-gray-50 cursor-pointer'
+                                }`}
                                 onClick={() => handleLessonSelect(lesson)}
                               >
                                 <div className="flex-shrink-0">
@@ -538,9 +540,9 @@ export default function CoursePage({ params }: CoursePageProps) {
                                     <span className="font-medium">{lesson.title}</span>
                                     {lesson.isFree && <Badge variant="secondary" className="text-xs">Free</Badge>}
                                   </div>
-                                  <p className="text-sm text-gray-600">{lesson.description}</p>
+                                  <p className="text-sm text-slate-700">{lesson.description}</p>
                                 </div>
-                                <div className="flex items-center gap-1 text-sm text-gray-500">
+                                <div className="flex items-center gap-1 text-sm text-slate-600">
                                   <Clock className="w-4 h-4" />
                                   <span>{lesson.duration}m</span>
                                 </div>
@@ -596,8 +598,8 @@ export default function CoursePage({ params }: CoursePageProps) {
                     </Avatar>
                     <div>
                       <h3 className="text-xl font-semibold">{course.instructor.name}</h3>
-                      <p className="text-gray-600 mb-3">{course.instructor.bio || 'Experienced instructor'}</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <p className="text-slate-700 mb-3">{course.instructor.bio || 'Experienced instructor'}</p>
+                      <div className="flex items-center gap-4 text-sm text-slate-600">
                         <div className="flex items-center gap-1">
                           <Star className="w-4 h-4 text-yellow-400 fill-current" />
                           <span>4.9 Instructor Rating</span>
@@ -616,7 +618,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                 </TabsContent>
 
                 <TabsContent value="reviews" className="p-6">
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-slate-600">
                     <Star className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     <p>Reviews section coming soon!</p>
                   </div>
@@ -630,7 +632,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                     </div>
 
                     {mockQuizzes.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
+                      <div className="text-center py-8 text-slate-600">
                         <Award className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                         <p>No assessments available for this course yet.</p>
                       </div>
@@ -696,7 +698,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                       {course.price === 0 ? "Free" : `$${course.price}`}
                     </div>
                     {course.price > 0 && (
-                      <div className="text-sm text-gray-500 line-through">
+                      <div className="text-sm text-slate-600 line-through">
                         $149.99
                       </div>
                     )}
@@ -741,21 +743,21 @@ export default function CoursePage({ params }: CoursePageProps) {
                     </Button>
                   )}
 
-                  <div className="space-y-3 text-sm">
+                  <div className="space-y-3 text-sm text-slate-700">
                     <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-gray-500" />
+                      <Clock className="w-4 h-4 text-slate-600" />
                       <span>{formatDuration(course.duration)} on-demand video</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Download className="w-4 h-4 text-gray-500" />
+                      <Download className="w-4 h-4 text-slate-600" />
                       <span>Downloadable resources</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Award className="w-4 h-4 text-gray-500" />
+                      <Award className="w-4 h-4 text-slate-600" />
                       <span>Certificate of completion</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-gray-500" />
+                      <Users className="w-4 h-4 text-slate-600" />
                       <span>Access to community</span>
                     </div>
                   </div>
@@ -782,22 +784,22 @@ export default function CoursePage({ params }: CoursePageProps) {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Students</span>
+                    <span className="text-slate-700">Students</span>
                     <span className="font-medium">{course.enrollmentCount?.toLocaleString() || '0'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Rating</span>
+                    <span className="text-slate-700">Rating</span>
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
                       <span className="font-medium">{course.rating}</span>
                     </div>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Duration</span>
+                    <span className="text-slate-700">Duration</span>
                     <span className="font-medium">{formatDuration(course.duration)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Level</span>
+                    <span className="text-slate-700">Level</span>
                     <span className="font-medium capitalize">{course.difficulty}</span>
                   </div>
                 </CardContent>

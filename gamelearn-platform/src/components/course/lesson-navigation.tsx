@@ -136,7 +136,7 @@ export function LessonNavigation({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className={`font-medium truncate ${
-                        isActive ? "text-blue-900" : canAccess ? "text-gray-900" : "text-gray-500"
+                        isActive ? "text-blue-900" : canAccess ? "text-gray-900" : "text-slate-600"
                       }`}>
                         {lesson.title}
                       </h4>
@@ -152,14 +152,14 @@ export function LessonNavigation({
                       )}
                     </div>
                     <p className={`text-sm truncate ${
-                      isActive ? "text-blue-700" : canAccess ? "text-gray-600" : "text-gray-400"
+                      isActive ? "text-blue-700" : canAccess ? "text-slate-700" : "text-slate-600"
                     }`}>
                       {lesson.description}
                     </p>
                   </div>
 
                   {/* Duration */}
-                  <div className="flex-shrink-0 text-sm text-gray-500">
+                  <div className="flex-shrink-0 text-sm text-slate-600">
                     {Math.floor(lesson.duration / 60)}:{(lesson.duration % 60).toString().padStart(2, '0')}
                   </div>
                 </div>

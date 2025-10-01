@@ -90,7 +90,7 @@ export function CourseCard({ course, showProgress = false, progress = 0 }: Cours
             ))}
           </div>
           <span className="text-sm font-mono font-semibold text-slate-300">{course.rating.toFixed(1)}</span>
-          <span className="text-sm text-slate-500">({course.reviewCount})</span>
+          <span className="text-sm text-slate-400">({course.reviewCount})</span>
         </div>
 
         {/* Progress Bar */}
