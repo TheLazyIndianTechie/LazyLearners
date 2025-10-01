@@ -1,0 +1,173 @@
+{
+	"meta": {
+		"generatedAt": "2025-10-01T13:37:14.944Z",
+		"tasksAnalyzed": 20,
+		"totalTasks": 30,
+		"analysisCount": 20,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 11,
+			"taskTitle": "Implement video upload interface for instructors",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the video upload interface implementation: 1) Create React component with drag-and-drop zone using react-dropzone, 2) Implement chunked upload using FileReader API with progress tracking, 3) Add file validation for video formats and size limits, 4) Integrate with existing /api/video/upload endpoint, 5) Add upload queue management and error handling",
+			"reasoning": "The video upload API already exists with comprehensive validation and processing. Main work is creating the React component with drag-and-drop functionality and integrating with the existing backend. Well-defined scope with clear requirements."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Enhanced video player with advanced controls",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Enhance the existing video player component: 1) Add Picture-in-Picture API support, 2) Implement playback speed controls (0.5x-2x), 3) Add keyboard shortcuts for play/pause and seeking, 4) Create quality selector dropdown, 5) Implement closed captions support with WebVTT, 6) Add fullscreen API integration and localStorage for resume position",
+			"reasoning": "A sophisticated video player already exists with basic controls. Adding advanced features requires working with multiple browser APIs (PiP, Fullscreen, WebVTT) and complex state management. Medium-high complexity due to browser compatibility concerns."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Module and lesson management interface",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Build comprehensive module and lesson management: 1) Create module creation/editing forms with validation, 2) Implement drag-and-drop reordering using @dnd-kit/sortable, 3) Build rich text editor for lesson content with @tiptap/react, 4) Add lesson type selection (video, quiz, reading, project), 5) Implement bulk lesson import via CSV/JSON, 6) Create lesson duration estimation calculator, 7) Integrate with existing API endpoints for modules and lessons",
+			"reasoning": "This is a complex CRUD interface with drag-and-drop functionality, rich text editing, and multiple content types. The API endpoints exist but the UI components need to be built from scratch. High complexity due to multiple integrations and user experience requirements."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "Database optimization and indexing",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Optimize database performance: 1) Analyze Prisma schema and add strategic indexes for query patterns, 2) Optimize N+1 queries in course listings and enrollments using Prisma include statements, 3) Implement database connection pooling configuration, 4) Add query performance monitoring and metrics collection",
+			"reasoning": "The Prisma schema exists with well-defined models. Database optimization is primarily about adding indexes and optimizing existing queries. Medium complexity due to need for performance analysis and testing."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "API route standardization and documentation",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Standardize API architecture: 1) Create standardized error response schema across all endpoints, 2) Implement request/response logging middleware, 3) Add rate limiting using @upstash/ratelimit, 4) Generate OpenAPI documentation for 70+ existing endpoints, 5) Implement request ID tracking and correlation, 6) Add response time headers and monitoring",
+			"reasoning": "With 70+ existing API endpoints, this requires systematic refactoring of error handling, adding middleware, and comprehensive documentation. High complexity due to the scope and need to maintain backward compatibility."
+		},
+		{
+			"taskId": 16,
+			"taskTitle": "Comprehensive security audit and hardening",
+			"complexityScore": 9,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Implement comprehensive security measures: 1) Configure Content Security Policy headers in next.config.ts, 2) Add input sanitization with DOMPurify, 3) Implement CSRF protection, 4) Add SQL injection prevention verification, 5) Implement XSS prevention with output encoding, 6) Add authentication brute force protection, 7) Create security monitoring dashboard, 8) Configure security headers (HSTS, X-Frame-Options, etc.)",
+			"reasoning": "Security hardening requires implementing multiple OWASP Top 10 protections across the entire application. Very high complexity due to the comprehensive nature and need for thorough testing to avoid breaking existing functionality."
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "Responsive design and mobile optimization",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Optimize mobile experience: 1) Audit all 45+ components for mobile responsiveness using Tailwind breakpoints, 2) Implement mobile-specific navigation with slide-out menu, 3) Optimize touch targets to 44x44px minimum, 4) Fix layout overflow issues with proper flex/grid constraints, 5) Test and optimize video player for mobile devices",
+			"reasoning": "The codebase uses Tailwind CSS which provides good responsive foundation. Main work is systematic auditing and fixing of existing components. Medium complexity due to the scope but straightforward implementation."
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "WCAG 2.1 AA accessibility compliance",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Achieve accessibility compliance: 1) Audit color contrast ratios and fix violations, 2) Implement ARIA labels on interactive elements, 3) Add keyboard navigation support with focus management, 4) Implement skip navigation links, 5) Add live regions for dynamic content, 6) Test with screen readers (NVDA, JAWS, VoiceOver), 7) Implement focus trap for modals",
+			"reasoning": "Accessibility compliance requires systematic auditing and fixing across all UI components. High complexity due to the comprehensive nature and need for specialized testing with assistive technologies."
+		},
+		{
+			"taskId": 19,
+			"taskTitle": "Enhanced course discovery with filtering and search",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Build advanced course discovery: 1) Implement search functionality using Fuse.js for fuzzy search, 2) Create filter UI with category, level, price, and rating filters, 3) Build autocomplete component with debounced queries, 4) Implement course recommendation algorithm based on user history, 5) Add Featured and Trending sections using analytics, 6) Create wishlist functionality with persistence",
+			"reasoning": "Requires building complex search and filtering logic with recommendation algorithms. The course data structure exists, but sophisticated search and recommendation features need to be built from scratch. High complexity due to algorithm implementation and user experience requirements."
+		},
+		{
+			"taskId": 20,
+			"taskTitle": "Video processing pipeline implementation",
+			"complexityScore": 9,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Build video processing pipeline: 1) Implement video transcoding using FFmpeg.js or cloud service, 2) Create job queue using Bull/Agenda for background processing, 3) Generate video thumbnails using canvas, 4) Implement video validation for format/size/duration, 5) Add video storage integration with AWS S3/Cloudinary, 6) Create progress tracking for transcoding jobs, 7) Implement adaptive bitrate streaming manifests, 8) Add error handling and retry logic",
+			"reasoning": "Very complex system involving video processing, cloud storage, job queues, and streaming protocols. The video upload API exists but the processing pipeline needs to be built from scratch. Very high complexity due to multiple integrations and technical challenges."
+		},
+		{
+			"taskId": 21,
+			"taskTitle": "Comprehensive test suite expansion",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Expand test coverage to 80%: 1) Add unit tests for all utility functions and API routes, 2) Create integration tests for payment flows and course enrollment, 3) Expand E2E tests using existing Playwright setup, 4) Implement visual regression testing, 5) Add performance testing for video streaming, 6) Create load testing scenarios, 7) Set up CI/CD integration for automated testing",
+			"reasoning": "The project has basic test structure with Jest and Playwright setup. Achieving 80% coverage requires systematic test writing across the entire codebase. High complexity due to the scope and need for various testing approaches."
+		},
+		{
+			"taskId": 22,
+			"taskTitle": "Redis caching implementation",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Implement Redis caching: 1) Set up Redis client using existing REDIS_URL configuration, 2) Cache course catalog data with appropriate TTL, 3) Cache user enrollment status and video metadata, 4) Implement cache invalidation strategies and monitoring",
+			"reasoning": "The Redis configuration and basic structure already exist. Implementation is straightforward with clear caching patterns. Low-medium complexity due to well-defined scope and existing foundation."
+		},
+		{
+			"taskId": 23,
+			"taskTitle": "Database seeding with comprehensive sample data",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Create comprehensive seed data: 1) Extend existing seed scripts for 20+ realistic courses, 2) Create instructor profiles with complete details, 3) Generate 50+ student accounts with enrollment history, 4) Add sample progress and payment data, 5) Create environment-specific seeding and data reset scripts",
+			"reasoning": "Basic seed files exist (seed.ts, seed-course.ts). Expanding them with comprehensive data is straightforward but requires careful data modeling. Medium complexity due to data relationship management and environment considerations."
+		},
+		{
+			"taskId": 24,
+			"taskTitle": "Email system integration",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Integrate email system: 1) Set up SendGrid/Resend API integration, 2) Create email templates using React Email, 3) Implement email queue using Bull for reliability, 4) Add email tracking and analytics, 5) Create email preference management system",
+			"reasoning": "Email integration is a well-defined feature with clear requirements. Medium complexity due to template creation, queue management, and tracking requirements. The environment configuration structure already exists."
+		},
+		{
+			"taskId": 25,
+			"taskTitle": "Course player immersive experience",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Build immersive course player: 1) Create course player layout with lesson sidebar, 2) Implement notes/bookmarks functionality with sync, 3) Add Q&A section with threaded discussions, 4) Create resource downloads section, 5) Implement autoplay with countdown timer, 6) Add keyboard shortcuts and progress tracking",
+			"reasoning": "Builds on existing lesson pages and video player. Requires complex UI layout and multiple interactive features. High complexity due to state management and user experience requirements."
+		},
+		{
+			"taskId": 26,
+			"taskTitle": "Quiz and assessment builder",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Build comprehensive quiz builder: 1) Create quiz builder interface extending existing quiz components, 2) Add multiple question types (MCQ, true/false, short answer, code), 3) Implement drag-and-drop question reordering, 4) Add quiz settings (time limits, passing scores), 5) Create question bank for reusability, 6) Build analytics dashboard for quiz performance",
+			"reasoning": "The quiz system exists with basic functionality in src/components/quiz/ and src/lib/quiz.ts. Building a comprehensive builder requires complex UI and question type management. High complexity due to multiple question types and analytics requirements."
+		},
+		{
+			"taskId": 27,
+			"taskTitle": "Instructor analytics dashboard",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Create instructor analytics: 1) Build course performance metrics dashboard, 2) Add revenue analytics with charts using Recharts, 3) Implement student engagement metrics, 4) Create video analytics with watch time and dropout analysis, 5) Add export functionality and date filtering",
+			"reasoning": "Instructor pages exist as foundation. Analytics dashboard requires data aggregation and visualization. Medium-high complexity due to chart implementation and data analysis requirements."
+		},
+		{
+			"taskId": 28,
+			"taskTitle": "Certificate system implementation",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Implement certificate system: 1) Create certificate templates using HTML/CSS, 2) Implement automatic certificate generation on course completion, 3) Add certificate verification system with public URLs, 4) Create certificate gallery in user profiles, 5) Add PDF download and social sharing functionality",
+			"reasoning": "The Certificate model exists in the Prisma schema. Implementation requires template creation and PDF generation. Medium-high complexity due to design requirements and verification system."
+		},
+		{
+			"taskId": 29,
+			"taskTitle": "CI/CD pipeline implementation",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Create CI/CD pipeline: 1) Set up GitHub Actions workflow for automated testing, 2) Add deployment checks including tests and linting, 3) Create staging environment deployment automation, 4) Implement database migration automation, 5) Add deployment notifications, 6) Create rollback procedures, 7) Add deployment health checks",
+			"reasoning": "No existing CI/CD infrastructure. Building a comprehensive pipeline requires multiple integrations and careful orchestration. High complexity due to the need for reliable automation and rollback capabilities."
+		},
+		{
+			"taskId": 30,
+			"taskTitle": "Performance monitoring and observability",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Implement comprehensive monitoring: 1) Enhance existing Sentry integration for error tracking, 2) Add APM using Vercel Analytics or DataDog, 3) Create custom metrics dashboards for platform usage, 4) Implement log aggregation using existing logger, 5) Add uptime monitoring and alerting rules",
+			"reasoning": "Basic Sentry integration and logging exist. Expanding to comprehensive monitoring requires additional integrations and dashboard creation. Medium-high complexity due to multiple monitoring tools and alerting setup."
+		}
+	]
+}

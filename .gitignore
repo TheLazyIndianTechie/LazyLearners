@@ -103,3 +103,12 @@ temp/
 *.njsproj
 *.sln
 *.sw?
+
+dev-debug.log
+# Environment variables
+.vscode
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/ 
