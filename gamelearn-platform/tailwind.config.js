@@ -138,16 +138,42 @@ module.exports = {
         "2xl": "1.5rem",
         full: "9999px",
       },
+      spacing: {
+        'xs': '0.5rem',   // 8px
+        'sm': '0.75rem',  // 12px
+        'md': '1rem',     // 16px
+        'lg': '1.5rem',   // 24px
+        'xl': '2rem',     // 32px
+        '2xl': '3rem',    // 48px
+        '3xl': '4rem',    // 64px
+        '4xl': '6rem',    // 96px
+      },
       boxShadow: {
+        // Standard elevation system (0-5)
         'xs': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
         'sm': '0 1px 3px 0 rgb(0 0 0 / 0.1)',
         'md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
         'lg': '0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
         'xl': '0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
         '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.5)',
+
+        // Semantic elevation scale (following Material Design)
+        'elevation-0': 'none',
+        'elevation-1': '0 1px 3px 0 rgb(0 0 0 / 0.12), 0 1px 2px 0 rgb(0 0 0 / 0.24)',
+        'elevation-2': '0 3px 6px 0 rgb(0 0 0 / 0.16), 0 3px 6px 0 rgb(0 0 0 / 0.23)',
+        'elevation-3': '0 10px 20px 0 rgb(0 0 0 / 0.19), 0 6px 6px 0 rgb(0 0 0 / 0.23)',
+        'elevation-4': '0 14px 28px 0 rgb(0 0 0 / 0.25), 0 10px 10px 0 rgb(0 0 0 / 0.22)',
+        'elevation-5': '0 19px 38px 0 rgb(0 0 0 / 0.30), 0 15px 12px 0 rgb(0 0 0 / 0.22)',
+
+        // Colored glow effects
         'glow-coral': '0 0 20px rgb(255 117 57 / 0.5), 0 0 40px rgb(255 117 57 / 0.2)',
         'glow-cyan': '0 0 20px rgb(34 211 238 / 0.5), 0 0 40px rgb(34 211 238 / 0.2)',
         'glow-forest': '0 0 20px rgb(16 185 129 / 0.5), 0 0 40px rgb(16 185 129 / 0.2)',
+
+        // Focus shadows
+        'focus-coral': '0 0 0 3px rgb(255 117 57 / 0.5)',
+        'focus-cyan': '0 0 0 3px rgb(34 211 238 / 0.5)',
+        'focus-destructive': '0 0 0 3px rgb(239 68 68 / 0.5)',
       },
       keyframes: {
         "accordion-down": {

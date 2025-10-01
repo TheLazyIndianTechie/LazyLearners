@@ -78,7 +78,8 @@
       "mcp__chrome-devtools__select_page",
       "mcp__chrome-devtools__resize_page",
       "mcp__chrome-devtools__take_screenshot",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Read(//var/folders/_j/s2wqqyrd4tx7rj52yn51klr80000gn/T/chrome-devtools-mcp-1uYbmw/**)"
     ]
   },
   "enableAllProjectMcpServers": true,
