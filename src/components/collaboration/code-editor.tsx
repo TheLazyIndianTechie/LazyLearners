@@ -169,19 +169,23 @@ export function CodeEditor({
     if (!activeFile) return
 
     try {
-      // Create a simple code execution simulation
-      console.log("Executing code:", activeFile.name)
+      // Note: Direct code execution is disabled for security reasons
+      // In a production environment, code execution should be handled via:
+      // - Sandboxed Web Workers with strict Content Security Policy
+      // - Server-side execution in isolated containers
+      // - Third-party code execution services (e.g., Judge0, CodeSandbox API)
 
-      // For now, we'll just validate syntax for supported languages
-      if (activeFile.language === 'javascript' || activeFile.language === 'typescript') {
-        // Basic syntax validation
-        new Function(activeFile.content)
-        console.log("✅ Code executed successfully")
-      } else {
-        console.log(`📝 Code execution for ${activeFile.language} files is not yet implemented`)
-      }
+      console.log("Code Preview:", activeFile.name)
+      console.log(`Language: ${activeFile.language}`)
+      console.log(`Lines: ${activeFile.content.split('\n').length}`)
+      console.log(`Characters: ${activeFile.content.length}`)
+
+      // Show a user-friendly message instead of executing code
+      alert(`Code execution is currently disabled for security.\n\nFile: ${activeFile.name}\nLanguage: ${activeFile.language}\n\nTo run this code, please use an external IDE or code runner.`)
+
+      console.log("ℹ️ Code execution disabled for security - use external IDE to run code")
     } catch (error) {
-      console.error("❌ Code execution failed:", error)
+      console.error("❌ Code preview failed:", error)
     }
   }
 

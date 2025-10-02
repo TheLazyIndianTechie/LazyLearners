@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useUser } from "@clerk/nextjs"
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
+import DOMPurify from "isomorphic-dompurify"
 import { SiteLayout } from "@/components/layout/site-layout"
 import { SimpleVideoPlayer } from "@/components/video/simple-video-player"
 import { Button } from "@/components/ui/button"
@@ -187,6 +188,15 @@ export default function LessonPage() {
   const nextLesson = getNextLesson()
   const previousLesson = getPreviousLesson()
 
+  // Sanitize lesson content to prevent XSS attacks
+  const sanitizedContent = useMemo(() => {
+    if (!currentLesson?.content) return ''
+    return DOMPurify.sanitize(currentLesson.content.replace(/\n/g, '<br>'), {
+      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'blockquote', 'code', 'pre'],
+      ALLOWED_ATTR: ['href', 'target', 'rel']
+    })
+  }, [currentLesson?.content])
+
   if (loading) {
     return (
       <SiteLayout>
@@ -300,11 +310,9 @@ export default function LessonPage() {
                   </div>
 
                   {/* Lesson Content */}
-                  {currentLesson.content && (
+                  {sanitizedContent && (
                     <div className="prose max-w-none">
-                      <div dangerouslySetInnerHTML={{
-                        __html: currentLesson.content.replace(/\n/g, '<br>')
-                      }} />
+                      <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
                     </div>
                   )}
                 </CardContent>

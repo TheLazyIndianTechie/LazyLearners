@@ -204,17 +204,17 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Main Stats */}
+          {/* Main Stats - WCAG 2.1 AA compliant colors */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card className="border-2 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-blue-700">Enrolled Courses</p>
-                    <p className="text-3xl font-bold text-blue-900">{stats.totalCourses}</p>
-                    <p className="text-xs text-blue-600 mt-1">Active learning paths</p>
+                    <p className="text-sm font-medium text-blue-900">Enrolled Courses</p>
+                    <p className="text-3xl font-bold text-blue-950">{stats.totalCourses}</p>
+                    <p className="text-xs text-blue-800 mt-1">Active learning paths</p>
                   </div>
-                  <BookOpen className="h-8 w-8 text-blue-600" />
+                  <BookOpen className="h-8 w-8 text-blue-700" />
                 </div>
               </CardContent>
             </Card>
@@ -223,16 +223,16 @@ export default function DashboardPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-green-700">Overall Progress</p>
-                    <p className="text-3xl font-bold text-green-900">{overallProgress}%</p>
+                    <p className="text-sm font-medium text-green-900">Overall Progress</p>
+                    <p className="text-3xl font-bold text-green-950">{overallProgress}%</p>
                     <Progress value={overallProgress} className="h-2 mt-2 bg-green-200">
                       <div
-                        className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full"
+                        className="h-full bg-gradient-to-r from-green-600 to-green-700 rounded-full"
                         style={{ width: `${overallProgress}%` }}
                       />
                     </Progress>
                   </div>
-                  <Target className="h-8 w-8 text-green-600" />
+                  <Target className="h-8 w-8 text-green-700" />
                 </div>
               </CardContent>
             </Card>
@@ -241,11 +241,11 @@ export default function DashboardPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-purple-700">Learning Streak</p>
-                    <p className="text-3xl font-bold text-purple-900">7 days</p>
-                    <p className="text-xs text-purple-600 mt-1">Keep it going! 🔥</p>
+                    <p className="text-sm font-medium text-purple-900">Learning Streak</p>
+                    <p className="text-3xl font-bold text-purple-950">7 days</p>
+                    <p className="text-xs text-purple-800 mt-1">Keep it going! 🔥</p>
                   </div>
-                  <Zap className="h-8 w-8 text-purple-600" />
+                  <Zap className="h-8 w-8 text-purple-700" />
                 </div>
               </CardContent>
             </Card>
@@ -254,11 +254,11 @@ export default function DashboardPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-orange-700">Time Spent</p>
-                    <p className="text-3xl font-bold text-orange-900">{Math.floor(stats.totalTimeSpent / 60)}h</p>
-                    <p className="text-xs text-orange-600 mt-1">This month</p>
+                    <p className="text-sm font-medium text-orange-900">Time Spent</p>
+                    <p className="text-3xl font-bold text-orange-950">{Math.floor(stats.totalTimeSpent / 60)}h</p>
+                    <p className="text-xs text-orange-800 mt-1">This month</p>
                   </div>
-                  <Clock className="h-8 w-8 text-orange-600" />
+                  <Clock className="h-8 w-8 text-orange-700" />
                 </div>
               </CardContent>
             </Card>

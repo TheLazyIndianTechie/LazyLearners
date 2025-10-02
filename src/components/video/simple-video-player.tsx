@@ -304,9 +304,25 @@ export function SimpleVideoPlayer({
 
   const currentVideoUrl = streamUrl || url
 
+  // Show loading state while fetching stream URL
+  if (videoId && !currentVideoUrl && !state.error && state.isLoading) {
+    return (
+      <div className={cn("relative bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center min-h-[400px]", className)}>
+        <div className="text-center text-white p-8">
+          <div className="w-16 h-16 mx-auto mb-4 relative">
+            <div className="absolute inset-0 border-4 border-blue-500/30 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <h3 className="text-lg font-semibold mb-2">Loading Video...</h3>
+          <p className="text-gray-400 text-sm">Preparing your content</p>
+        </div>
+      </div>
+    )
+  }
+
   if (!currentVideoUrl && !videoId) {
     return (
-      <div className={cn("relative bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center", className)}>
+      <div className={cn("relative bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center min-h-[400px]", className)}>
         <div className="text-center text-white p-8">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
             <Play className="w-8 h-8" />
@@ -320,20 +336,25 @@ export function SimpleVideoPlayer({
 
   if (state.error) {
     return (
-      <div className={cn("relative bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center", className)}>
+      <div className={cn("relative bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center min-h-[400px]", className)}>
         <div className="text-center text-white p-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-700 flex items-center justify-center">
-            <Play className="w-8 h-8" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-900/50 border-2 border-red-500 flex items-center justify-center">
+            <Play className="w-8 h-8 text-red-400" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">Video Error</h3>
-          <p className="text-gray-300">{state.error}</p>
+          <h3 className="text-lg font-semibold mb-2 text-red-400">Video Error</h3>
+          <p className="text-gray-300 mb-4">{state.error}</p>
           <Button
             onClick={() => {
-              setState(prev => ({ ...prev, error: null }))
-              videoRef.current?.load()
+              setState(prev => ({ ...prev, error: null, isLoading: true }))
+              if (videoId) {
+                // Retry fetching stream URL
+                window.location.reload()
+              } else if (videoRef.current) {
+                videoRef.current.load()
+              }
             }}
             variant="outline"
-            className="mt-4"
+            className="mt-2"
           >
             Try Again
           </Button>
