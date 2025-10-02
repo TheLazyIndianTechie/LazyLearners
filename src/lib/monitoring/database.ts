@@ -71,7 +71,13 @@ export class DatabaseMonitor {
         { emit: 'event', level: 'warn' },
         { emit: 'stdout', level: 'info' }
       ],
-      errorFormat: 'pretty'
+      errorFormat: 'pretty',
+      // Connection pool configuration for optimal performance
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL
+        }
+      }
     })
 
     // Query event monitoring
