@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Complete Database Seeding and Sample Content Generation",
         "description": "Populate the database with comprehensive sample data including courses, users, lessons, and test content to enable full platform functionality testing",
         "details": "Create Prisma seed script (prisma/seed.ts) with realistic sample data: 1) Generate 50+ sample courses across Unity, Unreal, and Godot with proper categories and difficulty levels 2) Create test user accounts for all roles (students, instructors, admins) with proper OAuth integration 3) Add sample course modules and lessons with placeholder video content 4) Generate mock payment records and license keys for testing enrollment flows 5) Include forum posts, reviews, and user progress data 6) Ensure all database relationships are properly populated with referential integrity",
@@ -17,9 +17,9 @@
             "description": "Expand the current prisma/seed.ts to generate 50+ courses across all categories (Unity, Unreal, Godot) with proper distribution, realistic metadata, and comprehensive content structure",
             "dependencies": [],
             "details": "Modify the existing seed.ts file to create 50+ courses instead of the current 5. Use the existing course structure as a template but expand it to cover all categories (GAME_PROGRAMMING, GAME_DESIGN, GAME_ART, GAME_AUDIO, UNITY_DEVELOPMENT, UNREAL_DEVELOPMENT, GODOT_DEVELOPMENT, MOBILE_GAMES, INDIE_DEVELOPMENT, VR_AR_DEVELOPMENT). Each course should have realistic titles, descriptions, pricing ($29.99-$199.99), proper difficulty distribution (30% BEGINNER, 50% INTERMEDIATE, 20% ADVANCED), and varied course durations (1200-4800 minutes). Include course requirements, objectives, and tags for each course.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Run seed script and verify database contains 50+ courses with proper category distribution, all difficulty levels represented, realistic pricing ranges, and complete metadata including requirements, objectives, and tags",
-            "updatedAt": "2025-10-01T06:41:48.847Z",
+            "updatedAt": "2025-10-02T11:45:23.864Z",
             "parentId": "undefined"
           },
           {
@@ -28,9 +28,10 @@
             "description": "Create diverse test user accounts for all roles (students, instructors, admins) with realistic profiles, skills, and OAuth provider compatibility",
             "dependencies": [],
             "details": "Expand user creation in seed.ts to generate 20+ students, 10+ instructors, and 3 admin users. Include realistic names, emails, bios, locations, and skills for each user. Create Account records for OAuth providers (Google, GitHub) for testing authentication flows. Ensure each instructor has expertise in specific game engines and categories. Students should have varied skill levels and interests. Include profile images, websites, and portfolio data where appropriate.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Verify seeded users can authenticate via both credentials and OAuth providers, instructor profiles display relevant expertise, student profiles show appropriate skill levels, and all role-based permissions function correctly",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-02T11:45:47.312Z"
           },
           {
             "id": 3,
@@ -63,10 +64,10 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-10-01T06:41:48.847Z"
+        "updatedAt": "2025-10-02T11:45:47.312Z"
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "Implement Comprehensive Course Management Interface for Instructors",
         "description": "Build complete course creation and management UI enabling instructors to create, edit, and publish courses with modules and lessons",
         "details": "Create instructor course management system: 1) Course creation form with title, description, category, difficulty, pricing using shadcn/ui components 2) Module and lesson management with drag-and-drop reordering using @dnd-kit 3) Rich text editor for course descriptions and lesson content 4) Video upload interface with progress tracking and thumbnail generation 5) Course preview functionality for content validation 6) Publishing workflow with course status management (draft/published/archived) 7) Course analytics dashboard showing enrollment and completion metrics 8) Integration with existing payment system for course pricing",
@@ -84,7 +85,8 @@
             "dependencies": [],
             "details": "Replace textarea elements in course creation form (/src/app/instructor/courses/create/page.tsx) and lesson editing pages with a comprehensive rich text editor. Install and configure a modern editor like TipTap or Quill.js with toolbar for formatting (bold, italic, headers, lists, links, code blocks). Ensure editor outputs markdown or HTML that integrates with existing API endpoints. Add preview functionality and ensure editor is accessible and responsive.",
             "status": "pending",
-            "testStrategy": "Unit tests for editor component functionality, integration tests for saving formatted content via APIs, visual regression tests for editor appearance across devices, and accessibility testing for keyboard navigation and screen readers"
+            "testStrategy": "Unit tests for editor component functionality, integration tests for saving formatted content via APIs, visual regression tests for editor appearance across devices, and accessibility testing for keyboard navigation and screen readers",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -93,7 +95,8 @@
             "dependencies": [],
             "details": "Extend existing video upload API (/src/app/api/video/upload/route.ts) with a React component featuring drag-and-drop zone using react-dropzone, chunked upload support for large files, real-time progress tracking with upload percentage, file validation and preview, thumbnail generation on upload completion, and upload queue management. Integrate with course/lesson creation workflows and handle upload failures with retry functionality.",
             "status": "pending",
-            "testStrategy": "Unit tests for upload component states and file validation, integration tests with video upload API endpoints, E2E tests for complete upload workflow including drag-and-drop, and performance tests with large video files to verify chunked upload functionality"
+            "testStrategy": "Unit tests for upload component states and file validation, integration tests with video upload API endpoints, E2E tests for complete upload workflow including drag-and-drop, and performance tests with large video files to verify chunked upload functionality",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -102,7 +105,8 @@
             "dependencies": [],
             "details": "Enhance the existing drag-and-drop implementation in /src/app/instructor/courses/[id]/modules/page.tsx to support dragging lessons between modules, add visual indicators during drag operations (drop zones, insertion points), implement undo/redo functionality for reordering actions, add bulk selection and movement of multiple lessons, and improve the mobile experience for touch-based reordering. Ensure all reorder operations update the database correctly.",
             "status": "pending",
-            "testStrategy": "Unit tests for drag-and-drop logic and state management, integration tests for API calls during reordering, E2E tests for complete reordering workflows including cross-module moves, and mobile device testing for touch interactions"
+            "testStrategy": "Unit tests for drag-and-drop logic and state management, integration tests for API calls during reordering, E2E tests for complete reordering workflows including cross-module moves, and mobile device testing for touch interactions",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -114,7 +118,8 @@
             ],
             "details": "Create a course preview mode accessible from instructor dashboard that renders the course using the same components students see. Include lesson navigation, video playback (if videos are uploaded), progress simulation, quiz preview (when available), and responsive design testing. Add a preview toolbar for instructors to easily switch between preview and edit modes, and implement preview sharing via temporary links for getting feedback before publishing.",
             "status": "pending",
-            "testStrategy": "Unit tests for preview rendering components, integration tests ensuring preview matches student view exactly, E2E tests for complete preview workflow including navigation between lessons, and cross-browser compatibility testing"
+            "testStrategy": "Unit tests for preview rendering components, integration tests ensuring preview matches student view exactly, E2E tests for complete preview workflow including navigation between lessons, and cross-browser compatibility testing",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -125,12 +130,13 @@
             ],
             "details": "Design and implement an analytics dashboard accessible from instructor course management showing enrollment trends over time, completion rates per module/lesson, student engagement metrics (time spent, replay rates), revenue analytics (if paid course), geographical distribution of students, and student feedback aggregation. Use charts and visualizations (Chart.js or Recharts) for data presentation. Include export functionality for detailed reports and integrate with existing course API endpoints to gather analytics data.",
             "status": "pending",
-            "testStrategy": "Unit tests for analytics calculations and chart components, integration tests for data aggregation APIs, E2E tests for complete analytics workflow including filters and exports, and performance tests for dashboard loading with large datasets"
+            "testStrategy": "Unit tests for analytics calculations and chart components, integration tests for data aggregation APIs, E2E tests for complete analytics workflow including filters and exports, and performance tests for dashboard loading with large datasets",
+            "parentId": "undefined"
           }
         ]
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Integrate Video Streaming with Course Lesson Content",
         "description": "Connect the existing video streaming infrastructure with course lessons to enable seamless video playback within the learning experience",
         "details": "Implement video-lesson integration: 1) Extend lesson model to include video metadata (duration, quality options, thumbnails) 2) Create lesson video player component with progress tracking and resume functionality 3) Implement video access control using license key validation from existing system 4) Add video quality selection and adaptive streaming integration 5) Create video progress tracking that updates user completion status 6) Implement video bookmarking and note-taking features 7) Add video analytics for engagement metrics 8) Ensure mobile-responsive video playback with touch controls",
@@ -149,7 +155,8 @@
             "dependencies": [],
             "details": "Update the Lesson model in prisma/schema.prisma to include fields for video metadata: videoDuration (Int), videoQualities (String for JSON array), videoThumbnails (String for JSON array), videoMetadata (String for JSON object with bitrate, resolution, frameRate), and lastWatchedPosition (Int for resume functionality). Also add a VideoProgress model to track user progress per lesson video including watchTime, completionPercentage, and lastPosition.",
             "status": "pending",
-            "testStrategy": "Generate and push Prisma schema changes, verify database migration, create seed data with video metadata, test API endpoints return new fields correctly"
+            "testStrategy": "Generate and push Prisma schema changes, verify database migration, create seed data with video metadata, test API endpoints return new fields correctly",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -160,7 +167,8 @@
             ],
             "details": "Create src/components/video/lesson-video-player.tsx that wraps the existing VideoPlayer component. Add lesson context including courseId, lessonId, progress tracking that automatically saves watch position every 10 seconds, resume functionality that starts from last watched position, completion tracking that marks lesson as complete when 90% watched, and integration with license key validation for access control.",
             "status": "pending",
-            "testStrategy": "Unit tests for progress tracking accuracy, resume functionality, completion detection, integration tests with video streaming service, and user journey tests for lesson completion flow"
+            "testStrategy": "Unit tests for progress tracking accuracy, resume functionality, completion detection, integration tests with video streaming service, and user journey tests for lesson completion flow",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -171,7 +179,8 @@
             ],
             "details": "Extend the existing video streaming service's verifyVideoAccess method to check user enrollment and license key status. Modify /api/video/stream route to validate lesson access using courseId and lessonId parameters. Implement middleware to check enrollment status and license key validity before serving video content. Add proper error responses for unauthorized access attempts.",
             "status": "pending",
-            "testStrategy": "Test access control for enrolled vs non-enrolled users, license key validation, expired license handling, proper error responses for unauthorized access, and security testing for bypass attempts"
+            "testStrategy": "Test access control for enrolled vs non-enrolled users, license key validation, expired license handling, proper error responses for unauthorized access, and security testing for bypass attempts",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -182,7 +191,8 @@
             ],
             "details": "Extend the LessonVideoPlayer to utilize the existing VideoStreamingService quality adaptation features. Implement automatic quality switching based on buffer health and network conditions. Add manual quality selection UI that persists user preferences. Integrate with the existing heartbeat system to monitor streaming performance and adjust quality accordingly.",
             "status": "pending",
-            "testStrategy": "Test automatic quality adaptation under various network conditions, manual quality selection persistence, buffer health monitoring accuracy, heartbeat integration, and cross-device quality preference sync"
+            "testStrategy": "Test automatic quality adaptation under various network conditions, manual quality selection persistence, buffer health monitoring accuracy, heartbeat integration, and cross-device quality preference sync",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -194,12 +204,13 @@
             ],
             "details": "Extend the existing Progress model to track video-specific metrics including watch time, completion percentage, and viewing sessions. Create API endpoints to update lesson progress when videos are watched. Implement automatic lesson completion when video is 90% watched. Update course progress calculation to include video lesson completion. Add progress analytics for instructors to view student engagement.",
             "status": "pending",
-            "testStrategy": "Test progress tracking accuracy, lesson completion triggers, course progress updates, progress persistence across sessions, analytics data accuracy, and instructor dashboard integration"
+            "testStrategy": "Test progress tracking accuracy, lesson completion triggers, course progress updates, progress persistence across sessions, analytics data accuracy, and instructor dashboard integration",
+            "parentId": "undefined"
           }
         ]
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "Build Comprehensive Student Dashboard and Learning Experience",
         "description": "Create complete student interface for course discovery, enrollment, learning progress tracking, and achievement management",
         "details": "Develop student learning experience: 1) Personal dashboard showing enrolled courses, progress indicators, and recent activity 2) Course discovery with advanced filtering by engine (Unity/Unreal/Godot), difficulty, and categories 3) One-click enrollment flow with license key activation integration 4) Learning path visualization with prerequisite management 5) Achievement and certification system with blockchain credential integration 6) Study streak tracking and gamification elements 7) Course completion certificates with PDF generation 8) Social features for course discussions and peer interaction",
@@ -218,7 +229,8 @@
             "dependencies": [],
             "details": "Extend the current dashboard (src/app/dashboard/page.tsx) by adding real-time progress tracking with visual charts for weekly activity, skill progression indicators, learning streak gamification with badges, personalized course recommendations based on completion history, study session analytics with time tracking, and achievement unlock notifications. Integrate with the existing useDashboard hook and add new API endpoints for analytics data.",
             "status": "pending",
-            "testStrategy": "Test dashboard loads correctly with real data, verify progress charts render accurately, validate learning streak calculations, test personalized recommendations logic, ensure real-time updates work properly"
+            "testStrategy": "Test dashboard loads correctly with real data, verify progress charts render accurately, validate learning streak calculations, test personalized recommendations logic, ensure real-time updates work properly",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -227,7 +239,8 @@
             "dependencies": [],
             "details": "Extend src/app/courses/page.tsx with intelligent course recommendations based on user's skill level and completed courses, prerequisite course mapping and visualization, learning path suggestions for career goals (game programmer, designer, etc.), course similarity recommendations, save-for-later functionality with wishlists, and advanced search with autocomplete for skills, engines, and topics. Add skill gap analysis showing which courses fill knowledge gaps.",
             "status": "pending",
-            "testStrategy": "Test filtering performance with large course catalogs, verify recommendation accuracy, validate prerequisite logic, test search autocomplete functionality, ensure responsive design across devices"
+            "testStrategy": "Test filtering performance with large course catalogs, verify recommendation accuracy, validate prerequisite logic, test search autocomplete functionality, ensure responsive design across devices",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -239,7 +252,8 @@
             ],
             "details": "Build upon existing enrollment API (src/app/api/enrollment/route.ts) to create instant enrollment for free courses and streamlined purchase flow for paid courses using Dodo Payments integration. Add enrollment confirmation with license key activation, course access verification, automatic dashboard updates post-enrollment, enrollment history tracking, and email notifications. Implement retry logic for failed payments and graceful error handling.",
             "status": "pending",
-            "testStrategy": "Test free course enrollment flow, verify paid course purchase and license activation, test payment failure scenarios, validate license key generation and activation, ensure enrollment persists across sessions"
+            "testStrategy": "Test free course enrollment flow, verify paid course purchase and license activation, test payment failure scenarios, validate license key generation and activation, ensure enrollment persists across sessions",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -250,7 +264,8 @@
             ],
             "details": "Create achievement tracking system using existing Achievement types from src/lib/types/index.ts. Implement milestone-based achievements (first course completion, coding streaks, quiz mastery), certificate generation with PDF export functionality, blockchain credential verification using digital signatures, achievement sharing on social platforms, leaderboards and peer comparison features, and achievement marketplace for premium badges. Add certificate templates and automated credential minting.",
             "status": "pending",
-            "testStrategy": "Test achievement unlock triggers, verify certificate PDF generation, validate blockchain credential creation and verification, test social sharing functionality, ensure achievement data persistence"
+            "testStrategy": "Test achievement unlock triggers, verify certificate PDF generation, validate blockchain credential creation and verification, test social sharing functionality, ensure achievement data persistence",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -261,12 +276,13 @@
             ],
             "details": "Implement course discussion forums using ForumPost types from existing type definitions, peer-to-peer study groups with scheduling, course-specific Q&A sections with instructor responses, student project showcases and peer reviews, collaborative note-taking and resource sharing, mentorship matching system, and real-time chat during video lessons. Add moderation tools and community guidelines enforcement.",
             "status": "pending",
-            "testStrategy": "Test forum post creation and replies, verify real-time chat functionality, validate study group scheduling, test peer review workflows, ensure proper moderation and content filtering"
+            "testStrategy": "Test forum post creation and replies, verify real-time chat functionality, validate study group scheduling, test peer review workflows, ensure proper moderation and content filtering",
+            "parentId": "undefined"
           }
         ]
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Implement Game Engine Integration and Project Management",
         "description": "Build Unity, Unreal Engine, and Godot integration features for seamless project import/export and version control",
         "details": "Create game engine integrations: 1) Unity Hub integration with automatic project setup and package management 2) Unreal Engine .uproject file handling with Blueprint and C++ templates 3) Godot project structure support with GDScript integration 4) WebGL build pipeline for automatic game deployment and hosting 5) Version control integration (Git) with visual diff tools for binary assets 6) Asset management system with thumbnail previews and metadata 7) Project templates library for different game types 8) Cloud-based development environment setup with pre-configured engine versions",
@@ -285,7 +301,8 @@
             "dependencies": [],
             "details": "Create Unity-specific services including: Unity project creation API endpoint (/api/engine/unity/projects), Unity Hub integration for automatic project setup with proper folder structure, Unity package manager integration for dependency management, Unity version detection and compatibility checking, Unity project file (.unityproject) parsing and manipulation, integration with existing video upload system for Unity tutorials, and WebGL build automation for Unity projects. Include proper validation for Unity project formats and asset handling.",
             "status": "pending",
-            "testStrategy": "Unit tests for Unity project creation logic, integration tests for Unity Hub API calls, E2E tests for complete Unity project workflow from creation to WebGL deployment, performance tests for large Unity project handling"
+            "testStrategy": "Unit tests for Unity project creation logic, integration tests for Unity Hub API calls, E2E tests for complete Unity project workflow from creation to WebGL deployment, performance tests for large Unity project handling",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -296,7 +313,8 @@
             ],
             "details": "Build Unreal Engine integration including: .uproject file parsing and generation, Blueprint template library with common game patterns, C++ project template support with proper CMake configuration, Unreal Engine version compatibility checking, asset import/export functionality for Unreal projects, integration with existing course management system for Unreal tutorials, automated packaging for WebGL/HTML5 builds, and Visual Studio/Rider IDE integration setup. Support both Blueprint-only and C++ hybrid projects.",
             "status": "pending",
-            "testStrategy": "Unit tests for .uproject file manipulation, integration tests for Blueprint template creation, E2E tests for C++ project compilation, compatibility tests across different Unreal Engine versions"
+            "testStrategy": "Unit tests for .uproject file manipulation, integration tests for Blueprint template creation, E2E tests for C++ project compilation, compatibility tests across different Unreal Engine versions",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -307,7 +325,8 @@
             ],
             "details": "Create Godot-specific functionality including: Godot project.godot file handling, GDScript code analysis and syntax highlighting, Godot scene (.tscn) file management, Godot resource (.tres) file support, integration with Godot's built-in version control system, automated HTML5 export for web deployment, Godot plugin management and installation, and C# scripting support for Godot 4.x. Include proper validation for Godot project structure and asset references.",
             "status": "pending",
-            "testStrategy": "Unit tests for GDScript parsing, integration tests for Godot project creation, E2E tests for HTML5 export pipeline, performance tests for large Godot project handling"
+            "testStrategy": "Unit tests for GDScript parsing, integration tests for Godot project creation, E2E tests for HTML5 export pipeline, performance tests for large Godot project handling",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -320,7 +339,8 @@
             ],
             "details": "Build comprehensive WebGL deployment system including: automated build pipeline that detects engine type and uses appropriate build tools, WebGL optimization for different engines (Unity WebGL, Unreal HTML5, Godot HTML5), integration with existing video upload infrastructure for build artifacts, CDN deployment for optimized WebGL builds, build status tracking and logging, progressive loading implementation for large WebGL builds, and mobile-responsive WebGL container. Include build caching and incremental builds for faster iterations.",
             "status": "pending",
-            "testStrategy": "Integration tests for each engine's WebGL build process, performance tests for build optimization, E2E tests for complete deployment pipeline, load testing for WebGL hosting infrastructure"
+            "testStrategy": "Integration tests for each engine's WebGL build process, performance tests for build optimization, E2E tests for complete deployment pipeline, load testing for WebGL hosting infrastructure",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -333,12 +353,13 @@
             ],
             "details": "Implement advanced version control and asset management including: Git LFS integration for large binary assets (textures, models, audio), visual diff tools for images and 3D models using existing video processing infrastructure, automated asset thumbnail generation using video processing pipeline, metadata extraction for game assets (textures, audio, models), asset dependency tracking across projects, collaborative asset library with search and filtering, integration with existing portfolio system for asset showcasing, and automated asset optimization pipeline. Include proper handling of engine-specific assets (Unity .prefab, Unreal .uasset, Godot .tres files).",
             "status": "pending",
-            "testStrategy": "Unit tests for Git LFS operations, integration tests for asset thumbnail generation, E2E tests for collaborative asset workflows, performance tests for large asset repository handling"
+            "testStrategy": "Unit tests for Git LFS operations, integration tests for asset thumbnail generation, E2E tests for collaborative asset workflows, performance tests for large asset repository handling",
+            "parentId": "undefined"
           }
         ]
       },
       {
-        "id": 6,
+        "id": "6",
         "title": "Develop Real-Time Collaboration and Communication Features",
         "description": "Implement WebSocket-based real-time collaboration tools for multi-user code editing, voice chat, and project synchronization",
         "details": "Build collaboration infrastructure: 1) WebSocket server implementation for real-time communication 2) Multi-user code editor with operational transformation and conflict resolution 3) Voice and video chat integration using WebRTC 4) Real-time project synchronization with live cursors and user presence 5) Team management with role-based permissions (programmer, artist, designer) 6) Session recording for collaborative coding sessions 7) Screen sharing functionality for mentorship and debugging 8) Integrated chat with file sharing and code snippet support",
@@ -352,7 +373,7 @@
         "subtasks": []
       },
       {
-        "id": 7,
+        "id": "7",
         "title": "Create Portfolio Showcase and WebGL Game Hosting System",
         "description": "Build comprehensive portfolio platform for students to showcase projects with integrated WebGL game hosting and social sharing",
         "details": "Implement portfolio showcase: 1) Portfolio builder with drag-and-drop layout customization 2) WebGL game hosting with embedded play experience and fullscreen support 3) Project gallery with high-resolution screenshots and video presentations 4) Social sharing integration with LinkedIn, Twitter, and professional networks 5) Employer portal for recruiter access and candidate discovery 6) Portfolio analytics showing view counts and engagement metrics 7) Custom domain support for professional portfolios 8) SEO optimization for portfolio discoverability",
@@ -366,7 +387,7 @@
         "subtasks": []
       },
       {
-        "id": 8,
+        "id": "8",
         "title": "Implement Advanced Assessment and Certification System",
         "description": "Build comprehensive assessment tools with automated grading, peer review, and blockchain-based certification",
         "details": "Create assessment infrastructure: 1) Quiz builder with multiple question types (multiple choice, code completion, drag-and-drop) 2) Practical project assignments with automated testing and peer review 3) Code review system with instructor and peer feedback integration 4) Mock technical interview preparation with industry-standard questions 5) Portfolio defense scheduling with live presentation capabilities 6) Blockchain certificate generation with employer verification 7) Skill badge system for micro-credentials 8) Integration with Unity, Epic Games, and industry certification programs",
@@ -380,7 +401,7 @@
         "subtasks": []
       },
       {
-        "id": 9,
+        "id": "9",
         "title": "Build Community Features and Social Learning Platform",
         "description": "Implement comprehensive community tools including forums, study groups, game jams, and mentorship matching",
         "details": "Develop community platform: 1) Discussion forums with course-specific threads and instructor participation 2) Study group formation with progress tracking and accountability features 3) Game jam hosting platform with theme announcements and submission systems 4) Mentorship matching algorithm connecting experienced developers with learners 5) Developer showcase events highlighting exceptional student work 6) Community leaderboards and recognition systems 7) Interest-based groups for specialized topics (VR, mobile, indie development) 8) Content curation system for community-generated tutorials and resources",
@@ -394,7 +415,7 @@
         "subtasks": []
       },
       {
-        "id": 10,
+        "id": "10",
         "title": "Optimize Performance and Complete Production Deployment",
         "description": "Implement performance optimizations, comprehensive monitoring, and complete production deployment with global CDN integration",
         "details": "Production optimization and deployment: 1) Performance optimization with bundle analysis and code splitting 2) CDN integration for global asset delivery with 100+ edge locations 3) Database query optimization and connection pooling 4) Comprehensive monitoring with Sentry error tracking and performance metrics 5) Load testing with simulated 10,000+ concurrent users 6) Security audit including penetration testing and vulnerability scanning 7) WCAG 2.1 AA accessibility compliance verification 8) Mobile app preparation with PWA features and offline capabilities 9) Analytics integration for user behavior tracking and conversion optimization",
@@ -409,7 +430,7 @@
         "subtasks": []
       },
       {
-        "id": 11,
+        "id": "11",
         "title": "Implement video upload interface for instructors",
         "description": "Create drag-and-drop video upload interface with chunked upload support and progress tracking for instructor course creation",
         "details": "Build React component using FileReader API for chunked uploads to /api/video/upload endpoint. Implement progress tracking with useState for upload percentage, drag-and-drop zone using onDrop handlers, file validation for video formats (mp4, webm, mov), and upload queue management. Integrate with existing instructor course creation flow and add video metadata extraction (duration, size, format). Use FormData for multipart uploads and handle upload resumption on failure.",
@@ -420,7 +441,7 @@
         "subtasks": []
       },
       {
-        "id": 12,
+        "id": "12",
         "title": "Enhanced video player with advanced controls",
         "description": "Add picture-in-picture, playback speed controls, keyboard shortcuts, and quality selector to existing video player component",
         "details": "Extend src/components/video/video-player.tsx with Picture-in-Picture API support, speed controls (0.5x-2x), keyboard event handlers (space for play/pause, arrow keys for seek), quality selector dropdown using HTMLVideoElement.videoTracks, closed captions support with WebVTT, and fullscreen API integration. Implement video thumbnail preview on seek using canvas for frame extraction and localStorage for resume position tracking.",
@@ -431,7 +452,7 @@
         "subtasks": []
       },
       {
-        "id": 13,
+        "id": "13",
         "title": "Module and lesson management interface",
         "description": "Create comprehensive module and lesson management UI with drag-and-drop reordering and content editor",
         "details": "Build React components using @dnd-kit/sortable for drag-and-drop module reordering, rich text editor with @tiptap/react for lesson content, lesson type selection (video, quiz, reading, project), module creation form with validation, bulk lesson import functionality via CSV/JSON, and lesson duration estimation calculator. Integrate with existing API endpoints /api/courses/[id]/modules and lessons endpoints.",
@@ -442,7 +463,7 @@
         "subtasks": []
       },
       {
-        "id": 14,
+        "id": "14",
         "title": "Database optimization and indexing",
         "description": "Add database indexes for common query patterns and optimize N+1 queries in Prisma schema",
         "details": "Analyze prisma/schema.prisma for index opportunities on Course.category, User.role, Enrollment.userId/courseId, Progress.userId/lessonId, and Payment.status fields. Implement Prisma include statements optimization to prevent N+1 queries in course listings and user enrollments. Add database connection pooling configuration in DATABASE_URL and implement query performance monitoring using Prisma metrics. Create database migration files using prisma migrate dev.",
@@ -453,7 +474,7 @@
         "subtasks": []
       },
       {
-        "id": 15,
+        "id": "15",
         "title": "API route standardization and documentation",
         "description": "Standardize error responses, add request logging, and create OpenAPI documentation for all 70+ API endpoints",
         "details": "Create standardized error response schema with code, message, details fields. Implement middleware for request/response logging using next/server RequestInit. Add rate limiting using @upstash/ratelimit with Redis or in-memory store. Generate OpenAPI/Swagger documentation using @apidevtools/swagger-jsdoc and serve via /api/docs endpoint. Implement request ID tracking using crypto.randomUUID() and add response time headers.",
@@ -464,7 +485,7 @@
         "subtasks": []
       },
       {
-        "id": 16,
+        "id": "16",
         "title": "Comprehensive security audit and hardening",
         "description": "Implement OWASP Top 10 protections, input sanitization, and security headers across the platform",
         "details": "Add Content Security Policy headers in next.config.ts, implement DOMPurify for user input sanitization, add CSRF protection using @edge-runtime/cookies, implement SQL injection prevention with Prisma parameterized queries, add XSS prevention with output encoding, implement authentication brute force protection with rate limiting, and create security monitoring dashboard. Configure security headers (HSTS, X-Frame-Options, X-Content-Type-Options).",
@@ -475,7 +496,7 @@
         "subtasks": []
       },
       {
-        "id": 17,
+        "id": "17",
         "title": "Responsive design and mobile optimization",
         "description": "Complete mobile experience audit and optimization for all breakpoints (320px-1024px+)",
         "details": "Audit all 45+ components for mobile responsiveness using Tailwind responsive prefixes (sm:, md:, lg:, xl:). Implement mobile-specific navigation patterns with slide-out menu, optimize touch targets to 44x44px minimum, fix layout overflow issues with proper flex/grid constraints, test on iOS Safari and Android Chrome for compatibility, and implement mobile-specific video player controls with larger touch targets.",
@@ -486,7 +507,7 @@
         "subtasks": []
       },
       {
-        "id": 18,
+        "id": "18",
         "title": "WCAG 2.1 AA accessibility compliance",
         "description": "Implement complete accessibility compliance including screen reader support, keyboard navigation, and color contrast fixes",
         "details": "Audit all components for 4.5:1 color contrast ratio using contrast checker tools, implement ARIA labels on interactive elements, add keyboard navigation support with proper focus management, implement skip navigation links, add live regions for dynamic content with aria-live, test with screen readers (NVDA, JAWS, VoiceOver), and implement focus trap for modals using @headlessui/react or similar.",
@@ -497,33 +518,33 @@
         "subtasks": []
       },
       {
-        "id": 19,
+        "id": "19",
         "title": "Enhanced course discovery with filtering and search",
         "description": "Implement advanced filtering, search with autocomplete, and course recommendation system",
         "details": "Build search functionality using Fuse.js or Algolia for fuzzy search, implement filter UI with checkboxes for category, level, price range, and rating, create autocomplete component with debounced search queries, implement course recommendation algorithm based on user enrollment history and preferences, add 'Featured' and 'Trending' sections using course analytics data, and create wishlist functionality with localStorage/database persistence.",
         "testStrategy": "Search relevance testing, filter combination testing, performance testing with large course datasets, user experience testing for search flows, and A/B testing for recommendation accuracy",
         "priority": "high",
         "dependencies": [
-          14
+          "14"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 20,
+        "id": "20",
         "title": "Video processing pipeline implementation",
         "description": "Create video transcoding pipeline for multiple qualities, thumbnail generation, and metadata extraction",
         "details": "Implement video transcoding using FFmpeg.js or cloud service (AWS MediaConvert, Cloudinary), create job queue using Bull/Agenda for background processing, generate video thumbnails using canvas or video frame extraction, implement video validation for format/size/duration limits, add video storage integration with AWS S3 or Cloudinary, create progress tracking for transcoding jobs, and implement adaptive bitrate streaming manifests (HLS/DASH).",
         "testStrategy": "Video processing quality tests, transcoding performance benchmarks, storage integration tests, job queue reliability tests, and end-to-end video upload-to-playback testing",
         "priority": "high",
         "dependencies": [
-          11
+          "11"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 21,
+        "id": "21",
         "title": "Comprehensive test suite expansion",
         "description": "Achieve 80% code coverage with unit, integration, and E2E tests for all critical user journeys",
         "details": "Expand existing test files in src/__tests__ to cover all utility functions, API routes, and components. Write integration tests for payment flows, course enrollment, video streaming, and instructor workflows. Create E2E tests using existing Playwright setup for complete user journeys. Implement visual regression testing with Percy or similar, add performance testing for video streaming and API endpoints, and create load testing scenarios for concurrent users.",
@@ -534,20 +555,20 @@
         "subtasks": []
       },
       {
-        "id": 22,
+        "id": "22",
         "title": "Redis caching implementation",
         "description": "Implement Redis caching for expensive queries and user sessions with cache invalidation strategies",
         "details": "Integrate Redis using existing REDIS_URL configuration and ioredis client. Cache course catalog data with TTL of 1 hour, user enrollment status with 30-minute TTL, video metadata with 24-hour TTL, and user session data. Implement cache invalidation on course updates, enrollment changes, and user modifications. Add cache warming strategies for popular courses and cache hit/miss monitoring with metrics.",
         "testStrategy": "Cache hit/miss ratio testing, cache invalidation verification, performance comparison with/without caching, memory usage monitoring, and cache coherence testing",
         "priority": "medium",
         "dependencies": [
-          14
+          "14"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 23,
+        "id": "23",
         "title": "Database seeding with comprehensive sample data",
         "description": "Create extensive seed data including 20+ courses, instructors, students, and enrollment data for testing",
         "details": "Extend existing prisma/seed.ts and seed-course.ts files to create realistic sample data: 20+ courses across different categories, 5+ instructor profiles with complete details, 50+ student accounts with varied enrollment history, sample progress and completion data, payment and license records, forum posts and discussions, quiz attempts and results. Implement seed data for different environments (development, staging) and create data reset/refresh scripts.",
@@ -558,7 +579,7 @@
         "subtasks": []
       },
       {
-        "id": 24,
+        "id": "24",
         "title": "Email system integration",
         "description": "Implement email service with templates for welcome, enrollment, payment receipts, and notifications",
         "details": "Integrate email service using SendGrid or Resend APIs with existing environment configuration. Create email templates using React Email or similar for welcome emails, course enrollment confirmation, payment receipts, license key delivery, progress milestones, and certificate delivery. Implement email queue using Bull for reliability, add email tracking and analytics, create email preference management system, and implement transactional email logging.",
@@ -569,20 +590,20 @@
         "subtasks": []
       },
       {
-        "id": 25,
+        "id": "25",
         "title": "Course player immersive experience",
         "description": "Create immersive course player with lesson sidebar, notes, Q&A, and autoplay functionality",
         "details": "Build immersive course player layout extending existing lesson pages with lesson sidebar showing progress indicators, course notes/bookmarks functionality using localStorage and database sync, Q&A section per lesson with threaded discussions, resource downloads section, next lesson autoplay with countdown timer, keyboard shortcuts guide modal, and lesson completion tracking with automatic progress updates.",
         "testStrategy": "User experience testing for player interface, progress tracking accuracy tests, note-taking functionality tests, discussion feature tests, and cross-browser player compatibility",
         "priority": "high",
         "dependencies": [
-          12
+          "12"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 26,
+        "id": "26",
         "title": "Quiz and assessment builder",
         "description": "Create comprehensive quiz builder with multiple question types, drag-and-drop reordering, and analytics",
         "details": "Extend existing quiz components in src/components/quiz/ to create quiz builder interface with question type selection (multiple choice, true/false, short answer, code challenges), drag-and-drop question reordering using @dnd-kit, answer validation rules, quiz settings (time limits, passing scores, retake policies), quiz preview functionality, question bank for reusability, and quiz analytics dashboard with performance metrics.",
@@ -593,7 +614,7 @@
         "subtasks": []
       },
       {
-        "id": 27,
+        "id": "27",
         "title": "Instructor analytics dashboard",
         "description": "Create comprehensive analytics dashboard for instructors with course performance, revenue, and engagement metrics",
         "details": "Build instructor analytics dashboard extending existing instructor pages with course performance metrics (enrollments, completion rates), revenue analytics with charts using Recharts or similar, student engagement metrics (video watch time, quiz scores), video analytics (watch time, dropout points), export functionality for reports, date range filtering, real-time statistics, and comparative analysis across multiple courses.",
@@ -604,7 +625,7 @@
         "subtasks": []
       },
       {
-        "id": 28,
+        "id": "28",
         "title": "Certificate system implementation",
         "description": "Design and implement certificate generation, verification system, and PDF downloads",
         "details": "Create certificate templates using HTML/CSS or PDF generation libraries, implement certificate generation on course completion using existing Certificate model, add certificate verification system with public URL and verification codes, create certificate gallery in user profiles, implement social sharing for certificates, add PDF download functionality using jsPDF or similar, certificate metadata management, and certificate revocation system for policy violations.",
@@ -615,20 +636,20 @@
         "subtasks": []
       },
       {
-        "id": 29,
+        "id": "29",
         "title": "CI/CD pipeline implementation",
         "description": "Create comprehensive CI/CD pipeline with automated testing, deployment checks, and rollback procedures",
         "details": "Implement GitHub Actions workflow for automated testing on pull requests, add deployment checks including tests, linting, and type checking, create staging environment deployment automation, implement database migration automation using Prisma, add deployment notifications via Slack/Discord, create rollback procedures for failed deployments, implement environment promotion workflows, and add deployment health checks.",
         "testStrategy": "CI/CD pipeline reliability testing, automated test execution verification, deployment rollback testing, staging environment validation, and deployment notification testing",
         "priority": "high",
         "dependencies": [
-          21
+          "21"
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 30,
+        "id": "30",
         "title": "Performance monitoring and observability",
         "description": "Implement comprehensive monitoring with error tracking, APM, and custom metrics dashboards",
         "details": "Enhance existing Sentry integration for comprehensive error monitoring, implement application performance monitoring using Vercel Analytics or DataDog, create custom metrics dashboards for course engagement and platform usage, implement log aggregation using existing logger, add uptime monitoring for critical endpoints, create alerting rules for performance degradation, implement user session recording (optional), and add database performance monitoring.",
@@ -640,9 +661,13 @@
       }
     ],
     "metadata": {
-      "created": "2025-10-01T13:33:51.293Z",
-      "updated": "2025-10-01T13:33:51.293Z",
-      "description": "Tasks for master context"
+      "version": "1.0.0",
+      "lastModified": "2025-10-02T11:45:47.312Z",
+      "taskCount": 30,
+      "completedCount": 0,
+      "tags": [
+        "master"
+      ]
     }
   }
 }

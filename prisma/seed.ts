@@ -418,6 +418,97 @@ async function main() {
   const studentUser2 = students[1]
   const studentUser3 = students[2]
 
+  // Create OAuth Account records for testing authentication flows
+  console.log('\n🔐 Creating OAuth Account records for testing...')
+
+  // Create Google OAuth accounts for students (first 5 students)
+  const googleStudentAccounts = []
+  for (let i = 0; i < Math.min(5, students.length); i++) {
+    const student = students[i]
+    const account = await prisma.account.create({
+      data: {
+        userId: student.id,
+        type: 'oauth',
+        provider: 'google',
+        providerAccountId: `google_${student.id}`,
+        access_token: `mock_google_access_token_${student.id}`,
+        refresh_token: `mock_google_refresh_token_${student.id}`,
+        token_type: 'Bearer',
+        scope: 'openid profile email',
+        expires_at: Math.floor(Date.now() / 1000) + 3600, // Expires in 1 hour
+      }
+    })
+    googleStudentAccounts.push(account)
+    console.log(`  ✓ Created Google OAuth for: ${student.name}`)
+  }
+
+  // Create GitHub OAuth accounts for instructors (first 5 instructors)
+  const githubInstructorAccounts = []
+  for (let i = 0; i < Math.min(5, instructors.length); i++) {
+    const instructor = instructors[i]
+    const account = await prisma.account.create({
+      data: {
+        userId: instructor.id,
+        type: 'oauth',
+        provider: 'github',
+        providerAccountId: `github_${instructor.id}`,
+        access_token: `mock_github_access_token_${instructor.id}`,
+        refresh_token: `mock_github_refresh_token_${instructor.id}`,
+        token_type: 'Bearer',
+        scope: 'read:user user:email',
+        expires_at: Math.floor(Date.now() / 1000) + 7200, // Expires in 2 hours
+      }
+    })
+    githubInstructorAccounts.push(account)
+    console.log(`  ✓ Created GitHub OAuth for: ${instructor.name}`)
+  }
+
+  // Create mixed OAuth accounts (Google for some instructors, GitHub for some students)
+  const mixedAccounts = []
+
+  // Add Google OAuth for 3 more instructors
+  for (let i = 5; i < Math.min(8, instructors.length); i++) {
+    const instructor = instructors[i]
+    const account = await prisma.account.create({
+      data: {
+        userId: instructor.id,
+        type: 'oauth',
+        provider: 'google',
+        providerAccountId: `google_${instructor.id}`,
+        access_token: `mock_google_access_token_${instructor.id}`,
+        token_type: 'Bearer',
+        scope: 'openid profile email',
+        expires_at: Math.floor(Date.now() / 1000) + 3600,
+      }
+    })
+    mixedAccounts.push(account)
+    console.log(`  ✓ Created Google OAuth for: ${instructor.name}`)
+  }
+
+  // Add GitHub OAuth for 3 more students
+  for (let i = 5; i < Math.min(8, students.length); i++) {
+    const student = students[i]
+    const account = await prisma.account.create({
+      data: {
+        userId: student.id,
+        type: 'oauth',
+        provider: 'github',
+        providerAccountId: `github_${student.id}`,
+        access_token: `mock_github_access_token_${student.id}`,
+        token_type: 'Bearer',
+        scope: 'read:user user:email',
+        expires_at: Math.floor(Date.now() / 1000) + 7200,
+      }
+    })
+    mixedAccounts.push(account)
+    console.log(`  ✓ Created GitHub OAuth for: ${student.name}`)
+  }
+
+  const totalOAuthAccounts = googleStudentAccounts.length + githubInstructorAccounts.length + mixedAccounts.length
+  const totalGoogle = googleStudentAccounts.length + 3 // 3 more instructors with Google from mixed
+  const totalGithub = githubInstructorAccounts.length + 3 // 3 more students with GitHub from mixed
+  console.log(`✅ Created ${totalOAuthAccounts} OAuth Account records (Google: ${totalGoogle}, GitHub: ${totalGithub})`)
+
   // Course template data for comprehensive generation
   const courseTemplates = {
     GAME_PROGRAMMING: [
@@ -1024,8 +1115,8 @@ async function main() {
     }
   }
 
-  // Determine instructor assignments
-  const instructors = [instructorUnity, instructorUnreal, instructorDesign, instructorGodot]
+  // Determine instructor assignments for courses
+  const courseInstructors = [instructorUnity, instructorUnreal, instructorDesign, instructorGodot]
   const instructorMap: { [key: string]: any } = {
     GAME_PROGRAMMING: instructorUnity,
     GAME_DESIGN: instructorDesign,
@@ -1044,7 +1135,7 @@ async function main() {
   const allCourses: any[] = []
 
   for (const [category, templates] of Object.entries(courseTemplates)) {
-    const instructor = instructorMap[category] || instructors[0]
+    const instructor = instructorMap[category] || courseInstructors[0]
 
     for (const template of templates) {
       const courseData = generateCourseData(category, template, instructor)
