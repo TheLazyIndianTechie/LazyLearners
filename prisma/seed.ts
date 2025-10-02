@@ -2081,62 +2081,821 @@ async function main() {
     }),
   ])
 
-  // Create sample payments and license keys
-  const samplePayment1 = await prisma.payment.create({
-    data: {
-      dodoPaymentId: 'dodo_pay_sample_001',
-      status: 'SUCCEEDED',
-      amount: 8999, // $89.99
-      currency: 'USD',
-      paymentMethod: 'card',
-      userId: studentUser1.id,
-      courseId: unityCourse.id,
-      completedAt: new Date('2024-09-01'),
-      metadata: '{"payment_method": "visa", "last4": "4242"}',
-    },
+  // ==================== Comprehensive Community Features Generation ====================
+  console.log('\n🌐 Generating comprehensive community features...')
+
+  // Forum post titles and content templates
+  const forumPostTemplates = {
+    Unity: [
+      { title: 'How to implement save/load system in Unity?', content: 'Looking for best practices for implementing a persistent save system. Should I use PlayerPrefs, JSON, or binary serialization?' },
+      { title: 'Unity UI Toolkit vs uGUI in 2024', content: 'What are the advantages of Unity\'s new UI Toolkit compared to the traditional uGUI system? Worth migrating?' },
+      { title: 'Addressables system - performance tips?', content: 'Just started using Addressables for asset management. Any performance gotchas I should know about?' },
+      { title: 'Best Unity multiplayer solution for turn-based games?', content: 'Building a turn-based strategy game. Photon, Mirror, or Netcode for GameObjects?' },
+      { title: 'Input System package - worth the learning curve?', content: 'Still using the old input manager. Is the new Input System worth switching to?' },
+      { title: 'Unity 2023 LTS vs 2024 Tech Stream?', content: 'Starting a new project. Should I go with the stable LTS or use the latest features?' },
+      { title: 'Scriptable Objects for game architecture?', content: 'Heard a lot about using Scriptable Objects for modular design. Best practices?' },
+      { title: 'Unity DOTS - ready for production?', content: 'Is DOTS (ECS) mature enough for a commercial project in 2024?' },
+      { title: 'Cinemachine tips for third-person camera?', content: 'Working on a third-person adventure game. Cinemachine camera setup recommendations?' },
+      { title: 'ProBuilder vs Blender for level blocking?', content: 'For rapid prototyping, should I use ProBuilder in Unity or block out in Blender?' },
+      { title: 'Unity ML-Agents for game AI?', content: 'Anyone using ML-Agents for NPC behavior instead of traditional AI? Worth it?' },
+      { title: 'Timeline for cutscenes - performance impact?', content: 'Concerned about Timeline performance in mobile games. Should I use it?' },
+      { title: 'Best asset for procedural generation?', content: 'Looking for recommendations on procedural generation assets for dungeon/level creation' },
+    ],
+    Unreal: [
+      { title: 'UE5 Nanite performance on mid-range PCs?', content: 'How well does Nanite perform on GTX 1060 level hardware? Worth using for my project?' },
+      { title: 'Blueprint vs C++ for gameplay programming?', content: 'Starting with Unreal. Should I learn Blueprints first or dive straight into C++?' },
+      { title: 'Lumen vs traditional lighting workflow?', content: 'Lumen looks amazing but impacts performance. When should I stick with baked lighting?' },
+      { title: 'MetaHuman Creator - customization limits?', content: 'How much can you customize MetaHumans? Can I create stylized characters?' },
+      { title: 'Best practices for Sequencer cinematics?', content: 'Making in-game cinematics with Sequencer. Tips for smooth playback and transitions?' },
+      { title: 'Enhanced Input system migration guide?', content: 'Migrating from old input to Enhanced Input. Any migration gotchas?' },
+      { title: 'GAS (Gameplay Ability System) for beginners?', content: 'Is GAS too complex for a solo developer? Alternatives for ability systems?' },
+      { title: 'UE5 World Partition for open world games?', content: 'Building an open-world game. World Partition best practices?' },
+      { title: 'Chaos physics vs PhysX?', content: 'Should I enable Chaos for vehicle physics or stick with PhysX?' },
+      { title: 'Best Unreal marketplace assets for environments?', content: 'Looking for high-quality environment assets. Recommendations?' },
+    ],
+    Godot: [
+      { title: 'Godot 4 vs Godot 3 - worth upgrading?', content: 'Currently on Godot 3.5. Is Godot 4 stable enough for production?' },
+      { title: 'GDScript vs C# in Godot 4?', content: 'Which language should I choose for a large project in Godot 4?' },
+      { title: 'Godot for 3D - competitive with Unity/Unreal?', content: 'How does Godot 4\'s 3D capabilities compare to Unity and Unreal now?' },
+      { title: 'Best Godot plugin for state machines?', content: 'Looking for a good state machine addon for complex AI behavior' },
+      { title: 'Godot multiplayer with Nakama?', content: 'Anyone using Nakama for Godot multiplayer? How\'s the integration?' },
+      { title: 'Godot signals vs direct function calls?', content: 'When should I use signals vs direct method calls? Performance impact?' },
+      { title: 'Godot shader tutorials for beginners?', content: 'Want to learn Godot\'s shader language. Best resources?' },
+      { title: 'Exporting to mobile - optimization tips?', content: 'First mobile game in Godot. What are the key optimization strategies?' },
+      { title: 'Godot asset library recommendations?', content: 'What are the must-have addons from the asset library?' },
+    ],
+    General: [
+      { title: 'Best game engine for solo developers in 2024?', content: 'Starting my first solo game project. Unity, Unreal, or Godot?' },
+      { title: 'How long to learn game development from scratch?', content: 'No programming experience. Realistic timeline to make a simple game?' },
+      { title: 'Portfolio projects that get you hired?', content: 'What kind of projects should I include in my gamedev portfolio?' },
+      { title: 'Game jams - worth it for beginners?', content: 'Never done a game jam. Should beginners participate or wait?' },
+      { title: 'Math requirements for game programming?', content: 'How much math do I need to know? Linear algebra? Calculus?' },
+      { title: 'Best laptop for game development 2024?', content: 'Budget $1500. Laptop recommendations for Unity/Unreal development?' },
+      { title: 'Source control for solo gamedev?', content: 'Git, Perforce, or Plastic SCM for a solo project?' },
+      { title: 'Marketing your first indie game?', content: 'Finished my game. Where do I even start with marketing?' },
+      { title: 'When to quit your day job for gamedev?', content: 'Indie developers - when did you go full-time? How much savings?' },
+      { title: 'Best game design books?', content: 'Looking for recommendations on game design theory and principles' },
+      { title: 'Pixel art tools for beginners?', content: 'Want to create pixel art for my game. Aseprite vs Pyxel Edit?' },
+      { title: 'Sound effects resources for indie devs?', content: 'Where do you get your SFX? Free or paid recommendations?' },
+    ],
+    Help: [
+      { title: 'Character controller jittering on slopes', content: 'My character stutters when walking on angled surfaces. How do I fix this?' },
+      { title: 'Null reference exception in Start()', content: 'Getting NullReferenceException when accessing component in Start(). Help!' },
+      { title: 'Git merge conflict in scene file', content: 'Collaborator and I both edited the same scene. How to resolve?' },
+      { title: 'Build size too large for mobile', content: 'Android build is 500MB. How can I reduce the size?' },
+      { title: 'AI pathfinding not working around obstacles', content: 'NavMesh agent ignores obstacles. What am I doing wrong?' },
+      { title: 'Animations not transitioning smoothly', content: 'Blend tree transitions are janky. Any common causes?' },
+      { title: 'Memory leak in game loop', content: 'Memory usage grows continuously during play. How to track down?' },
+      { title: 'UI scaling issues on different resolutions', content: 'UI looks great on 1920x1080 but breaks on other resolutions' },
+    ]
+  }
+
+  // Generate 50+ forum posts across categories
+  console.log('\n  Generating forum posts...')
+  let forumPostCount = 0
+  const allForumPosts: any[] = []
+
+  for (const [category, templates] of Object.entries(forumPostTemplates)) {
+    for (const template of templates) {
+      const author = [...students, ...instructors][Math.floor(Math.random() * (students.length + instructors.length))]
+      const createdAt = getRandomPastDate(6)
+
+      const forumPost = await prisma.forumPost.create({
+        data: {
+          title: template.title,
+          content: template.content,
+          category,
+          authorId: author.id,
+          likes: Math.floor(Math.random() * 50),
+          views: Math.floor(Math.random() * 300) + 20,
+          createdAt,
+          tags: {
+            create: category === 'Unity'
+              ? [{ tag: 'Unity' }, { tag: ['C#', 'Performance', 'Scripting'][Math.floor(Math.random() * 3)] }]
+              : category === 'Unreal'
+              ? [{ tag: 'Unreal' }, { tag: ['C++', 'Blueprints', 'UE5'][Math.floor(Math.random() * 3)] }]
+              : category === 'Godot'
+              ? [{ tag: 'Godot' }, { tag: ['GDScript', '2D', '3D'][Math.floor(Math.random() * 3)] }]
+              : [{ tag: category }]
+          },
+        }
+      })
+
+      allForumPosts.push(forumPost)
+      forumPostCount++
+
+      // Add 1-3 replies to some posts (50% chance)
+      if (Math.random() > 0.5) {
+        const replyCount = Math.floor(Math.random() * 3) + 1
+        for (let r = 0; r < replyCount; r++) {
+          const replier = [...students, ...instructors][Math.floor(Math.random() * (students.length + instructors.length))]
+          const replyDate = new Date(createdAt)
+          replyDate.setHours(replyDate.getHours() + (r + 1) * 2)
+
+          await prisma.reply.create({
+            data: {
+              content: [
+                'Great question! I had the same issue and solved it by...',
+                'Check out the official documentation, it has a good example of this',
+                'I recommend watching this tutorial series, helped me a lot',
+                'This is a common problem, here\'s what worked for me:',
+                'Have you tried using a different approach? Maybe...',
+              ][Math.floor(Math.random() * 5)],
+              authorId: replier.id,
+              postId: forumPost.id,
+              likes: Math.floor(Math.random() * 15),
+              createdAt: replyDate,
+            }
+          })
+        }
+      }
+    }
+  }
+  console.log(`  ✓ Created ${forumPostCount} forum posts with replies`)
+
+  // Generate comprehensive course reviews
+  console.log('\n  Generating course reviews...')
+  let reviewCount = 0
+  const reviewTemplates = [
+    { rating: 5, comment: 'Absolutely fantastic course! Clear explanations and great projects.' },
+    { rating: 5, comment: 'Best course I\'ve taken. The instructor really knows their stuff.' },
+    { rating: 5, comment: 'Exceeded my expectations. Worth every penny!' },
+    { rating: 4, comment: 'Really good course with solid content. A few sections could be updated.' },
+    { rating: 4, comment: 'Great learning experience. Would love more advanced topics.' },
+    { rating: 4, comment: 'Well structured and easy to follow. Minor audio issues in some videos.' },
+    { rating: 3, comment: 'Decent course but felt rushed in some sections.' },
+    { rating: 3, comment: 'Good for beginners but lacks depth for intermediate learners.' },
+    { rating: 2, comment: 'Some useful content but not what I expected from the description.' },
+  ]
+
+  // Add reviews for random courses from enrolled students
+  for (let i = 0; i < 75; i++) {
+    const student = students[Math.floor(Math.random() * students.length)]
+    const course = allCourses[Math.floor(Math.random() * allCourses.length)]
+    const template = reviewTemplates[Math.floor(Math.random() * reviewTemplates.length)]
+    const createdAt = getRandomPastDate(5)
+
+    try {
+      await prisma.review.create({
+        data: {
+          rating: template.rating,
+          comment: template.comment,
+          userId: student.id,
+          courseId: course.id,
+          createdAt,
+        }
+      })
+      reviewCount++
+    } catch (e) {
+      // Skip if duplicate review (user already reviewed this course)
+      continue
+    }
+  }
+  console.log(`  ✓ Created ${reviewCount} course reviews`)
+
+  // Generate comprehensive progress records
+  console.log('\n  Generating progress records...')
+  let progressCount = 0
+
+  // For each enrollment, create progress for some lessons
+  const allEnrollments = await prisma.enrollment.findMany({
+    include: {
+      course: {
+        include: {
+          modules: {
+            include: {
+              lessons: true
+            }
+          }
+        }
+      }
+    }
   })
 
-  const samplePayment2 = await prisma.payment.create({
-    data: {
-      dodoPaymentId: 'dodo_pay_sample_002',
-      status: 'SUCCEEDED',
-      amount: 12999, // $129.99
-      currency: 'USD',
-      paymentMethod: 'card',
-      userId: studentUser2.id,
-      courseId: unrealCourse.id,
-      completedAt: new Date('2024-09-10'),
-      metadata: '{"payment_method": "mastercard", "last4": "5555"}',
-    },
-  })
+  for (const enrollment of allEnrollments) {
+    const course = enrollment.course
+    const allLessons = course.modules.flatMap(m => m.lessons)
 
-  // Create license keys for successful payments
-  await Promise.all([
-    prisma.licenseKey.create({
+    // Create progress for 30-100% of lessons
+    const lessonCount = Math.floor(allLessons.length * (Math.random() * 0.7 + 0.3))
+    const lessonsToComplete = allLessons.slice(0, lessonCount)
+
+    for (const lesson of lessonsToComplete) {
+      const isCompleted = Math.random() > 0.3 // 70% completion rate
+      const completionPercentage = isCompleted ? 100 : Math.floor(Math.random() * 80) + 10
+      const timeSpent = Math.floor(Math.random() * 45) + 15 // 15-60 minutes
+
+      await prisma.progress.upsert({
+        where: {
+          userId_courseId_lessonId: {
+            userId: enrollment.userId,
+            courseId: course.id,
+            lessonId: lesson.id
+          }
+        },
+        create: {
+          userId: enrollment.userId,
+          courseId: course.id,
+          lessonId: lesson.id,
+          completionPercentage,
+          timeSpent,
+          completed: isCompleted,
+          lastAccessed: getRandomPastDate(4),
+        },
+        update: {
+          completionPercentage,
+          timeSpent,
+          completed: isCompleted,
+          lastAccessed: getRandomPastDate(4),
+        }
+      })
+      progressCount++
+    }
+  }
+  console.log(`  ✓ Created ${progressCount} progress records`)
+
+  // Generate more student portfolios
+  console.log('\n  Generating student portfolios...')
+  const portfolioStudents = students.slice(2, 10) // Create portfolios for additional students
+  let portfolioCount = 0
+
+  const projectTemplates = [
+    { title: 'Roguelike Dungeon Crawler', description: 'Procedurally generated dungeon crawler with permadeath mechanics', engine: 'UNITY', tags: ['Roguelike', 'Procedural', '2D'] },
+    { title: 'Tower Defense Strategy', description: 'Classic tower defense with unique enemy types and upgrade paths', engine: 'UNITY', tags: ['Strategy', 'TD', 'Mobile'] },
+    { title: 'Endless Runner', description: 'High-speed endless runner with obstacle generation and power-ups', engine: 'UNITY', tags: ['Endless', 'Mobile', 'Casual'] },
+    { title: 'Puzzle Match-3', description: 'Match-3 puzzle game with special combos and level progression', engine: 'GODOT', tags: ['Puzzle', 'Match-3', 'Casual'] },
+    { title: 'Racing Sim', description: 'Realistic racing simulator with multiple tracks and vehicles', engine: 'UNREAL', tags: ['Racing', 'Simulation', '3D'] },
+    { title: 'Stealth Action Game', description: 'Top-down stealth game with line-of-sight mechanics', engine: 'GODOT', tags: ['Stealth', 'Action', 'Indie'] },
+    { title: 'Bullet Hell Shooter', description: 'Fast-paced bullet hell with boss battles and power-ups', engine: 'UNITY', tags: ['Shooter', 'Bullet Hell', 'Arcade'] },
+    { title: 'City Builder', description: 'Isometric city building simulation with resource management', engine: 'UNITY', tags: ['Simulation', 'Strategy', 'Management'] },
+    { title: 'Metroidvania Explorer', description: 'Exploration-focused platformer with ability gating', engine: 'GODOT', tags: ['Metroidvania', 'Platformer', 'Exploration'] },
+    { title: 'VR Training Sim', description: 'Virtual reality training simulator for industrial applications', engine: 'UNREAL', tags: ['VR', 'Simulation', 'Training'] },
+  ]
+
+  for (const student of portfolioStudents) {
+    const projectCount = Math.floor(Math.random() * 3) + 2 // 2-4 projects per portfolio
+    const selectedProjects = []
+
+    for (let i = 0; i < projectCount; i++) {
+      const template = projectTemplates[Math.floor(Math.random() * projectTemplates.length)]
+      selectedProjects.push({
+        title: template.title,
+        description: template.description,
+        thumbnail: '/api/placeholder/300/200',
+        engine: template.engine,
+        webglBuild: Math.random() > 0.5 ? `/games/${template.title.toLowerCase().replace(/\s+/g, '-')}` : null,
+        sourceCode: `https://github.com/${student.name.toLowerCase().replace(/\s+/g, '-')}/${template.title.toLowerCase().replace(/\s+/g, '-')}`,
+        liveDemo: Math.random() > 0.7 ? `https://itch.io/${student.name.toLowerCase().replace(/\s+/g, '-')}/${template.title.toLowerCase().replace(/\s+/g, '-')}` : null,
+        featured: i === 0, // First project is featured
+        tags: {
+          create: template.tags.map(tag => ({ tag }))
+        }
+      })
+    }
+
+    await prisma.portfolio.create({
       data: {
-        key: 'UNITY-COURSE-2024-ABC123',
-        status: 'ACTIVE',
-        activationsLimit: 3,
-        activationsCount: 1,
-        expiresAt: new Date('2025-09-01'),
-        userId: studentUser1.id,
-        courseId: unityCourse.id,
-        paymentId: samplePayment1.id,
-      },
-    }),
-    prisma.licenseKey.create({
+        title: `${student.name}'s Game Development Portfolio`,
+        description: `Showcasing my game development journey and projects`,
+        userId: student.id,
+        projects: {
+          create: selectedProjects
+        }
+      }
+    })
+    portfolioCount++
+  }
+  console.log(`  ✓ Created ${portfolioCount} student portfolios`)
+
+  // Generate additional certifications
+  console.log('\n  Generating certifications...')
+  let certificationCount = 0
+  const certificationTemplates = [
+    { course: 'Unity', name: 'Unity Certified Developer', issuer: 'LazyGameDevs Academy' },
+    { course: 'Unreal', name: 'Unreal Engine Specialist', issuer: 'LazyGameDevs Academy' },
+    { course: 'Godot', name: 'Godot Master Developer', issuer: 'LazyGameDevs Academy' },
+    { course: 'Game Design', name: 'Certified Game Designer', issuer: 'LazyGameDevs Academy' },
+    { course: 'Mobile', name: 'Mobile Game Development Expert', issuer: 'LazyGameDevs Academy' },
+  ]
+
+  // Award certifications to students who have completed courses
+  for (let i = 0; i < 15; i++) {
+    const student = students[Math.floor(Math.random() * students.length)]
+    const template = certificationTemplates[Math.floor(Math.random() * certificationTemplates.length)]
+    const credentialId = `LGDV-${template.course.toUpperCase()}-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`
+
+    try {
+      await prisma.certification.create({
+        data: {
+          name: template.name,
+          description: `Successfully completed the comprehensive ${template.course} development course with distinction`,
+          issuer: template.issuer,
+          credentialId,
+          badgeUrl: `/badges/${template.course.toLowerCase()}-completion.svg`,
+          verificationUrl: `https://verify.lazygamedevs.com/${credentialId}`,
+          userId: student.id,
+          issuedAt: getRandomPastDate(4),
+        }
+      })
+      certificationCount++
+    } catch (e) {
+      // Skip duplicates
+      continue
+    }
+  }
+  console.log(`  ✓ Created ${certificationCount} certifications`)
+
+  console.log('\n✅ Community Features Complete:')
+  console.log(`   Forum Posts: ${forumPostCount}`)
+  console.log(`   Reviews: ${reviewCount}`)
+  console.log(`   Progress Records: ${progressCount}`)
+  console.log(`   Portfolios: ${portfolioCount}`)
+  console.log(`   Certifications: ${certificationCount}`)
+
+  // ==================== Comprehensive Payment and License Key Generation ====================
+  console.log('\n💳 Generating comprehensive payment records and license keys...')
+
+  // Helper functions for payment generation
+  function generatePaymentId(): string {
+    const timestamp = Date.now().toString(36)
+    const random = Math.random().toString(36).substring(2, 8)
+    return `dodo_pay_${timestamp}_${random}`
+  }
+
+  function generateLicenseKey(engine: string | null, courseTitle: string): string {
+    const enginePrefix = engine || 'GEN'
+    const coursePrefix = courseTitle.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, '')
+    const year = new Date().getFullYear()
+    const hash = Math.random().toString(36).substring(2, 8).toUpperCase()
+    return `${enginePrefix}-${coursePrefix}-${year}-${hash}`
+  }
+
+  function getRandomPastDate(monthsAgo: number): Date {
+    const now = new Date()
+    const pastDate = new Date(now)
+    pastDate.setMonth(now.getMonth() - Math.floor(Math.random() * monthsAgo))
+    pastDate.setDate(Math.floor(Math.random() * 28) + 1)
+    pastDate.setHours(Math.floor(Math.random() * 24))
+    pastDate.setMinutes(Math.floor(Math.random() * 60))
+    return pastDate
+  }
+
+  // Payment status distribution (100+ payments)
+  const paymentStatusDistribution = [
+    { status: 'SUCCEEDED', weight: 0.70, count: 0 },
+    { status: 'FAILED', weight: 0.15, count: 0 },
+    { status: 'PENDING', weight: 0.10, count: 0 },
+    { status: 'CANCELLED', weight: 0.03, count: 0 },
+    { status: 'PROCESSING', weight: 0.02, count: 0 }
+  ]
+
+  const paymentMethods = [
+    { method: 'card', types: ['visa', 'mastercard', 'amex', 'discover'], weight: 0.70 },
+    { method: 'paypal', types: ['paypal'], weight: 0.25 },
+    { method: 'bank_transfer', types: ['ach', 'wire'], weight: 0.05 }
+  ]
+
+  const targetPaymentCount = 120
+  const allPayments: any[] = []
+  const allLicenseKeys: any[] = []
+
+  // Generate payments for students across various courses
+  let paymentCounter = 0
+  console.log(`\n  Generating ${targetPaymentCount} payment records...`)
+
+  for (let i = 0; i < targetPaymentCount; i++) {
+    // Randomly select student, course, and payment details
+    const student = students[Math.floor(Math.random() * students.length)]
+    const course = allCourses[Math.floor(Math.random() * allCourses.length)]
+
+    // Determine payment status based on distribution
+    const statusRand = Math.random()
+    let cumulative = 0
+    let paymentStatus: any = 'SUCCEEDED'
+
+    for (const dist of paymentStatusDistribution) {
+      cumulative += dist.weight
+      if (statusRand <= cumulative) {
+        paymentStatus = dist.status
+        dist.count++
+        break
+      }
+    }
+
+    // Select payment method
+    const methodRand = Math.random()
+    let methodCumulative = 0
+    let selectedMethod = paymentMethods[0]
+
+    for (const method of paymentMethods) {
+      methodCumulative += method.weight
+      if (methodRand <= methodCumulative) {
+        selectedMethod = method
+        break
+      }
+    }
+
+    const paymentType = selectedMethod.types[Math.floor(Math.random() * selectedMethod.types.length)]
+    const last4 = Math.floor(1000 + Math.random() * 9000).toString()
+
+    // Create payment metadata
+    const metadata = {
+      payment_method: paymentType,
+      last4: selectedMethod.method === 'card' ? last4 : undefined,
+      email: selectedMethod.method === 'paypal' ? student.email : undefined,
+      processor_fee: Math.floor(course.price * 100 * 0.029 + 30), // 2.9% + $0.30
+      ip_address: `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+      user_agent: 'Mozilla/5.0',
+      ...(paymentStatus === 'FAILED' && {
+        failure_code: ['card_declined', 'insufficient_funds', 'expired_card', 'fraud'][Math.floor(Math.random() * 4)],
+        failure_message: 'Payment declined by issuer'
+      })
+    }
+
+    const createdDate = getRandomPastDate(6)
+    const completedDate = paymentStatus === 'SUCCEEDED' ? createdDate : null
+
+    const payment = await prisma.payment.create({
       data: {
-        key: 'UNREAL-COURSE-2024-XYZ789',
-        status: 'ACTIVE',
-        activationsLimit: 5,
-        activationsCount: 1,
-        expiresAt: new Date('2025-09-10'),
-        userId: studentUser2.id,
-        courseId: unrealCourse.id,
-        paymentId: samplePayment2.id,
-      },
-    }),
-  ])
+        dodoPaymentId: generatePaymentId(),
+        status: paymentStatus as any,
+        amount: Math.floor(course.price * 100), // Convert to cents
+        currency: 'USD',
+        paymentMethod: selectedMethod.method,
+        userId: student.id,
+        courseId: course.id,
+        createdAt: createdDate,
+        completedAt: completedDate,
+        metadata: JSON.stringify(metadata),
+      }
+    })
+
+    allPayments.push(payment)
+    paymentCounter++
+
+    // Create license key for successful payments
+    if (paymentStatus === 'SUCCEEDED') {
+      const licenseKey = generateLicenseKey(course.engine, course.title)
+      const activationsLimit = Math.floor(Math.random() * 5) + 1 // 1-5
+      const activationsCount = Math.floor(Math.random() * activationsLimit)
+
+      // Determine expiration date (6 months to 2 years)
+      const expiresAt = new Date(completedDate!)
+      const monthsToAdd = Math.floor(Math.random() * 18) + 6 // 6-24 months
+      expiresAt.setMonth(expiresAt.getMonth() + monthsToAdd)
+
+      // Determine license status (80% ACTIVE, 15% EXPIRED, 4% DISABLED, 1% REVOKED)
+      let licenseStatus: any = 'ACTIVE'
+      const statusRand = Math.random()
+      if (statusRand > 0.99) {
+        licenseStatus = 'REVOKED'
+      } else if (statusRand > 0.95) {
+        licenseStatus = 'DISABLED'
+      } else if (statusRand > 0.80) {
+        licenseStatus = 'EXPIRED'
+      }
+
+      const license = await prisma.licenseKey.upsert({
+        where: {
+          userId_courseId: {
+            userId: student.id,
+            courseId: course.id
+          }
+        },
+        create: {
+          key: licenseKey,
+          dodoLicenseKeyId: `dodo_lic_${generatePaymentId().substring(9)}`,
+          status: licenseStatus,
+          activationsLimit,
+          activationsCount,
+          expiresAt,
+          userId: student.id,
+          courseId: course.id,
+          paymentId: payment.id,
+        },
+        update: {
+          status: licenseStatus,
+          activationsCount,
+          expiresAt,
+          paymentId: payment.id,
+        }
+      })
+
+      allLicenseKeys.push(license)
+
+      // Create or update enrollment for successful payments
+      await prisma.enrollment.upsert({
+        where: {
+          userId_courseId: {
+            userId: student.id,
+            courseId: course.id
+          }
+        },
+        create: {
+          userId: student.id,
+          courseId: course.id,
+          status: licenseStatus === 'ACTIVE' ? 'ACTIVE' : 'PAUSED',
+          enrolledAt: createdDate,
+        },
+        update: {
+          status: licenseStatus === 'ACTIVE' ? 'ACTIVE' : 'PAUSED',
+        }
+      })
+    }
+
+    if ((paymentCounter % 20) === 0) {
+      console.log(`  ✓ Generated ${paymentCounter}/${targetPaymentCount} payments...`)
+    }
+  }
+
+  console.log(`\n✅ Payment Generation Complete:`)
+  console.log(`   Total Payments: ${allPayments.length}`)
+  paymentStatusDistribution.forEach(dist => {
+    const percentage = ((dist.count / targetPaymentCount) * 100).toFixed(1)
+    console.log(`   ${dist.status}: ${dist.count} (${percentage}%)`)
+  })
+  console.log(`   License Keys Generated: ${allLicenseKeys.length}`)
+  console.log(`   Enrollments Created: ${allLicenseKeys.length}`)
+
+  // Keep backward compatibility references
+  const samplePayment1 = allPayments.find(p => p.status === 'SUCCEEDED') || allPayments[0]
+  const samplePayment2 = allPayments.find((p, idx) => p.status === 'SUCCEEDED' && idx > 0) || allPayments[1]
+
+  // ==================== Advanced Payment Analytics Scenarios ====================
+  console.log('\n📊 Generating advanced payment analytics scenarios...')
+
+  // 1. Refund Records - Create refunds for 10% of successful payments
+  const refundablePayments = allPayments.filter(p => p.status === 'SUCCEEDED').slice(0, 12)
+  let refundCount = 0
+
+  for (const originalPayment of refundablePayments) {
+    const refundAmount = -Math.abs(originalPayment.amount) // Negative amount for refund
+    const refundDate = new Date(originalPayment.completedAt!)
+    refundDate.setDate(refundDate.getDate() + Math.floor(Math.random() * 30) + 1) // 1-30 days after purchase
+
+    const refundMetadata = {
+      refund_type: ['customer_request', 'course_cancelled', 'duplicate_charge', 'unauthorized'][Math.floor(Math.random() * 4)],
+      original_payment_id: originalPayment.dodoPaymentId,
+      refund_reason: 'Customer requested refund within 30-day guarantee period',
+      processor_fee_refunded: false, // Processor fees typically non-refundable
+      partial_refund: Math.random() > 0.8, // 20% chance of partial refund
+    }
+
+    await prisma.payment.create({
+      data: {
+        dodoPaymentId: `dodo_rfnd_${generatePaymentId().substring(9)}`,
+        status: 'SUCCEEDED',
+        amount: refundMetadata.partial_refund ? Math.floor(refundAmount * 0.5) : refundAmount,
+        currency: originalPayment.currency,
+        paymentMethod: originalPayment.paymentMethod,
+        userId: originalPayment.userId,
+        courseId: originalPayment.courseId,
+        createdAt: refundDate,
+        completedAt: refundDate,
+        metadata: JSON.stringify(refundMetadata),
+      }
+    })
+    refundCount++
+  }
+  console.log(`  ✓ Created ${refundCount} refund records`)
+
+  // 2. Payment Plans - Multi-part payments for higher-priced courses
+  const expensiveCourses = allCourses.filter(c => c.price > 80).slice(0, 5)
+  let paymentPlanCount = 0
+
+  for (const course of expensiveCourses) {
+    const student = students[Math.floor(Math.random() * students.length)]
+    const totalAmount = Math.floor(course.price * 100)
+    const installments = Math.random() > 0.5 ? 3 : 4 // 3 or 4 installment plan
+    const installmentAmount = Math.floor(totalAmount / installments)
+    const startDate = getRandomPastDate(4)
+
+    for (let i = 0; i < installments; i++) {
+      const installmentDate = new Date(startDate)
+      installmentDate.setMonth(installmentDate.getMonth() + i)
+
+      const isPaid = i < installments - 1 || Math.random() > 0.3 // Last installment sometimes unpaid
+      const installmentMetadata = {
+        payment_plan: true,
+        installment_number: i + 1,
+        total_installments: installments,
+        remaining_balance: isPaid ? (installments - i - 1) * installmentAmount : totalAmount - (i * installmentAmount),
+        plan_id: `plan_${student.id}_${course.id}`,
+        auto_charge: true,
+      }
+
+      await prisma.payment.create({
+        data: {
+          dodoPaymentId: generatePaymentId(),
+          status: isPaid ? 'SUCCEEDED' : 'PENDING',
+          amount: installmentAmount,
+          currency: 'USD',
+          paymentMethod: 'card',
+          userId: student.id,
+          courseId: course.id,
+          createdAt: installmentDate,
+          completedAt: isPaid ? installmentDate : null,
+          metadata: JSON.stringify(installmentMetadata),
+        }
+      })
+    }
+    paymentPlanCount++
+  }
+  console.log(`  ✓ Created ${paymentPlanCount} payment plans (${paymentPlanCount * 3.5} installment payments)`)
+
+  // 3. International Payments with Currency Conversion
+  const currencies = [
+    { code: 'EUR', rate: 0.92, countries: ['Germany', 'France', 'Spain'] },
+    { code: 'GBP', rate: 0.79, countries: ['United Kingdom'] },
+    { code: 'CAD', rate: 1.35, countries: ['Canada'] },
+    { code: 'AUD', rate: 1.52, countries: ['Australia'] },
+    { code: 'JPY', rate: 149.50, countries: ['Japan'] },
+  ]
+  let internationalPaymentCount = 0
+
+  for (let i = 0; i < 15; i++) {
+    const student = students[Math.floor(Math.random() * students.length)]
+    const course = allCourses[Math.floor(Math.random() * allCourses.length)]
+    const currency = currencies[Math.floor(Math.random() * currencies.length)]
+    const amountInCurrency = Math.floor(course.price * 100 * currency.rate)
+    const createdDate = getRandomPastDate(5)
+
+    const internationalMetadata = {
+      original_currency: currency.code,
+      original_amount: amountInCurrency,
+      exchange_rate: currency.rate,
+      usd_amount: Math.floor(course.price * 100),
+      country: currency.countries[Math.floor(Math.random() * currency.countries.length)],
+      conversion_fee: Math.floor(course.price * 100 * 0.02), // 2% conversion fee
+      payment_method: 'card',
+      international: true,
+    }
+
+    await prisma.payment.create({
+      data: {
+        dodoPaymentId: generatePaymentId(),
+        status: 'SUCCEEDED',
+        amount: Math.floor(course.price * 100),
+        currency: 'USD',
+        paymentMethod: 'card',
+        userId: student.id,
+        courseId: course.id,
+        createdAt: createdDate,
+        completedAt: createdDate,
+        metadata: JSON.stringify(internationalMetadata),
+      }
+    })
+    internationalPaymentCount++
+  }
+  console.log(`  ✓ Created ${internationalPaymentCount} international payments`)
+
+  // 4. Bulk Course Purchases with Group Discounts
+  const bulkPurchases = [
+    { studentCount: 5, discount: 0.15, name: 'Small Team' },
+    { studentCount: 10, discount: 0.25, name: 'Department' },
+    { studentCount: 20, discount: 0.35, name: 'Enterprise' },
+  ]
+  let bulkPurchaseCount = 0
+
+  for (const bulk of bulkPurchases) {
+    const course = allCourses[Math.floor(Math.random() * allCourses.length)]
+    const primaryStudent = students[Math.floor(Math.random() * students.length)]
+    const totalPrice = course.price * bulk.studentCount
+    const discountedPrice = totalPrice * (1 - bulk.discount)
+    const createdDate = getRandomPastDate(3)
+
+    const bulkMetadata = {
+      bulk_purchase: true,
+      seat_count: bulk.studentCount,
+      price_per_seat: course.price,
+      total_before_discount: Math.floor(totalPrice * 100),
+      discount_percentage: bulk.discount * 100,
+      discount_amount: Math.floor((totalPrice - discountedPrice) * 100),
+      organization_name: `${bulk.name} - Test Organization`,
+      license_type: 'multi_seat',
+      administrator_email: primaryStudent.email,
+    }
+
+    await prisma.payment.create({
+      data: {
+        dodoPaymentId: generatePaymentId(),
+        status: 'SUCCEEDED',
+        amount: Math.floor(discountedPrice * 100),
+        currency: 'USD',
+        paymentMethod: 'bank_transfer',
+        userId: primaryStudent.id,
+        courseId: course.id,
+        createdAt: createdDate,
+        completedAt: createdDate,
+        metadata: JSON.stringify(bulkMetadata),
+      }
+    })
+    bulkPurchaseCount++
+  }
+  console.log(`  ✓ Created ${bulkPurchaseCount} bulk purchase records`)
+
+  // 5. Chargeback Scenarios
+  const chargebackPayments = allPayments.filter(p => p.status === 'SUCCEEDED').slice(0, 5)
+  let chargebackCount = 0
+
+  for (const originalPayment of chargebackPayments) {
+    const chargebackDate = new Date(originalPayment.completedAt!)
+    chargebackDate.setDate(chargebackDate.getDate() + Math.floor(Math.random() * 60) + 30) // 30-90 days later
+
+    const chargebackMetadata = {
+      chargeback: true,
+      original_payment_id: originalPayment.dodoPaymentId,
+      chargeback_reason: ['fraudulent', 'unrecognized', 'duplicate', 'product_not_received'][Math.floor(Math.random() * 4)],
+      chargeback_amount: -Math.abs(originalPayment.amount),
+      dispute_status: ['under_review', 'lost', 'won'][Math.floor(Math.random() * 3)],
+      chargeback_fee: 1500, // $15 chargeback fee in cents
+      representment_submitted: Math.random() > 0.5,
+    }
+
+    await prisma.payment.create({
+      data: {
+        dodoPaymentId: `dodo_chbk_${generatePaymentId().substring(9)}`,
+        status: 'FAILED',
+        amount: -Math.abs(originalPayment.amount),
+        currency: originalPayment.currency,
+        paymentMethod: originalPayment.paymentMethod,
+        userId: originalPayment.userId,
+        courseId: originalPayment.courseId,
+        createdAt: chargebackDate,
+        completedAt: null,
+        metadata: JSON.stringify(chargebackMetadata),
+      }
+    })
+    chargebackCount++
+  }
+  console.log(`  ✓ Created ${chargebackCount} chargeback scenarios`)
+
+  // 6. Enhanced Analytics - Tax, Affiliate, and Promotional Scenarios
+  let analyticsPaymentCount = 0
+  const promotionalCodes = ['LAUNCH50', 'SUMMER25', 'STUDENT15', 'BLACKFRIDAY40']
+
+  for (let i = 0; i < 20; i++) {
+    const student = students[Math.floor(Math.random() * students.length)]
+    const course = allCourses[Math.floor(Math.random() * allCourses.length)]
+    const basePrice = course.price * 100
+    const createdDate = getRandomPastDate(4)
+
+    // Random promotional discount
+    const hasPromo = Math.random() > 0.5
+    const promoCode = hasPromo ? promotionalCodes[Math.floor(Math.random() * promotionalCodes.length)] : null
+    const promoDiscount = hasPromo ? parseInt(promoCode!.match(/\d+/)![0]) / 100 : 0
+
+    // Tax calculation (varies by location)
+    const taxRate = Math.random() > 0.7 ? 0.08 : 0 // 30% chance of 8% tax
+    const taxAmount = Math.floor(basePrice * taxRate)
+
+    // Affiliate commission (10% of sales)
+    const hasAffiliate = Math.random() > 0.6
+    const affiliateCommission = hasAffiliate ? Math.floor(basePrice * 0.10) : 0
+
+    const discountedPrice = Math.floor(basePrice * (1 - promoDiscount))
+    const finalPrice = discountedPrice + taxAmount
+
+    const analyticsMetadata = {
+      base_price: basePrice,
+      promotional_code: promoCode,
+      discount_amount: Math.floor(basePrice * promoDiscount),
+      tax_rate: taxRate,
+      tax_amount: taxAmount,
+      final_price: finalPrice,
+      affiliate_code: hasAffiliate ? `AFF_${Math.random().toString(36).substring(2, 8).toUpperCase()}` : null,
+      affiliate_commission: affiliateCommission,
+      processor_fee: Math.floor(finalPrice * 0.029 + 30),
+      net_revenue: finalPrice - Math.floor(finalPrice * 0.029 + 30) - affiliateCommission,
+      utm_source: ['google', 'facebook', 'twitter', 'reddit', 'youtube'][Math.floor(Math.random() * 5)],
+      utm_campaign: ['spring_sale', 'influencer', 'retargeting', 'organic'][Math.floor(Math.random() * 4)],
+    }
+
+    await prisma.payment.create({
+      data: {
+        dodoPaymentId: generatePaymentId(),
+        status: 'SUCCEEDED',
+        amount: finalPrice,
+        currency: 'USD',
+        paymentMethod: 'card',
+        userId: student.id,
+        courseId: course.id,
+        createdAt: createdDate,
+        completedAt: createdDate,
+        metadata: JSON.stringify(analyticsMetadata),
+      }
+    })
+    analyticsPaymentCount++
+  }
+  console.log(`  ✓ Created ${analyticsPaymentCount} payments with enhanced analytics`)
+
+  console.log('\n✅ Advanced Payment Analytics Complete:')
+  console.log(`   Refunds: ${refundCount}`)
+  console.log(`   Payment Plans: ${paymentPlanCount}`)
+  console.log(`   International Payments: ${internationalPaymentCount}`)
+  console.log(`   Bulk Purchases: ${bulkPurchaseCount}`)
+  console.log(`   Chargebacks: ${chargebackCount}`)
+  console.log(`   Analytics-Enhanced: ${analyticsPaymentCount}`)
 
   // Create certifications for completed courses
   await prisma.certification.create({
