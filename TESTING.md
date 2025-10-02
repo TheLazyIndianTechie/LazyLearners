@@ -1,374 +1,368 @@
-# Testing Guide - GameLearn Platform Video Streaming System
+# Testing Guide - GameLearn Platform
 
-This document provides comprehensive information about the testing framework for the LazyGameDevs GameLearn Platform video streaming system.
+**"Test the user journey, not just the code"** - Our testing approach prioritizes end-to-end user experiences to catch integration issues early.
 
-## Overview
+## Quick Start
 
-The testing framework is designed to ensure the reliability, performance, and security of the video streaming system. It includes unit tests, integration tests, and end-to-end tests covering all aspects of video processing, streaming, and user interactions.
+### 1. Install Dependencies
+```bash
+# Install Playwright for E2E testing
+npm install -D @playwright/test
+npx playwright install
+```
+
+### 2. Run Tests
+```bash
+# Run all tests
+npm test
+
+# Run critical tests (fast feedback)
+npm run test:critical
+
+# Run with coverage
+npm run test:coverage
+
+# Run E2E tests
+npm run test:e2e
+```
+
+## Testing Philosophy & Strategy
+
+### Testing Pyramid
+```
+    /\
+   /  \  E2E Tests (20%)
+  /____\  Integration Tests (30%)
+ /      \ Unit Tests (50%)
+```
+
+**Coverage Goals**: 70%+ overall (functions, lines, branches)
+
+### Core Technologies
+- **Jest**: JavaScript testing with mocking and assertions
+- **React Testing Library**: Component testing focused on user interactions
+- **Playwright**: End-to-end testing across browsers
+- **ts-jest**: TypeScript support
 
 ## Test Structure
 
 ```
 src/__tests__/
-├── setup/
-│   ├── test-utils.tsx          # Custom testing utilities
-├── unit/
-│   ├── lib/
-│   │   ├── redis.test.ts       # Redis service tests
-│   │   └── video/
-│   │       ├── processing.test.ts    # Video processing tests
-│   │       └── streaming.test.ts     # Video streaming tests
+├── setup/                    # Test utilities
+│   └── test-utils.tsx
+├── unit/                     # Isolated component tests
 │   ├── api/
-│   │   └── video/
-│   │       ├── upload.test.ts        # Upload API tests
-│   │       ├── stream.test.ts        # Streaming API tests
-│   │       ├── heartbeat.test.ts     # Heartbeat API tests
-│   │       └── analytics.test.ts     # Analytics API tests
-│   └── components/
-│       └── video/
-│           ├── video-player.test.tsx       # Video player component tests
-│           └── video-streaming-wrapper.test.tsx  # Wrapper component tests
-└── integration/
-    └── video-streaming-workflow.test.ts   # End-to-end workflow tests
+│   ├── components/
+│   └── lib/
+├── integration/              # Multi-component workflows
+│   └── video-streaming-workflow.test.ts
+└── critical/                 # Critical user journeys
+    └── video-streaming-user-journey.test.ts
+
+tests/e2e/                    # Playwright E2E tests
+└── user-journeys/
+    └── video-streaming.spec.ts
 ```
 
-## Testing Framework
+## Critical User Journeys
 
-### Core Technologies
+### 1. Video Streaming Journey (CRITICAL)
+**Test Flow**:
+1. User browses course catalog
+2. User signs in/creates account
+3. User enrolls in course
+4. User clicks "Watch Video"
+5. Video player loads streaming manifest
+6. Video starts playing
+7. Progress is tracked
+8. Analytics are recorded
 
-- **Jest**: JavaScript testing framework with built-in mocking and assertion capabilities
-- **React Testing Library**: Testing utilities for React components with focus on user interactions
-- **@testing-library/user-event**: Enhanced user interaction simulation
-- **ts-jest**: TypeScript support for Jest
+**Test Files**:
+- `tests/e2e/user-journeys/video-streaming.spec.ts`
+- `src/__tests__/critical/video-streaming-user-journey.test.ts`
 
-### Configuration Files
+### 2. Course Enrollment Journey
+1. Browse course catalog
+2. View course details
+3. Initiate enrollment
+4. Complete payment
+5. Access course content
+6. Track progress
 
-- `jest.config.js`: Main Jest configuration
-- `jest.setup.js`: Global test setup and mocks
-- `jest.env.js`: Test environment variables
+### 3. Instructor Content Management
+1. Instructor login
+2. Create/edit course
+3. Upload videos
+4. Manage course content
+5. View analytics
 
-## Running Tests
+## Test Commands
 
-### Basic Commands
-
+### Development Workflow
 ```bash
-# Run all tests
-npm test
+# Before committing
+npm run test:critical
+npm run lint
 
-# Run tests in watch mode
+# Run specific test types
+npm run test:unit              # Unit tests only
+npm run test:integration       # Integration tests only
+npm run test:e2e              # E2E tests
+npm run test:video-streaming  # Video-specific tests
+
+# Watch mode (development)
 npm run test:watch
 
-# Run tests with coverage
-npm run test:coverage
-
-# Run only unit tests
-npm run test:unit
-
-# Run only integration tests
-npm run test:integration
-
-# Run tests for CI/CD
-npm run test:ci
+# Debug E2E tests
+npm run test:e2e:ui
+npm run test:e2e:debug
 ```
 
-### Test Categories
-
-#### Unit Tests
-Test individual components, services, and functions in isolation.
-
+### CI/CD Pipeline
 ```bash
-npm run test:unit
+# Pre-commit hooks
+npm run test:critical
+
+# Pull Request validation
+npm run test:full-suite
+
+# Pre-deployment
+npm run test:smoke
+npm run test:performance
 ```
-
-#### Integration Tests
-Test the interaction between multiple components and services.
-
-```bash
-npm run test:integration
-```
-
-#### Coverage Reports
-Generate detailed coverage reports showing test coverage across the codebase.
-
-```bash
-npm run test:coverage
-```
-
-## Test Coverage Goals
-
-The testing framework aims for the following coverage targets:
-
-- **Overall Coverage**: 70%+
-- **Functions**: 70%+
-- **Lines**: 70%+
-- **Branches**: 70%+
-
-### Current Coverage Areas
-
-1. **Redis Service**: 100% coverage of MemoryStore and RedisService classes
-2. **Video Processing**: 95% coverage of VideoProcessor class and processing logic
-3. **Video Streaming**: 95% coverage of VideoStreamingService and streaming logic
-4. **API Endpoints**: 90% coverage of all video-related API routes
-5. **React Components**: 85% coverage of video player components
-6. **Integration Workflows**: 80% coverage of end-to-end video streaming workflows
 
 ## Key Test Scenarios
 
 ### Video Processing Tests
-
-#### VideoProcessor Class (`src/__tests__/unit/lib/video/processing.test.ts`)
-
-- Video file validation (format, size, security)
-- Metadata extraction and quality profile selection
-- Job creation, tracking, and cancellation
-- Error handling and malware detection
-- Concurrent job limits and processing workflow
-
-#### Key Test Cases:
 ```typescript
-// Test video submission
-test('should successfully submit a valid video')
+// Video file validation
+test('should validate file format', async () => {
+  // Test video submission
+});
 
-// Test file validation
-test('should validate file format')
-test('should validate file size')
-test('should reject unsupported formats')
+test('should reject unsupported formats', async () => {
+  // Test format validation
+});
 
-// Test job management
-test('should get job status')
-test('should cancel pending job')
-test('should enforce concurrent job limits')
+// Job management
+test('should get job status', async () => {
+  // Test job tracking
+});
 ```
 
 ### Video Streaming Tests
-
-#### VideoStreamingService Class (`src/__tests__/unit/lib/video/streaming.test.ts`)
-
-- Session creation and management
-- Access control and concurrent session limits
-- Heartbeat processing and quality adaptation
-- Analytics tracking and event handling
-- Session cleanup and error recovery
-
-#### Key Test Cases:
 ```typescript
-// Test session management
-test('should create streaming session successfully')
-test('should enforce concurrent session limits')
+// Session management
+test('should create streaming session successfully', async () => {
+  // Test session creation
+});
 
-// Test heartbeat processing
-test('should process valid heartbeat')
-test('should recommend quality changes')
-test('should handle expired sessions')
+test('should enforce concurrent session limits', async () => {
+  // Test access control
+});
 
-// Test analytics
-test('should track video events')
-test('should handle video completion')
+// Heartbeat processing
+test('should process valid heartbeat', async () => {
+  // Test heartbeat system
+});
 ```
 
 ### API Endpoint Tests
-
-#### Upload API (`src/__tests__/unit/api/video/upload.test.ts`)
-
-- POST: Video upload with validation
-- GET: Job status retrieval
-- DELETE: Job cancellation
+All API routes are tested for:
+- All HTTP methods (GET, POST, PUT, DELETE)
 - Authentication and authorization
-- File validation and error handling
-
-#### Streaming API (`src/__tests__/unit/api/video/stream.test.ts`)
-
-- POST: Session creation
-- PUT: Session updates
-- DELETE: Session termination
-- Access control and device info handling
-
-#### Heartbeat API (`src/__tests__/unit/api/video/heartbeat.test.ts`)
-
-- POST: Heartbeat processing
-- GET: Session status
-- Quality recommendations
-- Buffer health monitoring
-
-#### Analytics API (`src/__tests__/unit/api/video/analytics.test.ts`)
-
-- POST: Event tracking
-- GET: Analytics retrieval
-- Event-specific handling (play, pause, seek, quality change)
-- Course progress tracking
+- Input validation and error handling
+- Response structure and status codes
 
 ### React Component Tests
-
-#### VideoPlayer Component (`src/__tests__/unit/components/video/video-player.test.tsx`)
-
-- Video controls (play, pause, seek, volume)
-- Quality and playback speed changes
-- Fullscreen functionality
-- Analytics tracking integration
-- Error handling and accessibility
-
-#### VideoStreamingWrapper Component (`src/__tests__/unit/components/video/video-streaming-wrapper.test.tsx`)
-
-- Session initialization
-- VideoPlayer integration
-- Error states and retry functionality
-- Loading states and UI feedback
-- Course progress tracking
-
-### Integration Tests
-
-#### End-to-End Workflow (`src/__tests__/integration/video-streaming-workflow.test.ts`)
-
-- Complete video upload to streaming workflow
-- Quality adaptation scenarios
-- Session management across multiple endpoints
-- Error recovery and resilience testing
-- Security and access control validation
-- Performance and scalability scenarios
+Components tested for:
+- User interactions (click, input, etc.)
+- State management
+- Props handling
+- Error states
+- Accessibility
 
 ## Test Utilities
 
-### Custom Testing Utilities (`src/__tests__/setup/test-utils.tsx`)
-
-The framework provides several utility functions for common testing scenarios:
-
+### Custom Testing Helpers
 ```typescript
 // Create mock video file
 const videoFile = createMockVideoFile({
   name: 'test-video.mp4',
   size: 1024 * 1024 * 100, // 100MB
-})
+});
 
 // Create mock user session
 const session = createMockSession({
   user: { role: 'INSTRUCTOR' }
-})
+});
 
 // Create mock streaming session
 const streamingSession = createMockStreamingSession({
   duration: 1800,
   quality: '720p'
-})
+});
 
 // Wait for async operations
-await waitForAsync(100)
-
-// Custom matchers
-expect(value).toBeWithinRange(10, 20)
+await waitForAsync(100);
 ```
+
+## Test Categories & Tags
+
+### @smoke Tests
+Essential functionality - run before every deployment:
+- User can sign in
+- Course catalog loads
+- Video streaming works
+- Payment processing works
+
+### @regression Tests
+Prevent bugs from reoccurring - run with every PR:
+- All API endpoints have required HTTP methods
+- Video streaming works across devices
+- Payment flows handle edge cases
+
+### @critical Tests
+High-impact scenarios - run multiple times daily:
+- Complete video streaming workflow
+- Payment processing end-to-end
+- User authentication flow
+
+### @performance Tests
+Platform performance - run weekly and before releases:
+- Page load times < 3 seconds
+- Video startup time < 5 seconds
+- API response times < 500ms
+
+## Quality Gates
+
+### Commit Level
+- ✅ Critical tests pass
+- ✅ No linting errors
+- ✅ Type checking passes
+
+### Pull Request Level
+- ✅ All tests pass
+- ✅ Code coverage > 70%
+- ✅ No security vulnerabilities
+- ✅ Performance benchmarks met
+
+### Deployment Level
+- ✅ Smoke tests pass
+- ✅ Integration tests pass
+- ✅ E2E tests pass in staging
+- ✅ Manual QA approval
 
 ## Mocking Strategy
 
 ### Global Mocks
-
-The testing framework uses comprehensive mocking for external dependencies:
-
-1. **Next.js APIs**: Router, navigation, server components
-2. **Authentication**: NextAuth session management
-3. **External Services**: Redis, file system, network requests
-4. **Browser APIs**: Video element, fullscreen, device APIs
-
-### Component Mocking
-
-React components are mocked to test integration without UI complexity:
-
-```typescript
-// Mock VideoPlayer for wrapper tests
-jest.mock('@/components/video/video-player', () => {
-  return function MockVideoPlayer(props: any) {
-    return <div data-testid="video-player">...</div>
-  }
-})
-```
+- **Next.js APIs**: Router, navigation, server components
+- **Authentication**: NextAuth session management
+- **External Services**: Redis, file system, network requests
+- **Browser APIs**: Video element, fullscreen, device APIs
 
 ### API Mocking
-
-HTTP requests are mocked using Jest's global fetch mock:
-
 ```typescript
 global.fetch = jest.fn().mockResolvedValue({
   ok: true,
   json: async () => ({ success: true, data: {...} })
-})
+});
 ```
-
-## Error Scenario Testing
-
-The framework extensively tests error conditions:
-
-### Network Errors
-- Connection failures
-- Timeout scenarios
-- Malformed responses
-
-### Authentication Errors
-- Unauthorized access
-- Session expiration
-- Role-based access denial
-
-### Processing Errors
-- Invalid file formats
-- File size limits
-- Malware detection
-
-### Session Errors
-- Concurrent session limits
-- Session timeout
-- Invalid session access
 
 ## Performance Testing
 
-### Load Testing Scenarios
+### Key Metrics
+- **Page Load Time**: < 3 seconds
+- **Video Start Time**: < 5 seconds
+- **API Response Time**: < 500ms
+- **Time to Interactive**: < 5 seconds
 
-1. **Concurrent Uploads**: Multiple simultaneous video uploads
-2. **High-Frequency Heartbeats**: Rapid heartbeat processing
-3. **Session Scaling**: Large numbers of concurrent streaming sessions
-4. **Memory Usage**: Memory leak detection and cleanup verification
+### Load Testing
+```bash
+# Use Artillery.io for load testing
+npm install -g artillery
 
-### Performance Assertions
+# Run load test
+artillery run load-test-video.yml
+```
 
+## Accessibility Testing
+
+### Automated Checks
+- Color contrast ratios (WCAG 2.1 AA)
+- Keyboard navigation
+- Screen reader compatibility
+- ARIA label validation
+
+### Manual Checks
+- Tab order logical
+- Video captions available
+- Form labels clear
+- Error messages descriptive
+
+## Security Testing
+
+### Automated Scans
+- Dependency vulnerability scanning
+- OWASP Top 10 validation
+- Authentication bypass attempts
+- SQL injection testing
+
+### Manual Testing
+- Session management validation
+- Authorization boundary testing
+- Input validation verification
+- File upload security
+
+## Test Data Management
+
+### Test Users
 ```typescript
-// Test response times
-const startTime = Date.now()
-await apiCall()
-const responseTime = Date.now() - startTime
-expect(responseTime).toBeLessThan(1000) // < 1 second
-
-// Test memory cleanup
-expect(clearInterval).toHaveBeenCalled()
-expect(removeEventListener).toHaveBeenCalledTimes(8)
+const TEST_USERS = {
+  STUDENT: { email: 'student@test.com', role: 'STUDENT' },
+  INSTRUCTOR: { email: 'instructor@test.com', role: 'INSTRUCTOR' },
+  ADMIN: { email: 'admin@test.com', role: 'ADMIN' }
+};
 ```
 
-## Continuous Integration
-
-### GitHub Actions Workflow (`.github/workflows/test.yml`)
-
-The CI pipeline includes:
-
-1. **Multi-Node Testing**: Tests on Node.js 18.x and 20.x
-2. **Linting and Type Checking**: Code quality validation
-3. **Test Suite Execution**: Unit and integration tests
-4. **Coverage Reporting**: Coverage reports uploaded to Codecov
-5. **Security Auditing**: Dependency vulnerability scanning
-6. **Performance Testing**: Performance regression detection
-
-### CI Commands
-
-```yaml
-- name: Run unit tests
-  run: npm run test:unit
-
-- name: Run integration tests
-  run: npm run test:integration
-
-- name: Run full test suite with coverage
-  run: npm run test:coverage
+### Test Courses
+```typescript
+const TEST_COURSES = {
+  UNITY_FUNDAMENTALS: {
+    id: 'unity-fundamentals',
+    videoId: 'sample-unity-tutorial'
+  }
+};
 ```
+
+## Troubleshooting
+
+### Common Issues
+
+**Timer-related Tests**
+```typescript
+jest.useFakeTimers();
+```
+
+**Async Operations**
+```typescript
+await waitFor(() => expect(element).toBeInTheDocument());
+```
+
+**Module Mocking**
+```typescript
+jest.doMock('./module', () => ({ default: mockImpl }));
+```
+
+### Debug Techniques
+1. Test isolation: `npm test -- specific.test.ts`
+2. Console logging in tests
+3. Check coverage reports: `npm run test:coverage`
+4. Verify mock calls: `expect(mockFn).toHaveBeenCalledWith(...)`
 
 ## Best Practices
 
 ### Writing Tests
-
 1. **Test Behavior, Not Implementation**: Focus on user-facing functionality
 2. **Use Descriptive Test Names**: Clearly describe what is being tested
 3. **Arrange-Act-Assert Pattern**: Structure tests consistently
@@ -376,52 +370,53 @@ The CI pipeline includes:
 5. **Test Error Conditions**: Ensure robust error handling
 
 ### Test Organization
+1. **Group Related Tests**: Use `describe` blocks
+2. **Setup and Teardown**: Use `beforeEach` and `afterEach`
+3. **Shared Test Data**: Create reusable mock data
+4. **Consistent Naming**: Follow naming conventions
 
-1. **Group Related Tests**: Use `describe` blocks for logical grouping
-2. **Setup and Teardown**: Use `beforeEach` and `afterEach` for test isolation
-3. **Shared Test Data**: Create reusable mock data and utilities
-4. **Test File Naming**: Follow consistent naming conventions
+## Continuous Integration
 
-### Assertions
+### GitHub Actions Workflow
+```yaml
+name: Tests
+on: [push, pull_request]
 
-1. **Specific Assertions**: Use precise matchers for clear error messages
-2. **Async Testing**: Properly handle promises and async operations
-3. **Custom Matchers**: Create domain-specific assertion helpers
-4. **Snapshot Testing**: Use sparingly for stable UI components
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
 
-## Troubleshooting
+      - name: Install dependencies
+        run: npm ci
 
-### Common Issues
+      - name: Run tests
+        run: npm run test:full-suite
 
-1. **Timer-related Tests**: Use `jest.useFakeTimers()` for time-dependent tests
-2. **Async Operations**: Use `waitFor` or `await` for async assertions
-3. **DOM Events**: Use `fireEvent` or `userEvent` for user interactions
-4. **Module Mocking**: Use `jest.doMock` for dynamic mocking
+      - name: Install Playwright
+        run: npx playwright install --with-deps
 
-### Debug Techniques
+      - name: Run E2E tests
+        run: npm run test:e2e
+```
 
-1. **Test Isolation**: Run individual tests to isolate issues
-2. **Console Logging**: Use `console.log` in tests for debugging
-3. **Test Coverage**: Check coverage reports to identify untested code
-4. **Mock Verification**: Verify mock calls and arguments
+## Test Effectiveness Metrics
 
-## Contributing
-
-When adding new features or fixing bugs:
-
-1. **Write Tests First**: Follow TDD principles when possible
-2. **Update Existing Tests**: Ensure changes don't break existing functionality
-3. **Add Integration Tests**: Test feature interactions
-4. **Document Test Cases**: Update this guide for new testing patterns
-5. **Maintain Coverage**: Ensure new code meets coverage requirements
+Track these metrics to improve testing:
+- **Bug Escape Rate**: Bugs found in production vs tests
+- **Test Execution Time**: Optimize for developer productivity
+- **Coverage Trends**: Maintain or improve over time
+- **Flaky Test Rate**: Keep below 5%
 
 ## Resources
 
 - [Jest Documentation](https://jestjs.io/docs/getting-started)
 - [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- [Playwright Documentation](https://playwright.dev)
 - [Testing Best Practices](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)
-- [CI/CD with GitHub Actions](https://docs.github.com/en/actions)
 
 ---
 
-This testing framework ensures the reliability and maintainability of the GameLearn Platform video streaming system, providing confidence in deployments and enabling rapid development cycles.
+**Remember**: The goal is to catch issues early and ensure a seamless user experience!
