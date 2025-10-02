@@ -82,7 +82,10 @@
       "Read(//var/folders/_j/s2wqqyrd4tx7rj52yn51klr80000gn/T/chrome-devtools-mcp-1uYbmw/**)",
       "Bash(task-master:*)",
       "Read(//Users/vinayvidyasagar/Dev/LazyGameDevs/**)",
-      "mcp__task-master-ai__analyze_project_complexity"
+      "mcp__task-master-ai__analyze_project_complexity",
+      "mcp__task-master-ai__next_task",
+      "mcp__task-master-ai__get_task",
+      "mcp__task-master-ai__expand_task"
     ]
   },
   "enableAllProjectMcpServers": true,

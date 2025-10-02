@@ -187,8 +187,664 @@ async function main() {
 
   console.log('✅ Demo users created')
 
-  // Create comprehensive courses
-  const unityCourse = await prisma.course.create({
+  // Course template data for comprehensive generation
+  const courseTemplates = {
+    GAME_PROGRAMMING: [
+      {
+        title: 'Complete C++ Game Programming',
+        description: 'Master C++ for game development with practical projects. Learn memory management, OOP, and game engine architecture.',
+        price: 99.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 3200,
+        requirements: ['Basic programming knowledge', 'C++ compiler installed'],
+        objectives: ['Master C++ fundamentals', 'Build custom game engines', 'Optimize performance'],
+        tags: ['C++', 'Game Programming', 'Performance']
+      },
+      {
+        title: 'Python Game Development Fundamentals',
+        description: 'Learn game development with Python and Pygame. Perfect for beginners starting their coding journey.',
+        price: 49.99,
+        difficulty: 'BEGINNER',
+        duration: 1800,
+        requirements: ['No prior experience needed', 'Python 3.x installed'],
+        objectives: ['Learn Python basics', 'Create 2D games with Pygame', 'Understand game loops'],
+        tags: ['Python', 'Pygame', 'Beginner Friendly']
+      },
+      {
+        title: 'Advanced Game AI Programming',
+        description: 'Implement sophisticated AI systems including pathfinding, behavior trees, and machine learning for games.',
+        price: 149.99,
+        difficulty: 'ADVANCED',
+        duration: 4200,
+        requirements: ['Strong programming skills', 'Data structures knowledge', 'Game development experience'],
+        objectives: ['Implement A* pathfinding', 'Create behavior trees', 'Integrate ML models'],
+        tags: ['AI', 'Machine Learning', 'Advanced']
+      },
+      {
+        title: 'Game Networking and Multiplayer',
+        description: 'Build multiplayer games with authoritative servers, client prediction, and lag compensation.',
+        price: 119.99,
+        difficulty: 'ADVANCED',
+        duration: 3800,
+        requirements: ['Network programming basics', 'Game development experience'],
+        objectives: ['Implement client-server architecture', 'Handle latency', 'Secure multiplayer games'],
+        tags: ['Networking', 'Multiplayer', 'Backend']
+      },
+      {
+        title: 'Game Physics Programming',
+        description: 'Learn to implement physics systems from scratch including collision detection and rigid body dynamics.',
+        price: 89.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 2800,
+        requirements: ['Basic math skills', 'Programming fundamentals'],
+        objectives: ['Implement collision systems', 'Create physics engines', 'Optimize simulations'],
+        tags: ['Physics', 'Math', 'Simulation']
+      }
+    ],
+    GAME_DESIGN: [
+      {
+        title: 'Complete Game Design Masterclass',
+        description: 'Master core game design principles, player psychology, and balancing. Design engaging experiences.',
+        price: 79.99,
+        difficulty: 'BEGINNER',
+        duration: 2400,
+        requirements: ['Passion for games', 'No technical skills required'],
+        objectives: ['Understand game mechanics', 'Design balanced systems', 'Create game documents'],
+        tags: ['Game Design', 'Mechanics', 'Balancing']
+      },
+      {
+        title: 'Level Design Fundamentals',
+        description: 'Create compelling game levels with proper flow, pacing, and player guidance.',
+        price: 69.99,
+        difficulty: 'BEGINNER',
+        duration: 2000,
+        requirements: ['Basic game design knowledge', 'Any game engine'],
+        objectives: ['Design level layouts', 'Implement player flow', 'Test and iterate'],
+        tags: ['Level Design', 'Game Flow', 'Iteration']
+      },
+      {
+        title: 'Advanced Game Systems Design',
+        description: 'Design complex game systems including economies, progression, and emergent gameplay.',
+        price: 129.99,
+        difficulty: 'ADVANCED',
+        duration: 3600,
+        requirements: ['Game design experience', 'Systems thinking'],
+        objectives: ['Design game economies', 'Create progression systems', 'Balance complex mechanics'],
+        tags: ['Systems Design', 'Economy', 'Progression']
+      },
+      {
+        title: 'Narrative Design for Games',
+        description: 'Craft compelling stories and dialogue systems. Learn branching narratives and player choice.',
+        price: 74.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 2200,
+        requirements: ['Writing skills', 'Game design basics'],
+        objectives: ['Write game narratives', 'Design dialogue systems', 'Create branching stories'],
+        tags: ['Narrative', 'Writing', 'Story']
+      },
+      {
+        title: 'Mobile Game Design Essentials',
+        description: 'Design successful mobile games with monetization, retention, and touch controls.',
+        price: 59.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 1800,
+        requirements: ['Basic game design knowledge'],
+        objectives: ['Design for mobile platforms', 'Implement F2P mechanics', 'Optimize retention'],
+        tags: ['Mobile', 'F2P', 'Monetization']
+      }
+    ],
+    GAME_ART: [
+      {
+        title: '2D Game Art Mastery',
+        description: 'Create beautiful 2D game art from sprites to animations. Master pixel art and vector graphics.',
+        price: 84.99,
+        difficulty: 'BEGINNER',
+        duration: 2600,
+        requirements: ['Drawing tablet recommended', 'Art software (Photoshop/GIMP)'],
+        objectives: ['Create sprite sheets', 'Animate characters', 'Design UI elements'],
+        tags: ['2D Art', 'Pixel Art', 'Animation']
+      },
+      {
+        title: '3D Modeling for Games',
+        description: 'Learn game-ready 3D modeling with Blender. Create optimized characters and environments.',
+        price: 99.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 3400,
+        requirements: ['Blender installed', 'Basic 3D concepts'],
+        objectives: ['Model game assets', 'Create UV maps', 'Optimize polygon count'],
+        tags: ['3D Modeling', 'Blender', 'Game Assets']
+      },
+      {
+        title: 'Game Texturing and Materials',
+        description: 'Master PBR texturing and material creation. Use Substance Painter and Designer professionally.',
+        price: 109.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 2900,
+        requirements: ['3D modeling basics', 'Substance suite'],
+        objectives: ['Create PBR textures', 'Design tileable materials', 'Optimize texture memory'],
+        tags: ['Texturing', 'PBR', 'Substance']
+      },
+      {
+        title: 'Character Art for Games',
+        description: 'Design and create memorable game characters from concept to final 3D model.',
+        price: 119.99,
+        difficulty: 'ADVANCED',
+        duration: 4000,
+        requirements: ['Strong art fundamentals', '3D modeling experience'],
+        objectives: ['Design characters', 'Create high-poly sculpts', 'Retopology and rigging'],
+        tags: ['Character Design', 'Sculpting', 'ZBrush']
+      },
+      {
+        title: 'Environment Art Essentials',
+        description: 'Build stunning game environments with modular assets and world-building techniques.',
+        price: 94.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 3100,
+        requirements: ['3D software knowledge', 'Game engine basics'],
+        objectives: ['Create modular assets', 'Build game environments', 'Optimize draw calls'],
+        tags: ['Environment Art', 'World Building', 'Modular Design']
+      }
+    ],
+    GAME_AUDIO: [
+      {
+        title: 'Game Audio Design Fundamentals',
+        description: 'Create immersive soundscapes and sound effects for games. Master audio middleware and implementation.',
+        price: 79.99,
+        difficulty: 'BEGINNER',
+        duration: 2200,
+        requirements: ['DAW software', 'Headphones or monitors'],
+        objectives: ['Design sound effects', 'Implement audio in engines', 'Mix game audio'],
+        tags: ['Sound Design', 'Audio', 'SFX']
+      },
+      {
+        title: 'Music Composition for Games',
+        description: 'Compose adaptive and interactive game music. Learn orchestration and implementation.',
+        price: 89.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 2800,
+        requirements: ['Music theory basics', 'DAW and virtual instruments'],
+        objectives: ['Compose game music', 'Create adaptive scores', 'Implement FMOD/Wwise'],
+        tags: ['Music', 'Composition', 'Adaptive Audio']
+      },
+      {
+        title: 'Advanced Audio Implementation',
+        description: 'Master FMOD and Wwise for professional game audio. Implement complex interactive systems.',
+        price: 124.99,
+        difficulty: 'ADVANCED',
+        duration: 3300,
+        requirements: ['Audio design experience', 'Game development knowledge'],
+        objectives: ['Master audio middleware', 'Create interactive systems', 'Optimize audio performance'],
+        tags: ['FMOD', 'Wwise', 'Implementation']
+      },
+      {
+        title: 'Voice Acting and Dialogue',
+        description: 'Direct and edit voice acting for games. Manage dialogue pipelines and localization.',
+        price: 69.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 1900,
+        requirements: ['Audio editing software', 'Recording equipment'],
+        objectives: ['Direct voice actors', 'Edit dialogue', 'Manage VO pipelines'],
+        tags: ['Voice Acting', 'Dialogue', 'Recording']
+      },
+      {
+        title: 'Procedural Audio for Games',
+        description: 'Generate dynamic audio content procedurally. Create infinite variations and reactive systems.',
+        price: 99.99,
+        difficulty: 'ADVANCED',
+        duration: 2700,
+        requirements: ['Programming skills', 'Audio fundamentals'],
+        objectives: ['Generate procedural audio', 'Create reactive systems', 'Optimize real-time audio'],
+        tags: ['Procedural', 'Generative', 'Programming']
+      }
+    ],
+    UNITY_DEVELOPMENT: [
+      {
+        title: 'Unity Beginner Bootcamp',
+        description: 'Start your Unity journey with hands-on projects. Build 5 complete games from scratch.',
+        price: 64.99,
+        difficulty: 'BEGINNER',
+        duration: 2100,
+        requirements: ['Computer with Unity installed', 'No prior experience needed'],
+        objectives: ['Master Unity basics', 'Build complete games', 'Publish to platforms'],
+        tags: ['Unity', 'Beginner', 'Game Development']
+      },
+      {
+        title: 'Unity 2D Game Development',
+        description: 'Master 2D game development in Unity. Create platformers, puzzles, and mobile games.',
+        price: 74.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 2600,
+        requirements: ['Basic Unity knowledge', 'C# fundamentals'],
+        objectives: ['Build 2D games', 'Implement physics', 'Create tilemaps'],
+        tags: ['Unity', '2D', 'Platformer']
+      },
+      {
+        title: 'Unity 3D Advanced Techniques',
+        description: 'Advanced Unity development with custom shaders, optimization, and architectural patterns.',
+        price: 139.99,
+        difficulty: 'ADVANCED',
+        duration: 4100,
+        requirements: ['Strong Unity skills', 'C# proficiency', 'Shader knowledge'],
+        objectives: ['Write custom shaders', 'Optimize performance', 'Implement design patterns'],
+        tags: ['Unity', 'Advanced', 'Shaders']
+      },
+      {
+        title: 'Unity VR Development',
+        description: 'Build immersive VR experiences with Unity and XR Toolkit. Support multiple VR platforms.',
+        price: 109.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 3000,
+        requirements: ['Unity experience', 'VR headset recommended'],
+        objectives: ['Build VR applications', 'Implement teleportation', 'Optimize for VR'],
+        tags: ['Unity', 'VR', 'XR Toolkit']
+      },
+      {
+        title: 'Unity Multiplayer with Netcode',
+        description: 'Create multiplayer games using Unity Netcode for GameObjects. Implement authoritative servers.',
+        price: 119.99,
+        difficulty: 'ADVANCED',
+        duration: 3500,
+        requirements: ['Unity proficiency', 'Networking basics'],
+        objectives: ['Implement multiplayer', 'Handle synchronization', 'Create dedicated servers'],
+        tags: ['Unity', 'Multiplayer', 'Netcode']
+      }
+    ],
+    UNREAL_DEVELOPMENT: [
+      {
+        title: 'Unreal Engine 5 for Beginners',
+        description: 'Learn Unreal Engine 5 with Blueprints. No coding required to create stunning games.',
+        price: 79.99,
+        difficulty: 'BEGINNER',
+        duration: 2500,
+        requirements: ['Powerful PC', 'Unreal Engine 5 installed'],
+        objectives: ['Master Blueprints', 'Use Nanite and Lumen', 'Build complete games'],
+        tags: ['Unreal', 'Blueprints', 'Beginner']
+      },
+      {
+        title: 'Unreal C++ Game Development',
+        description: 'Master Unreal Engine with C++ programming. Build professional AAA-quality systems.',
+        price: 134.99,
+        difficulty: 'ADVANCED',
+        duration: 4300,
+        requirements: ['C++ knowledge', 'Unreal basics', 'Strong programming skills'],
+        objectives: ['Master Unreal C++', 'Create gameplay systems', 'Optimize performance'],
+        tags: ['Unreal', 'C++', 'AAA']
+      },
+      {
+        title: 'Unreal Blueprint Mastery',
+        description: 'Advanced Blueprint techniques for complex game systems without coding.',
+        price: 89.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 2900,
+        requirements: ['Basic Unreal knowledge', 'Blueprint fundamentals'],
+        objectives: ['Create advanced systems', 'Optimize Blueprints', 'Integrate C++'],
+        tags: ['Unreal', 'Blueprints', 'Visual Scripting']
+      },
+      {
+        title: 'Unreal Environments and Landscapes',
+        description: 'Create breathtaking open-world environments with Unreal Engine 5 landscape tools.',
+        price: 99.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 3200,
+        requirements: ['Unreal basics', '3D art fundamentals'],
+        objectives: ['Design landscapes', 'Use Nanite for detail', 'Optimize large worlds'],
+        tags: ['Unreal', 'Environment', 'Landscape']
+      },
+      {
+        title: 'Unreal Animation and Rigging',
+        description: 'Implement character animation systems with Animation Blueprints and Control Rig.',
+        price: 109.99,
+        difficulty: 'ADVANCED',
+        duration: 3400,
+        requirements: ['Unreal experience', 'Animation basics'],
+        objectives: ['Create animation systems', 'Implement IK', 'Use Control Rig'],
+        tags: ['Unreal', 'Animation', 'Rigging']
+      }
+    ],
+    GODOT_DEVELOPMENT: [
+      {
+        title: 'Godot 4 Complete Guide',
+        description: 'Master Godot 4 with GDScript. Build 2D and 3D games with this powerful open-source engine.',
+        price: 59.99,
+        difficulty: 'BEGINNER',
+        duration: 2300,
+        requirements: ['Godot 4 installed', 'Basic computer skills'],
+        objectives: ['Learn GDScript', 'Build 2D and 3D games', 'Export to platforms'],
+        tags: ['Godot', 'GDScript', 'Open Source']
+      },
+      {
+        title: 'Godot 2D Game Development',
+        description: 'Create beautiful 2D games with Godot. Master nodes, signals, and scene management.',
+        price: 49.99,
+        difficulty: 'BEGINNER',
+        duration: 1900,
+        requirements: ['Godot installed', 'No prior experience'],
+        objectives: ['Master 2D nodes', 'Implement game mechanics', 'Create pixel-perfect games'],
+        tags: ['Godot', '2D', 'Indie']
+      },
+      {
+        title: 'Godot 3D and Shaders',
+        description: 'Build 3D games and write custom shaders in Godot 4. Master the visual shader editor.',
+        price: 84.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 2800,
+        requirements: ['Godot basics', '3D concepts'],
+        objectives: ['Create 3D games', 'Write shaders', 'Optimize rendering'],
+        tags: ['Godot', '3D', 'Shaders']
+      },
+      {
+        title: 'Godot Multiplayer Networking',
+        description: 'Implement multiplayer games with Godot high-level networking API.',
+        price: 79.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 2400,
+        requirements: ['Godot proficiency', 'Networking basics'],
+        objectives: ['Create multiplayer games', 'Handle synchronization', 'Implement lobbies'],
+        tags: ['Godot', 'Multiplayer', 'Networking']
+      },
+      {
+        title: 'Advanced Godot C# Development',
+        description: 'Use C# with Godot for performance-critical systems and enterprise integration.',
+        price: 94.99,
+        difficulty: 'ADVANCED',
+        duration: 3100,
+        requirements: ['C# knowledge', 'Godot experience'],
+        objectives: ['Integrate C# with Godot', 'Optimize performance', 'Use .NET libraries'],
+        tags: ['Godot', 'C#', 'Performance']
+      }
+    ],
+    MOBILE_GAMES: [
+      {
+        title: 'Complete Mobile Game Development',
+        description: 'Build and publish successful mobile games for iOS and Android. Master touch controls and monetization.',
+        price: 89.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 2900,
+        requirements: ['Unity or Unreal basics', 'Mobile device for testing'],
+        objectives: ['Build mobile games', 'Implement IAP', 'Publish to stores'],
+        tags: ['Mobile', 'iOS', 'Android']
+      },
+      {
+        title: 'Casual Mobile Game Design',
+        description: 'Design addictive casual games with proven mechanics. Learn retention and monetization.',
+        price: 69.99,
+        difficulty: 'BEGINNER',
+        duration: 2000,
+        requirements: ['Game design basics', 'Mobile device'],
+        objectives: ['Design casual mechanics', 'Implement F2P model', 'Optimize retention'],
+        tags: ['Mobile', 'Casual', 'F2P']
+      },
+      {
+        title: 'Mobile Game Performance',
+        description: 'Optimize mobile games for battery life, frame rate, and device compatibility.',
+        price: 99.99,
+        difficulty: 'ADVANCED',
+        duration: 2700,
+        requirements: ['Mobile game development', 'Profiling tools'],
+        objectives: ['Optimize performance', 'Reduce battery drain', 'Support low-end devices'],
+        tags: ['Mobile', 'Optimization', 'Performance']
+      },
+      {
+        title: 'Mobile AR Game Development',
+        description: 'Create augmented reality games with ARCore and ARKit. Build location-based experiences.',
+        price: 114.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 3300,
+        requirements: ['Unity experience', 'AR-capable device'],
+        objectives: ['Implement AR features', 'Create location games', 'Handle real-world tracking'],
+        tags: ['Mobile', 'AR', 'Location-Based']
+      },
+      {
+        title: 'Mobile Game Monetization',
+        description: 'Master mobile monetization strategies including ads, IAP, and subscription models.',
+        price: 74.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 1800,
+        requirements: ['Published mobile game', 'Analytics tools'],
+        objectives: ['Implement monetization', 'Optimize ARPU', 'Balance gameplay and revenue'],
+        tags: ['Mobile', 'Monetization', 'Analytics']
+      }
+    ],
+    INDIE_DEVELOPMENT: [
+      {
+        title: 'Solo Indie Game Development',
+        description: 'Learn to build and ship games as a solo developer. Cover all aspects from code to marketing.',
+        price: 79.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 3000,
+        requirements: ['Basic game dev skills', 'Self-motivation'],
+        objectives: ['Manage solo projects', 'Market indie games', 'Ship complete games'],
+        tags: ['Indie', 'Solo Dev', 'Marketing']
+      },
+      {
+        title: 'Game Marketing for Indies',
+        description: 'Market your indie game effectively. Build community, run campaigns, and get press coverage.',
+        price: 64.99,
+        difficulty: 'BEGINNER',
+        duration: 1600,
+        requirements: ['Game project in development'],
+        objectives: ['Build community', 'Create marketing materials', 'Run launch campaigns'],
+        tags: ['Indie', 'Marketing', 'Community']
+      },
+      {
+        title: 'Rapid Game Prototyping',
+        description: 'Quickly prototype game ideas to test fun and viability. Perfect for game jams and MVP creation.',
+        price: 54.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 1500,
+        requirements: ['Game engine knowledge', 'Design basics'],
+        objectives: ['Prototype quickly', 'Test game mechanics', 'Iterate on feedback'],
+        tags: ['Indie', 'Prototyping', 'Game Jams']
+      },
+      {
+        title: 'Kickstarter for Game Developers',
+        description: 'Launch successful crowdfunding campaigns for your indie game. From campaign to fulfillment.',
+        price: 69.99,
+        difficulty: 'BEGINNER',
+        duration: 1700,
+        requirements: ['Game prototype', 'Marketing basics'],
+        objectives: ['Create campaigns', 'Build backer community', 'Manage fulfillment'],
+        tags: ['Indie', 'Kickstarter', 'Crowdfunding']
+      },
+      {
+        title: 'Steam Success for Indie Devs',
+        description: 'Navigate Steam launch, optimize store page, and maximize wishlists and sales.',
+        price: 84.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 2100,
+        requirements: ['Game near completion', 'Steamworks account'],
+        objectives: ['Optimize Steam page', 'Build wishlists', 'Launch successfully'],
+        tags: ['Indie', 'Steam', 'Publishing']
+      }
+    ],
+    VR_AR_DEVELOPMENT: [
+      {
+        title: 'VR Game Development Fundamentals',
+        description: 'Build immersive VR games for Quest, PSVR, and PC VR. Master locomotion and interaction.',
+        price: 109.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 3200,
+        requirements: ['Game engine experience', 'VR headset'],
+        objectives: ['Create VR games', 'Implement comfort features', 'Support multiple platforms'],
+        tags: ['VR', 'XR', 'Immersive']
+      },
+      {
+        title: 'AR Game Development',
+        description: 'Create engaging AR experiences with ARCore, ARKit, and location-based gameplay.',
+        price: 99.99,
+        difficulty: 'INTERMEDIATE',
+        duration: 2800,
+        requirements: ['Mobile development', 'AR-capable device'],
+        objectives: ['Build AR apps', 'Implement plane detection', 'Create location games'],
+        tags: ['AR', 'Mobile', 'Location']
+      },
+      {
+        title: 'VR Interaction Design',
+        description: 'Design intuitive VR interactions and UI. Master hand tracking and controller input.',
+        price: 89.99,
+        difficulty: 'ADVANCED',
+        duration: 2500,
+        requirements: ['VR development basics', 'UX knowledge'],
+        objectives: ['Design VR interactions', 'Implement hand tracking', 'Create VR UI'],
+        tags: ['VR', 'UX', 'Interaction']
+      },
+      {
+        title: 'Mixed Reality Development',
+        description: 'Build mixed reality experiences for HoloLens and Quest 3. Blend digital and physical worlds.',
+        price: 129.99,
+        difficulty: 'ADVANCED',
+        duration: 3600,
+        requirements: ['XR development', 'Spatial computing concepts'],
+        objectives: ['Create MR apps', 'Implement passthrough', 'Handle spatial anchors'],
+        tags: ['MR', 'HoloLens', 'Spatial']
+      },
+      {
+        title: 'VR Performance Optimization',
+        description: 'Achieve smooth 90fps+ in VR. Master rendering techniques and performance profiling.',
+        price: 119.99,
+        difficulty: 'ADVANCED',
+        duration: 3100,
+        requirements: ['VR development', 'Graphics programming'],
+        objectives: ['Optimize VR rendering', 'Maintain high framerates', 'Reduce latency'],
+        tags: ['VR', 'Performance', 'Optimization']
+      }
+    ]
+  }
+
+  // Helper function to generate courses from templates
+  function generateCourseData(category: string, template: any, instructor: any) {
+    return {
+      title: template.title,
+      description: template.description,
+      thumbnail: '/api/placeholder/400/225',
+      price: template.price,
+      published: true,
+      category: category,
+      engine: category.includes('UNITY') ? 'UNITY' : category.includes('UNREAL') ? 'UNREAL' : category.includes('GODOT') ? 'GODOT' : null,
+      difficulty: template.difficulty,
+      duration: template.duration,
+      requirements: {
+        create: template.requirements.map((req: string, idx: number) => ({
+          requirement: req,
+          order: idx + 1
+        }))
+      },
+      objectives: {
+        create: template.objectives.map((obj: string, idx: number) => ({
+          objective: obj,
+          order: idx + 1
+        }))
+      },
+      tags: {
+        create: template.tags.map((tag: string) => ({ tag }))
+      },
+      instructorId: instructor.id,
+      modules: {
+        create: [
+          {
+            title: `${template.title.split(' ')[0]} Fundamentals`,
+            description: `Core concepts and foundations`,
+            order: 1,
+            duration: Math.floor(template.duration * 0.4),
+            lessons: {
+              create: [
+                {
+                  title: 'Getting Started',
+                  description: 'Introduction and setup',
+                  type: 'VIDEO',
+                  content: '{"videoUrl": "/videos/intro.mp4"}',
+                  order: 1,
+                  duration: 30,
+                  videoUrl: '/videos/intro.mp4'
+                },
+                {
+                  title: 'Core Concepts',
+                  description: 'Understanding the fundamentals',
+                  type: 'VIDEO',
+                  content: '{"videoUrl": "/videos/concepts.mp4"}',
+                  order: 2,
+                  duration: 45,
+                  videoUrl: '/videos/concepts.mp4'
+                }
+              ]
+            }
+          },
+          {
+            title: 'Practical Applications',
+            description: 'Hands-on projects and implementation',
+            order: 2,
+            duration: Math.floor(template.duration * 0.6),
+            lessons: {
+              create: [
+                {
+                  title: 'Building Your First Project',
+                  description: 'Step-by-step project creation',
+                  type: 'VIDEO',
+                  content: '{"videoUrl": "/videos/project.mp4"}',
+                  order: 1,
+                  duration: 60,
+                  videoUrl: '/videos/project.mp4'
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+
+  // Determine instructor assignments
+  const instructors = [instructorUnity, instructorUnreal, instructorDesign, instructorGodot]
+  const instructorMap: { [key: string]: any } = {
+    GAME_PROGRAMMING: instructorUnity,
+    GAME_DESIGN: instructorDesign,
+    GAME_ART: instructorUnreal,
+    GAME_AUDIO: instructorDesign,
+    UNITY_DEVELOPMENT: instructorUnity,
+    UNREAL_DEVELOPMENT: instructorUnreal,
+    GODOT_DEVELOPMENT: instructorGodot,
+    MOBILE_GAMES: instructorUnity,
+    INDIE_DEVELOPMENT: instructorDesign,
+    VR_AR_DEVELOPMENT: instructorUnreal
+  }
+
+  // Generate all courses (50+)
+  console.log('📚 Generating comprehensive course catalog...')
+  const allCourses: any[] = []
+
+  for (const [category, templates] of Object.entries(courseTemplates)) {
+    const instructor = instructorMap[category] || instructors[0]
+
+    for (const template of templates) {
+      const courseData = generateCourseData(category, template, instructor)
+      const course = await prisma.course.create({
+        data: courseData,
+        include: {
+          modules: {
+            include: {
+              lessons: true
+            }
+          }
+        }
+      })
+      allCourses.push(course)
+      console.log(`  ✓ Created: ${course.title}`)
+    }
+  }
+
+  console.log(`✅ Created ${allCourses.length} courses across all categories`)
+
+  // Keep original course references for backward compatibility with existing seed data
+  const unityCourse = allCourses.find(c => c.category === 'UNITY_DEVELOPMENT') || allCourses[0]
+  const unrealCourse = allCourses.find(c => c.category === 'UNREAL_DEVELOPMENT') || allCourses[0]
+  const gameDesignCourse = allCourses.find(c => c.category === 'GAME_DESIGN') || allCourses[0]
+  const godotCourse = allCourses.find(c => c.category === 'GODOT_DEVELOPMENT') || allCourses[0]
+  const mobileCourse = allCourses.find(c => c.category === 'MOBILE_GAMES') || allCourses[0]
+
+  // Legacy course creation removed - now using template system above
+
+  // Create comprehensive courses (LEGACY - keeping for reference, but courses now generated above)
+  /*const unityCourse = await prisma.course.create({
     data: {
       title: 'Complete Unity Game Development Course',
       description: 'Learn Unity from scratch and build 10 complete games. Master C# programming, game physics, UI design, and publishing to multiple platforms.',
@@ -603,9 +1259,7 @@ async function main() {
         },
       },
     },
-  })
-
-  console.log('✅ All courses created successfully')
+  })*/
 
   // Create enrollments for students
   const enrollments = await Promise.all([
