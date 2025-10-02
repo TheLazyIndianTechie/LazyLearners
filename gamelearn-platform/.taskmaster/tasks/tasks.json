@@ -1,0 +1,200 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Complete Database Seeding and Sample Content Generation",
+        "description": "Populate the database with comprehensive sample data including courses, users, lessons, and test content to enable full platform functionality testing",
+        "status": "in-progress",
+        "priority": "high",
+        "dependencies": [],
+        "tags": [
+          "master"
+        ],
+        "details": "Create Prisma seed script (prisma/seed.ts) with realistic sample data: 1) Generate 50+ sample courses across Unity, Unreal, and Godot with proper categories and difficulty levels 2) Create test user accounts for all roles (students, instructors, admins) with proper OAuth integration 3) Add sample course modules and lessons with placeholder video content 4) Generate mock payment records and license keys for testing enrollment flows 5) Include forum posts, reviews, and user progress data 6) Ensure all database relationships are properly populated with referential integrity",
+        "testStrategy": "Run seed script and verify: database contains sample courses accessible via API, user authentication works with seeded accounts, course enrollment flows function with sample license keys, all relationships properly established without foreign key errors",
+        "subtasks": [],
+        "createdAt": "2025-10-01T13:45:00.000Z",
+        "updatedAt": "2025-10-01T13:45:00.000Z"
+      },
+      {
+        "id": 2,
+        "title": "Implement Comprehensive Course Management Interface for Instructors",
+        "description": "Build complete course creation and management UI enabling instructors to create, edit, and publish courses with modules and lessons",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "tags": [
+          "master"
+        ],
+        "details": "Create instructor course management system: 1) Course creation form with title, description, category, difficulty, pricing using shadcn/ui components 2) Module and lesson management with drag-and-drop reordering using @dnd-kit 3) Rich text editor for course descriptions and lesson content 4) Video upload interface with progress tracking and thumbnail generation 5) Course preview functionality for content validation 6) Publishing workflow with course status management (draft/published/archived) 7) Course analytics dashboard showing enrollment and completion metrics 8) Integration with existing payment system for course pricing",
+        "testStrategy": "Test instructor workflow: create course from scratch, add multiple modules and lessons, upload video content, preview course as student, publish course and verify it appears in marketplace, check analytics dashboard displays correct data",
+        "subtasks": [],
+        "createdAt": "2025-10-01T13:45:00.000Z",
+        "updatedAt": "2025-10-01T13:45:00.000Z"
+      },
+      {
+        "id": 3,
+        "title": "Integrate Video Streaming with Course Lesson Content",
+        "description": "Connect the existing video streaming infrastructure with course lessons to enable seamless video playback within the learning experience",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "1",
+          "2"
+        ],
+        "tags": [
+          "master"
+        ],
+        "details": "Implement video-lesson integration: 1) Extend lesson model to include video metadata (duration, quality options, thumbnails) 2) Create lesson video player component with progress tracking and resume functionality 3) Implement video access control using license key validation from existing system 4) Add video quality selection and adaptive streaming integration 5) Create video progress tracking that updates user completion status 6) Implement video bookmarking and note-taking features 7) Add video analytics for engagement metrics 8) Ensure mobile-responsive video playback with touch controls",
+        "testStrategy": "Verify video integration: enrolled students can watch lesson videos, progress is tracked and resumable, video quality adapts to connection, unauthorized users cannot access content, mobile video playback functions properly",
+        "subtasks": [],
+        "createdAt": "2025-10-01T13:45:00.000Z",
+        "updatedAt": "2025-10-01T13:45:00.000Z"
+      },
+      {
+        "id": 4,
+        "title": "Build Comprehensive Student Dashboard and Learning Experience",
+        "description": "Create complete student interface for course discovery, enrollment, learning progress tracking, and achievement management",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "1",
+          "3"
+        ],
+        "tags": [
+          "master"
+        ],
+        "details": "Develop student learning experience: 1) Personal dashboard showing enrolled courses, progress indicators, and recent activity 2) Course discovery with advanced filtering by engine (Unity/Unreal/Godot), difficulty, and categories 3) One-click enrollment flow with license key activation integration 4) Learning path visualization with prerequisite management 5) Achievement and certification system with blockchain credential integration 6) Study streak tracking and gamification elements 7) Course completion certificates with PDF generation 8) Social features for course discussions and peer interaction",
+        "testStrategy": "Test student journey: discover and enroll in courses, track learning progress across multiple courses, earn achievements and certificates, interact with course discussions, verify all progress persists across sessions",
+        "subtasks": [],
+        "createdAt": "2025-10-01T13:45:00.000Z",
+        "updatedAt": "2025-10-01T13:45:00.000Z"
+      },
+      {
+        "id": 5,
+        "title": "Implement Game Engine Integration and Project Management",
+        "description": "Build Unity, Unreal Engine, and Godot integration features for seamless project import/export and version control",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "3",
+          "4"
+        ],
+        "tags": [
+          "master"
+        ],
+        "details": "Create game engine integrations: 1) Unity Hub integration with automatic project setup and package management 2) Unreal Engine .uproject file handling with Blueprint and C++ templates 3) Godot project structure support with GDScript integration 4) WebGL build pipeline for automatic game deployment and hosting 5) Version control integration (Git) with visual diff tools for binary assets 6) Asset management system with thumbnail previews and metadata 7) Project templates library for different game types 8) Cloud-based development environment setup with pre-configured engine versions",
+        "testStrategy": "Verify engine integrations: create new projects in each engine, import/export projects successfully, WebGL builds deploy correctly, version control tracks changes properly, asset management functions across all supported engines",
+        "subtasks": [],
+        "createdAt": "2025-10-01T13:45:00.000Z",
+        "updatedAt": "2025-10-01T13:45:00.000Z"
+      },
+      {
+        "id": 6,
+        "title": "Develop Real-Time Collaboration and Communication Features",
+        "description": "Implement WebSocket-based real-time collaboration tools for multi-user code editing, voice chat, and project synchronization",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "4",
+          "5"
+        ],
+        "tags": [
+          "master"
+        ],
+        "details": "Build collaboration infrastructure: 1) WebSocket server implementation for real-time communication 2) Multi-user code editor with operational transformation and conflict resolution 3) Voice and video chat integration using WebRTC 4) Real-time project synchronization with live cursors and user presence 5) Team management with role-based permissions (programmer, artist, designer) 6) Session recording for collaborative coding sessions 7) Screen sharing functionality for mentorship and debugging 8) Integrated chat with file sharing and code snippet support",
+        "testStrategy": "Test collaboration features: multiple users edit code simultaneously without conflicts, voice/video chat functions reliably, project changes sync in real-time, session recordings capture all activities properly",
+        "subtasks": [],
+        "createdAt": "2025-10-01T13:45:00.000Z",
+        "updatedAt": "2025-10-01T13:45:00.000Z"
+      },
+      {
+        "id": 7,
+        "title": "Create Portfolio Showcase and WebGL Game Hosting System",
+        "description": "Build comprehensive portfolio platform for students to showcase projects with integrated WebGL game hosting and social sharing",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "5",
+          "6"
+        ],
+        "tags": [
+          "master"
+        ],
+        "details": "Implement portfolio showcase: 1) Portfolio builder with drag-and-drop layout customization 2) WebGL game hosting with embedded play experience and fullscreen support 3) Project gallery with high-resolution screenshots and video presentations 4) Social sharing integration with LinkedIn, Twitter, and professional networks 5) Employer portal for recruiter access and candidate discovery 6) Portfolio analytics showing view counts and engagement metrics 7) Custom domain support for professional portfolios 8) SEO optimization for portfolio discoverability",
+        "testStrategy": "Verify portfolio functionality: students can create and customize portfolios, WebGL games play smoothly in browser, social sharing generates proper previews, employer portal provides good candidate filtering, portfolios are mobile-responsive",
+        "subtasks": [],
+        "createdAt": "2025-10-01T13:45:00.000Z",
+        "updatedAt": "2025-10-01T13:45:00.000Z"
+      },
+      {
+        "id": 8,
+        "title": "Implement Advanced Assessment and Certification System",
+        "description": "Build comprehensive assessment tools with automated grading, peer review, and blockchain-based certification",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "4",
+          "7"
+        ],
+        "tags": [
+          "master"
+        ],
+        "details": "Create assessment infrastructure: 1) Quiz builder with multiple question types (multiple choice, code completion, drag-and-drop) 2) Practical project assignments with automated testing and peer review 3) Code review system with instructor and peer feedback integration 4) Mock technical interview preparation with industry-standard questions 5) Portfolio defense scheduling with live presentation capabilities 6) Blockchain certificate generation with employer verification 7) Skill badge system for micro-credentials 8) Integration with Unity, Epic Games, and industry certification programs",
+        "testStrategy": "Test assessment system: create and take quizzes with various question types, submit practical projects for review, receive meaningful feedback, earn certificates that verify on blockchain, skill badges display correctly in profiles",
+        "subtasks": [],
+        "createdAt": "2025-10-01T13:45:00.000Z",
+        "updatedAt": "2025-10-01T13:45:00.000Z"
+      },
+      {
+        "id": 9,
+        "title": "Build Community Features and Social Learning Platform",
+        "description": "Implement comprehensive community tools including forums, study groups, game jams, and mentorship matching",
+        "status": "pending",
+        "priority": "low",
+        "dependencies": [
+          "6",
+          "8"
+        ],
+        "tags": [
+          "master"
+        ],
+        "details": "Develop community platform: 1) Discussion forums with course-specific threads and instructor participation 2) Study group formation with progress tracking and accountability features 3) Game jam hosting platform with theme announcements and submission systems 4) Mentorship matching algorithm connecting experienced developers with learners 5) Developer showcase events highlighting exceptional student work 6) Community leaderboards and recognition systems 7) Interest-based groups for specialized topics (VR, mobile, indie development) 8) Content curation system for community-generated tutorials and resources",
+        "testStrategy": "Verify community features: forums enable meaningful discussions, study groups form and track progress effectively, game jam submissions work smoothly, mentorship matching creates valuable connections, community events generate engagement",
+        "subtasks": [],
+        "createdAt": "2025-10-01T13:45:00.000Z",
+        "updatedAt": "2025-10-01T13:45:00.000Z"
+      },
+      {
+        "id": 10,
+        "title": "Optimize Performance and Complete Production Deployment",
+        "description": "Implement performance optimizations, comprehensive monitoring, and complete production deployment with global CDN integration",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "7",
+          "8",
+          "9"
+        ],
+        "tags": [
+          "master"
+        ],
+        "details": "Production optimization and deployment: 1) Performance optimization with bundle analysis and code splitting 2) CDN integration for global asset delivery with 100+ edge locations 3) Database query optimization and connection pooling 4) Comprehensive monitoring with Sentry error tracking and performance metrics 5) Load testing with simulated 10,000+ concurrent users 6) Security audit including penetration testing and vulnerability scanning 7) WCAG 2.1 AA accessibility compliance verification 8) Mobile app preparation with PWA features and offline capabilities 9) Analytics integration for user behavior tracking and conversion optimization",
+        "testStrategy": "Verify production readiness: platform handles expected load without performance degradation, global CDN delivers content sub-50ms latency, monitoring alerts function properly, security audit passes all checks, accessibility compliance verified with automated and manual testing",
+        "subtasks": [],
+        "createdAt": "2025-10-01T13:45:00.000Z",
+        "updatedAt": "2025-10-01T13:45:00.000Z"
+      }
+    ],
+    "metadata": {
+      "version": "1.0",
+      "created": "2025-10-01T13:45:00.000Z",
+      "lastModified": "2025-10-01T13:45:00.000Z",
+      "totalTasks": 10,
+      "completedTasks": 0
+    }
+  }
+}

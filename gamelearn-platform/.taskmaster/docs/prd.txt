@@ -1,0 +1,236 @@
+# GameLearn Platform - Remaining MVP Tasks PRD
+
+## Project Overview
+Complete the remaining 10% of the LazyGameDevs GameLearn Platform MVP. The platform is a comprehensive game development Learning Management System (LMS) built with Next.js 15, TypeScript, and modern web technologies, combining Udemy's marketplace model with specialized game development education tools.
+
+## Current Status
+- MVP Completion: ~90%
+- Core infrastructure: COMPLETE (payments, authentication, database, video streaming)
+- Remaining work: Content management, UI polish, feature completion
+
+## Priority Tasks
+
+### 1. Complete Database Seeding and Sample Content Generation
+**Priority:** High
+**Complexity:** 4/10
+**Estimated Subtasks:** 5
+
+Generate comprehensive sample data for development and testing:
+- Create 50+ sample courses across Unity, Unreal, and Godot with proper categories and difficulty levels
+- Generate test user accounts for all roles (students, instructors, admins) with OAuth integration
+- Add sample course modules and lessons with placeholder video content
+- Create mock payment records and license keys for testing enrollment flows
+- Include forum posts, reviews, user progress data, portfolios, and certifications
+
+**Technical Details:**
+Expand the existing prisma/seed.ts file. Current seed creates 5 courses and basic users. Need to scale to 50+ courses with realistic data distribution (30% BEGINNER, 50% INTERMEDIATE, 20% ADVANCED), proper pricing ($29.99-$199.99), and comprehensive relationships.
+
+**Test Strategy:**
+Run seed script and verify: database contains sample courses accessible via API, user authentication works with seeded accounts, course enrollment flows function with sample license keys, all relationships properly established without foreign key errors.
+
+### 2. Implement Comprehensive Course Management Interface for Instructors
+**Priority:** High
+**Complexity:** 7/10
+**Estimated Subtasks:** 8
+
+Build complete instructor course management system:
+- Course creation form with title, description, category, difficulty, pricing using shadcn/ui components
+- Module and lesson management with drag-and-drop reordering using @dnd-kit
+- Rich text editor for course descriptions and lesson content
+- Video upload interface with progress tracking and thumbnail generation
+- Course preview functionality for content validation
+- Publishing workflow with course status management (draft/published/archived)
+- Course analytics dashboard showing enrollment and completion metrics
+- Integration with existing payment system for course pricing
+
+**Technical Details:**
+Basic course creation page exists at /instructor/courses/create but lacks module management, video upload, and analytics. Need to build comprehensive management interface using existing shadcn/ui components and Next.js 15 app router. Integrate with /api/courses endpoints.
+
+**Test Strategy:**
+Test instructor workflow: create course from scratch, add multiple modules and lessons, upload video content, preview course as student, publish course and verify it appears in marketplace, check analytics dashboard displays correct data.
+
+### 3. Integrate Video Streaming with Course Lesson Content
+**Priority:** High
+**Complexity:** 6/10
+**Estimated Subtasks:** 6
+
+Connect existing video streaming infrastructure with course lessons:
+- Extend lesson model to include video metadata (duration, quality options, thumbnails)
+- Create lesson video player component with progress tracking and resume functionality
+- Implement video access control using license key validation from existing system
+- Add video quality selection and adaptive streaming integration
+- Create video progress tracking that updates user completion status
+- Implement video bookmarking and note-taking features
+- Add video analytics for engagement metrics
+- Ensure mobile-responsive video playback with touch controls
+
+**Technical Details:**
+VideoPlayer component exists with analytics and quality selection. Video streaming API (/api/video/stream) and license key system are implemented. Main work is connecting these systems with lesson content and adding progress tracking.
+
+**Test Strategy:**
+Verify video integration: enrolled students can watch lesson videos, progress is tracked and resumable, video quality adapts to connection, unauthorized users cannot access content, mobile video playback functions properly.
+
+### 4. Build Comprehensive Student Dashboard and Learning Experience
+**Priority:** Medium
+**Complexity:** 6/10
+**Estimated Subtasks:** 7
+
+Create complete student interface:
+- Personal dashboard showing enrolled courses, progress indicators, and recent activity
+- Course discovery with advanced filtering by engine (Unity/Unreal/Godot), difficulty, and categories
+- One-click enrollment flow with license key activation integration
+- Learning path visualization with prerequisite management
+- Achievement and certification system with blockchain credential integration
+- Study streak tracking and gamification elements
+- Course completion certificates with PDF generation
+- Social features for course discussions and peer interaction
+
+**Technical Details:**
+Basic enrollment and progress tracking systems exist in database and API. Dashboard needs to aggregate data and provide filtering/search. Existing payment and license key systems handle enrollment.
+
+**Test Strategy:**
+Test student journey: discover and enroll in courses, track learning progress across multiple courses, earn achievements and certificates, interact with course discussions, verify all progress persists across sessions.
+
+### 5. Implement Game Engine Integration and Project Management
+**Priority:** Medium
+**Complexity:** 8/10
+**Estimated Subtasks:** 8
+
+Build Unity, Unreal Engine, and Godot integration features:
+- Unity Hub integration with automatic project setup and package management
+- Unreal Engine .uproject file handling with Blueprint and C++ templates
+- Godot project structure support with GDScript integration
+- WebGL build pipeline for automatic game deployment and hosting
+- Version control integration (Git) with visual diff tools for binary assets
+- Asset management system with thumbnail previews and metadata
+- Project templates library for different game types
+- Cloud-based development environment setup with pre-configured engine versions
+
+**Technical Details:**
+Complex integrations with external game engines requiring understanding of Unity Hub, Unreal project structure (.uproject), and Godot ecosystem. WebGL build pipeline and version control for binary assets add significant complexity.
+
+**Test Strategy:**
+Verify engine integrations: create new projects in each engine, import/export projects successfully, WebGL builds deploy correctly, version control tracks changes properly, asset management functions across all supported engines.
+
+### 6. Develop Real-Time Collaboration and Communication Features
+**Priority:** Medium
+**Complexity:** 9/10
+**Estimated Subtasks:** 8
+
+Implement WebSocket-based real-time collaboration:
+- WebSocket server implementation for real-time communication
+- Multi-user code editor with operational transformation and conflict resolution
+- Voice and video chat integration using WebRTC
+- Real-time project synchronization with live cursors and user presence
+- Team management with role-based permissions (programmer, artist, designer)
+- Session recording for collaborative coding sessions
+- Screen sharing functionality for mentorship and debugging
+- Integrated chat with file sharing and code snippet support
+
+**Technical Details:**
+Real-time collaboration is inherently complex requiring WebSocket infrastructure, operational transformation for conflict resolution, WebRTC for voice/video, and sophisticated state synchronization. Some collaboration components exist but need significant expansion.
+
+**Test Strategy:**
+Test collaboration features: multiple users edit code simultaneously without conflicts, voice/video chat functions reliably, project changes sync in real-time, session recordings capture all activities properly.
+
+### 7. Create Portfolio Showcase and WebGL Game Hosting System
+**Priority:** Medium
+**Complexity:** 6/10
+**Estimated Subtasks:** 7
+
+Build comprehensive portfolio platform:
+- Portfolio builder with drag-and-drop layout customization
+- WebGL game hosting with embedded play experience and fullscreen support
+- Project gallery with high-resolution screenshots and video presentations
+- Social sharing integration with LinkedIn, Twitter, and professional networks
+- Employer portal for recruiter access and candidate discovery
+- Portfolio analytics showing view counts and engagement metrics
+- Custom domain support for professional portfolios
+- SEO optimization for portfolio discoverability
+
+**Technical Details:**
+Portfolio and project models exist in database with basic pages. Main work involves creating builder interface, WebGL hosting infrastructure, and social features. Moderately complex due to file hosting, SEO optimization, and employer portal.
+
+**Test Strategy:**
+Verify portfolio functionality: students can create and customize portfolios, WebGL games play smoothly in browser, social sharing generates proper previews, employer portal provides good candidate filtering, portfolios are mobile-responsive.
+
+### 8. Implement Advanced Assessment and Certification System
+**Priority:** Medium
+**Complexity:** 7/10
+**Estimated Subtasks:** 8
+
+Create comprehensive assessment tools:
+- Quiz builder with multiple question types (multiple choice, code completion, drag-and-drop)
+- Practical project assignments with automated testing and peer review
+- Code review system with instructor and peer feedback integration
+- Mock technical interview preparation with industry-standard questions
+- Portfolio defense scheduling with live presentation capabilities
+- Blockchain certificate generation with employer verification
+- Skill badge system for micro-credentials
+- Integration with Unity, Epic Games, and industry certification programs
+
+**Technical Details:**
+Basic quiz functionality exists in database schema and some API routes. Complexity comes from adding multiple assessment types, peer review workflows, blockchain integration, and industry partnerships.
+
+**Test Strategy:**
+Test assessment system: create and take quizzes with various question types, submit practical projects for review, receive meaningful feedback, earn certificates that verify on blockchain, skill badges display correctly in profiles.
+
+### 9. Build Community Features and Social Learning Platform
+**Priority:** Low
+**Complexity:** 5/10
+**Estimated Subtasks:** 6
+
+Enhance existing forum system:
+- Discussion forums with course-specific threads and instructor participation
+- Study group formation with progress tracking and accountability features
+- Game jam hosting platform with theme announcements and submission systems
+- Mentorship matching algorithm connecting experienced developers with learners
+- Developer showcase events highlighting exceptional student work
+- Community leaderboards and recognition systems
+- Interest-based groups for specialized topics (VR, mobile, indie development)
+- Content curation system for community-generated tutorials and resources
+
+**Technical Details:**
+Forum models and basic structure exist in database. Existing forum posts and replies provide foundation. Moderate complexity involving extending existing social features and adding gamification.
+
+**Test Strategy:**
+Verify community features: forums enable meaningful discussions, study groups form and track progress effectively, game jam submissions work smoothly, mentorship matching creates valuable connections, community events generate engagement.
+
+### 10. Optimize Performance and Complete Production Deployment
+**Priority:** Medium
+**Complexity:** 6/10
+**Estimated Subtasks:** 9
+
+Implement production optimization:
+- Performance optimization with bundle analysis and code splitting
+- CDN integration for global asset delivery with 100+ edge locations
+- Database query optimization and connection pooling
+- Comprehensive monitoring with Sentry (already configured) error tracking and performance metrics
+- Load testing with simulated 10,000+ concurrent users
+- Security audit including penetration testing and vulnerability scanning
+- WCAG 2.1 AA accessibility compliance verification
+- Mobile app preparation with PWA features and offline capabilities
+- Analytics integration for user behavior tracking and conversion optimization
+
+**Technical Details:**
+Application already deployed on Vercel with Sentry configured. Main work involves optimization, security testing, and accessibility compliance. Moderately complex but builds on existing infrastructure.
+
+**Test Strategy:**
+Verify production readiness: platform handles expected load without performance degradation, global CDN delivers content sub-50ms latency, monitoring alerts function properly, security audit passes all checks, accessibility compliance verified with automated and manual testing.
+
+## Success Criteria
+- All 10 tasks completed and tested
+- Platform supports 50+ courses with full functionality
+- Student enrollment and learning journey works end-to-end
+- Instructor course creation and management fully functional
+- Video streaming integrated with lessons and progress tracking
+- Performance meets production standards (<2s page load, <50ms CDN latency)
+- Security audit passes with no critical vulnerabilities
+- WCAG 2.1 AA accessibility compliance achieved
+
+## Technical Constraints
+- Must use existing Next.js 15 app router architecture
+- Must integrate with existing Prisma database schema
+- Must leverage existing shadcn/ui components
+- Must maintain existing authentication and payment systems
+- Must support Unity, Unreal Engine, and Godot equally

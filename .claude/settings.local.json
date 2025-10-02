@@ -79,7 +79,10 @@
       "mcp__chrome-devtools__resize_page",
       "mcp__chrome-devtools__take_screenshot",
       "Bash(rm:*)",
-      "Read(//var/folders/_j/s2wqqyrd4tx7rj52yn51klr80000gn/T/chrome-devtools-mcp-1uYbmw/**)"
+      "Read(//var/folders/_j/s2wqqyrd4tx7rj52yn51klr80000gn/T/chrome-devtools-mcp-1uYbmw/**)",
+      "Bash(task-master:*)",
+      "Read(//Users/vinayvidyasagar/Dev/LazyGameDevs/**)",
+      "mcp__task-master-ai__analyze_project_complexity"
     ]
   },
   "enableAllProjectMcpServers": true,

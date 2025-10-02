@@ -1,0 +1,11 @@
+# Task ID: 2
+# Title: Implement Comprehensive Course Management Interface for Instructors
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: Build complete course creation and management UI enabling instructors to create, edit, and publish courses with modules and lessons
+# Details:
+Create instructor course management system: 1) Course creation form with title, description, category, difficulty, pricing using shadcn/ui components 2) Module and lesson management with drag-and-drop reordering using @dnd-kit 3) Rich text editor for course descriptions and lesson content 4) Video upload interface with progress tracking and thumbnail generation 5) Course preview functionality for content validation 6) Publishing workflow with course status management (draft/published/archived) 7) Course analytics dashboard showing enrollment and completion metrics 8) Integration with existing payment system for course pricing
+
+# Test Strategy:
+Test instructor workflow: create course from scratch, add multiple modules and lessons, upload video content, preview course as student, publish course and verify it appears in marketplace, check analytics dashboard displays correct data
