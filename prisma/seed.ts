@@ -28,164 +28,395 @@ async function main() {
   await prisma.account.deleteMany()
   await prisma.user.deleteMany()
 
-  // Create demo users
+  // User data templates for comprehensive generation
   const hashedPassword = await bcrypt.hash('demo123', 12)
 
-  // Create admin user
-  const adminUser = await prisma.user.create({
-    data: {
+  // Admin user templates
+  const adminTemplates = [
+    {
       email: 'admin@lazygamedevs.com',
       name: 'Admin User',
-      password: hashedPassword,
-      role: 'ADMIN',
       bio: 'Platform administrator for LazyGameDevs',
+      location: 'Remote'
     },
-  })
-
-  // Create multiple students
-  const studentUser1 = await prisma.user.create({
-    data: {
-      email: 'student1@example.com',
-      name: 'Alex Thompson',
-      password: hashedPassword,
-      role: 'STUDENT',
-      bio: 'Aspiring indie game developer with a passion for 2D platformers',
-      location: 'San Francisco, CA',
-      skills: {
-        create: [
-          { skill: 'Unity' },
-          { skill: 'C#' },
-          { skill: 'Pixel Art' },
-          { skill: 'Game Design' },
-        ],
-      },
+    {
+      email: 'superadmin@lazygamedevs.com',
+      name: 'Super Admin',
+      bio: 'Senior platform administrator with full system access',
+      location: 'San Francisco, CA'
     },
-  })
+    {
+      email: 'support@lazygamedevs.com',
+      name: 'Support Admin',
+      bio: 'Customer support and user management administrator',
+      location: 'Austin, TX'
+    }
+  ]
 
-  const studentUser2 = await prisma.user.create({
-    data: {
-      email: 'student2@example.com',
-      name: 'Sarah Chen',
-      password: hashedPassword,
-      role: 'STUDENT',
-      bio: 'Computer science student interested in VR development',
-      location: 'Toronto, Canada',
-      skills: {
-        create: [
-          { skill: 'Unreal Engine' },
-          { skill: 'C++' },
-          { skill: 'VR' },
-          { skill: '3D Modeling' },
-        ],
-      },
-    },
-  })
-
-  const studentUser3 = await prisma.user.create({
-    data: {
-      email: 'student3@example.com',
-      name: 'Mike Rodriguez',
-      password: hashedPassword,
-      role: 'STUDENT',
-      bio: 'Mobile game developer focusing on casual games',
-      location: 'Barcelona, Spain',
-      skills: {
-        create: [
-          { skill: 'Unity' },
-          { skill: 'Mobile Development' },
-          { skill: 'UI/UX' },
-          { skill: 'Monetization' },
-        ],
-      },
-    },
-  })
-
-  // Create multiple instructors
-  const instructorUnity = await prisma.user.create({
-    data: {
+  // Instructor templates with game engine expertise
+  const instructorTemplates = [
+    {
       email: 'john.smith@instructor.com',
       name: 'John Smith',
-      password: hashedPassword,
-      role: 'INSTRUCTOR',
       bio: 'Senior Unity developer with 12+ years in the gaming industry. Former lead developer at EA and Ubisoft.',
       website: 'https://johnsmith.dev',
       location: 'Austin, TX',
-      skills: {
-        create: [
-          { skill: 'Unity' },
-          { skill: 'C#' },
-          { skill: 'Game Architecture' },
-          { skill: 'Performance Optimization' },
-          { skill: 'Team Leadership' },
-        ],
-      },
+      skills: ['Unity', 'C#', 'Game Architecture', 'Performance Optimization', 'Team Leadership'],
+      expertise: 'UNITY_DEVELOPMENT'
     },
-  })
-
-  const instructorUnreal = await prisma.user.create({
-    data: {
+    {
       email: 'emma.wilson@instructor.com',
       name: 'Emma Wilson',
-      password: hashedPassword,
-      role: 'INSTRUCTOR',
       bio: 'Unreal Engine expert and technical artist with AAA game development experience at Epic Games.',
       website: 'https://emmawilson.dev',
       location: 'Seattle, WA',
-      skills: {
-        create: [
-          { skill: 'Unreal Engine' },
-          { skill: 'C++' },
-          { skill: 'Blueprints' },
-          { skill: 'Technical Art' },
-          { skill: 'Shaders' },
-        ],
-      },
+      skills: ['Unreal Engine', 'C++', 'Blueprints', 'Technical Art', 'Shaders'],
+      expertise: 'UNREAL_DEVELOPMENT'
     },
-  })
-
-  const instructorDesign = await prisma.user.create({
-    data: {
+    {
       email: 'david.park@instructor.com',
       name: 'David Park',
-      password: hashedPassword,
-      role: 'INSTRUCTOR',
       bio: 'Game design consultant and indie developer with multiple successful mobile games.',
       website: 'https://davidpark.games',
       location: 'Seoul, South Korea',
-      skills: {
-        create: [
-          { skill: 'Game Design' },
-          { skill: 'Level Design' },
-          { skill: 'Monetization' },
-          { skill: 'Analytics' },
-          { skill: 'User Research' },
-        ],
-      },
+      skills: ['Game Design', 'Level Design', 'Monetization', 'Analytics', 'User Research'],
+      expertise: 'GAME_DESIGN'
     },
-  })
-
-  const instructorGodot = await prisma.user.create({
-    data: {
+    {
       email: 'lisa.anderson@instructor.com',
       name: 'Lisa Anderson',
-      password: hashedPassword,
-      role: 'INSTRUCTOR',
       bio: 'Open-source game development advocate and Godot Engine contributor.',
       website: 'https://lisaanderson.dev',
       location: 'Portland, OR',
-      skills: {
-        create: [
-          { skill: 'Godot' },
-          { skill: 'GDScript' },
-          { skill: 'Python' },
-          { skill: 'Open Source' },
-          { skill: 'Indie Development' },
-        ],
-      },
+      skills: ['Godot', 'GDScript', 'Python', 'Open Source', 'Indie Development'],
+      expertise: 'GODOT_DEVELOPMENT'
     },
-  })
+    {
+      email: 'carlos.rodriguez@instructor.com',
+      name: 'Carlos Rodriguez',
+      bio: 'C++ programming expert and game engine architect with 15 years of experience.',
+      website: 'https://carlosrod.dev',
+      location: 'Madrid, Spain',
+      skills: ['C++', 'Game Engines', 'Low-Level Programming', 'Memory Management', 'Multithreading'],
+      expertise: 'GAME_PROGRAMMING'
+    },
+    {
+      email: 'maria.santos@instructor.com',
+      name: 'Maria Santos',
+      bio: 'Mobile game development specialist with expertise in iOS and Android platforms.',
+      website: 'https://mariasantos.games',
+      location: 'São Paulo, Brazil',
+      skills: ['Mobile Development', 'Unity', 'Swift', 'Kotlin', 'App Store Optimization'],
+      expertise: 'MOBILE_GAMES'
+    },
+    {
+      email: 'zhang.wei@instructor.com',
+      name: 'Zhang Wei',
+      bio: '3D artist and character designer for AAA games. Former Blizzard and Riot Games artist.',
+      website: 'https://zhangwei.art',
+      location: 'Shanghai, China',
+      skills: ['3D Modeling', 'Character Design', 'Blender', 'ZBrush', 'Substance Painter'],
+      expertise: 'GAME_ART'
+    },
+    {
+      email: 'alex.petrov@instructor.com',
+      name: 'Alex Petrov',
+      bio: 'VR/AR developer with expertise in Unity XR and Unreal VR development.',
+      website: 'https://alexpetrov.vr',
+      location: 'Moscow, Russia',
+      skills: ['VR Development', 'AR Development', 'Unity XR', 'Meta Quest', 'Spatial Audio'],
+      expertise: 'VR_AR_DEVELOPMENT'
+    },
+    {
+      email: 'sarah.mitchell@instructor.com',
+      name: 'Sarah Mitchell',
+      bio: 'Game audio designer and composer with credits on 50+ indie and AAA titles.',
+      website: 'https://sarahmitchell.audio',
+      location: 'Los Angeles, CA',
+      skills: ['Sound Design', 'Music Composition', 'FMOD', 'Wwise', 'Audio Programming'],
+      expertise: 'GAME_AUDIO'
+    },
+    {
+      email: 'james.taylor@instructor.com',
+      name: 'James Taylor',
+      bio: 'Indie game developer and publisher. Successfully launched 10+ games on Steam.',
+      website: 'https://jamestaylor.games',
+      location: 'London, UK',
+      skills: ['Indie Development', 'Steam Publishing', 'Marketing', 'Community Building', 'Game Jams'],
+      expertise: 'INDIE_DEVELOPMENT'
+    },
+    {
+      email: 'yuki.tanaka@instructor.com',
+      name: 'Yuki Tanaka',
+      bio: 'Network programming specialist focusing on multiplayer game architecture.',
+      website: 'https://yukitanaka.net',
+      location: 'Tokyo, Japan',
+      skills: ['Network Programming', 'Multiplayer Systems', 'Server Architecture', 'Netcode', 'Lag Compensation'],
+      expertise: 'GAME_PROGRAMMING'
+    },
+    {
+      email: 'nina.kowalski@instructor.com',
+      name: 'Nina Kowalski',
+      bio: 'Technical animator and rigging specialist for game characters.',
+      website: 'https://ninakowalski.tech',
+      location: 'Warsaw, Poland',
+      skills: ['Technical Animation', 'Character Rigging', 'Motion Capture', 'Animation Systems', 'Inverse Kinematics'],
+      expertise: 'GAME_ART'
+    }
+  ]
 
-  console.log('✅ Demo users created')
+  // Student templates with varied interests and skill levels
+  const studentTemplates = [
+    {
+      email: 'alex.thompson@student.com',
+      name: 'Alex Thompson',
+      bio: 'Aspiring indie game developer with a passion for 2D platformers',
+      location: 'San Francisco, CA',
+      skills: ['Unity', 'C#', 'Pixel Art', 'Game Design'],
+      interests: ['UNITY_DEVELOPMENT', 'GAME_DESIGN', 'INDIE_DEVELOPMENT']
+    },
+    {
+      email: 'sarah.chen@student.com',
+      name: 'Sarah Chen',
+      bio: 'Computer science student interested in VR development and immersive experiences',
+      location: 'Toronto, Canada',
+      skills: ['Unreal Engine', 'C++', 'VR', '3D Modeling'],
+      interests: ['VR_AR_DEVELOPMENT', 'UNREAL_DEVELOPMENT']
+    },
+    {
+      email: 'mike.rodriguez@student.com',
+      name: 'Mike Rodriguez',
+      bio: 'Mobile game developer focusing on casual games and F2P mechanics',
+      location: 'Barcelona, Spain',
+      skills: ['Unity', 'Mobile Development', 'UI/UX', 'Monetization'],
+      interests: ['MOBILE_GAMES', 'GAME_DESIGN']
+    },
+    {
+      email: 'emily.johnson@student.com',
+      name: 'Emily Johnson',
+      bio: 'Art student learning game art and character design',
+      location: 'New York, NY',
+      skills: ['Blender', '2D Art', 'Character Design', 'Adobe Creative Suite'],
+      interests: ['GAME_ART']
+    },
+    {
+      email: 'ryan.kim@student.com',
+      name: 'Ryan Kim',
+      bio: 'High school student passionate about making games with Godot',
+      location: 'Seoul, South Korea',
+      skills: ['Godot', 'GDScript', 'Pixel Art'],
+      interests: ['GODOT_DEVELOPMENT', 'INDIE_DEVELOPMENT']
+    },
+    {
+      email: 'jessica.brown@student.com',
+      name: 'Jessica Brown',
+      bio: 'Audio engineering student exploring game sound design',
+      location: 'Nashville, TN',
+      skills: ['Sound Design', 'Music Production', 'Audio Editing'],
+      interests: ['GAME_AUDIO']
+    },
+    {
+      email: 'david.lee@student.com',
+      name: 'David Lee',
+      bio: 'Programmer learning C++ and game engine development',
+      location: 'Singapore',
+      skills: ['C++', 'Data Structures', 'Algorithms', 'Mathematics'],
+      interests: ['GAME_PROGRAMMING']
+    },
+    {
+      email: 'olivia.martinez@student.com',
+      name: 'Olivia Martinez',
+      bio: 'Game design student focusing on narrative and storytelling',
+      location: 'Mexico City, Mexico',
+      skills: ['Writing', 'Game Design', 'Unity', 'Dialogue Systems'],
+      interests: ['GAME_DESIGN']
+    },
+    {
+      email: 'liam.wilson@student.com',
+      name: 'Liam Wilson',
+      bio: 'Amateur developer working on first multiplayer game',
+      location: 'Sydney, Australia',
+      skills: ['Unity', 'Networking', 'C#', 'Database'],
+      interests: ['GAME_PROGRAMMING', 'UNITY_DEVELOPMENT']
+    },
+    {
+      email: 'sophia.anderson@student.com',
+      name: 'Sophia Anderson',
+      bio: 'Environmental artist learning to create stunning game worlds',
+      location: 'Vancouver, Canada',
+      skills: ['Unreal Engine', '3D Modeling', 'Level Design', 'Lighting'],
+      interests: ['GAME_ART', 'UNREAL_DEVELOPMENT']
+    },
+    {
+      email: 'noah.taylor@student.com',
+      name: 'Noah Taylor',
+      bio: 'VR enthusiast building immersive educational experiences',
+      location: 'Berlin, Germany',
+      skills: ['Unity', 'VR', 'C#', 'User Testing'],
+      interests: ['VR_AR_DEVELOPMENT']
+    },
+    {
+      email: 'emma.white@student.com',
+      name: 'Emma White',
+      bio: 'Indie developer preparing for first Steam launch',
+      location: 'Brighton, UK',
+      skills: ['Unity', 'Marketing', 'Community Management', 'Pixel Art'],
+      interests: ['INDIE_DEVELOPMENT', 'GAME_DESIGN']
+    },
+    {
+      email: 'ethan.garcia@student.com',
+      name: 'Ethan Garcia',
+      bio: 'Mobile AR developer creating location-based games',
+      location: 'Miami, FL',
+      skills: ['Unity', 'AR', 'GPS Integration', 'Mobile Development'],
+      interests: ['MOBILE_GAMES', 'VR_AR_DEVELOPMENT']
+    },
+    {
+      email: 'ava.martinez@student.com',
+      name: 'Ava Martinez',
+      bio: 'Animation student transitioning to game animation',
+      location: 'Los Angeles, CA',
+      skills: ['Animation', 'Maya', 'Rigging', 'Motion Capture'],
+      interests: ['GAME_ART']
+    },
+    {
+      email: 'mason.davis@student.com',
+      name: 'Mason Davis',
+      bio: 'Physics student interested in realistic game simulations',
+      location: 'Boston, MA',
+      skills: ['Mathematics', 'Physics', 'C++', 'Algorithm Design'],
+      interests: ['GAME_PROGRAMMING']
+    },
+    {
+      email: 'isabella.moore@student.com',
+      name: 'Isabella Moore',
+      bio: 'Aspiring sound designer for horror games',
+      location: 'Portland, OR',
+      skills: ['Sound Design', 'Audio Editing', 'FMOD', 'Horror Game Design'],
+      interests: ['GAME_AUDIO', 'GAME_DESIGN']
+    },
+    {
+      email: 'lucas.hernandez@student.com',
+      name: 'Lucas Hernandez',
+      bio: 'Unreal Engine beginner learning Blueprint visual scripting',
+      location: 'Buenos Aires, Argentina',
+      skills: ['Unreal Engine', 'Blueprints', '3D Art Basics'],
+      interests: ['UNREAL_DEVELOPMENT']
+    },
+    {
+      email: 'mia.clark@student.com',
+      name: 'Mia Clark',
+      bio: 'Game writer and narrative designer',
+      location: 'Edinburgh, Scotland',
+      skills: ['Creative Writing', 'Story Design', 'Character Development', 'Dialogue'],
+      interests: ['GAME_DESIGN']
+    },
+    {
+      email: 'logan.lewis@student.com',
+      name: 'Logan Lewis',
+      bio: 'Godot enthusiast contributing to open-source game projects',
+      location: 'Amsterdam, Netherlands',
+      skills: ['Godot', 'GDScript', 'Git', 'Open Source Collaboration'],
+      interests: ['GODOT_DEVELOPMENT', 'INDIE_DEVELOPMENT']
+    },
+    {
+      email: 'charlotte.walker@student.com',
+      name: 'Charlotte Walker',
+      bio: 'Mobile game designer studying player retention strategies',
+      location: 'Helsinki, Finland',
+      skills: ['Mobile Game Design', 'Analytics', 'User Acquisition', 'A/B Testing'],
+      interests: ['MOBILE_GAMES', 'GAME_DESIGN']
+    },
+    {
+      email: 'jackson.hall@student.com',
+      name: 'Jackson Hall',
+      bio: 'Shader programmer creating visual effects for games',
+      location: 'Copenhagen, Denmark',
+      skills: ['Shader Programming', 'HLSL', 'Unity', 'Mathematics'],
+      interests: ['GAME_PROGRAMMING', 'GAME_ART']
+    },
+    {
+      email: 'amelia.allen@student.com',
+      name: 'Amelia Allen',
+      bio: 'Texture artist specializing in PBR materials',
+      location: 'Stockholm, Sweden',
+      skills: ['Substance Painter', 'PBR Texturing', 'Photoshop', '3D Modeling'],
+      interests: ['GAME_ART']
+    },
+    {
+      email: 'benjamin.young@student.com',
+      name: 'Benjamin Young',
+      bio: 'Competitive game designer studying multiplayer balance',
+      location: 'Vienna, Austria',
+      skills: ['Game Design', 'Balancing', 'Systems Design', 'Analytics'],
+      interests: ['GAME_DESIGN', 'GAME_PROGRAMMING']
+    }
+  ]
+
+  // Generate admin users
+  console.log('👥 Creating admin users...')
+  const adminUsers = []
+  for (const template of adminTemplates) {
+    const admin = await prisma.user.create({
+      data: {
+        ...template,
+        password: hashedPassword,
+        role: 'ADMIN',
+      },
+    })
+    adminUsers.push(admin)
+    console.log(`  ✓ Created admin: ${admin.name}`)
+  }
+
+  // Generate instructor users
+  console.log('\n📚 Creating instructor accounts...')
+  const instructors: any[] = []
+  for (const template of instructorTemplates) {
+    const { skills, expertise, ...userData } = template
+    const instructor = await prisma.user.create({
+      data: {
+        ...userData,
+        password: hashedPassword,
+        role: 'INSTRUCTOR',
+        skills: {
+          create: skills.map((skill: string) => ({ skill }))
+        }
+      },
+    })
+    instructors.push({ ...instructor, expertise })
+    console.log(`  ✓ Created instructor: ${instructor.name} (${expertise})`)
+  }
+
+  // Generate student users
+  console.log('\n🎓 Creating student accounts...')
+  const students: any[] = []
+  for (const template of studentTemplates) {
+    const { skills, interests, ...userData } = template
+    const student = await prisma.user.create({
+      data: {
+        ...userData,
+        password: hashedPassword,
+        role: 'STUDENT',
+        skills: {
+          create: skills.map((skill: string) => ({ skill }))
+        }
+      },
+    })
+    students.push({ ...student, interests })
+    console.log(`  ✓ Created student: ${student.name}`)
+  }
+
+  console.log(`\n✅ Created ${adminUsers.length} admins, ${instructors.length} instructors, ${students.length} students`)
+
+  // Keep references for backward compatibility
+  const adminUser = adminUsers[0]
+  const instructorUnity = instructors.find(i => i.expertise === 'UNITY_DEVELOPMENT') || instructors[0]
+  const instructorUnreal = instructors.find(i => i.expertise === 'UNREAL_DEVELOPMENT') || instructors[1]
+  const instructorDesign = instructors.find(i => i.expertise === 'GAME_DESIGN') || instructors[2]
+  const instructorGodot = instructors.find(i => i.expertise === 'GODOT_DEVELOPMENT') || instructors[3]
+  const studentUser1 = students[0]
+  const studentUser2 = students[1]
+  const studentUser3 = students[2]
 
   // Course template data for comprehensive generation
   const courseTemplates = {
