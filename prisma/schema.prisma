@@ -67,6 +67,8 @@ model User {
   licenseKeys       LicenseKey[]
   skills            UserSkill[]
 
+  @@index([role]) // For filtering users by role (instructors, students, etc.)
+  @@index([createdAt]) // For sorting users by registration date
   @@map("users")
 }
 
@@ -120,6 +122,15 @@ model Course {
   requirements CourseRequirement[]
   objectives   CourseObjective[]
   tags         CourseTag[]
+
+  @@index([category]) // For filtering courses by category
+  @@index([published]) // For filtering published vs draft courses
+  @@index([instructorId]) // For finding instructor's courses
+  @@index([difficulty]) // For filtering by difficulty level
+  @@index([engine]) // For filtering by game engine
+  @@index([createdAt]) // For sorting courses by creation date
+  @@index([category, published]) // Composite index for common query pattern
+  @@index([published, difficulty]) // For filtering published courses by difficulty
 }
 
 model CourseRequirement {
@@ -169,6 +180,9 @@ model Module {
   course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId String
   lessons  Lesson[]
+
+  @@index([courseId]) // For finding all modules in a course
+  @@index([courseId, order]) // For ordered module retrieval
 }
 
 model Lesson {
@@ -188,6 +202,10 @@ model Lesson {
   quiz      Quiz?
   progress  Progress[]
   resources LessonResource[]
+
+  @@index([moduleId]) // For finding all lessons in a module
+  @@index([moduleId, order]) // For ordered lesson retrieval
+  @@index([type]) // For filtering lessons by type
 }
 
 model LessonResource {
@@ -200,6 +218,8 @@ model LessonResource {
 
   lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   lessonId String
+
+  @@index([lessonId]) // For finding all resources for a lesson
 }
 
 model Quiz {
@@ -228,6 +248,11 @@ model QuizAttempt {
   userId String
   quiz   Quiz   @relation(fields: [quizId], references: [id])
   quizId String
+
+  @@index([userId]) // For finding all quiz attempts by a user
+  @@index([quizId]) // For finding all attempts for a quiz
+  @@index([userId, quizId]) // For finding user's attempts on a specific quiz
+  @@index([completedAt]) // For sorting attempts by date
 }
 
 model Enrollment {
@@ -242,6 +267,11 @@ model Enrollment {
   courseId String
 
   @@unique([userId, courseId])
+  @@index([userId]) // For finding all enrollments for a user
+  @@index([courseId]) // For finding all enrollments for a course
+  @@index([status]) // For filtering enrollments by status
+  @@index([userId, status]) // For finding user's active/completed enrollments
+  @@index([enrolledAt]) // For sorting enrollments by date
 }
 
 model Progress {
@@ -259,6 +289,13 @@ model Progress {
   lessonId String?
 
   @@unique([userId, courseId, lessonId])
+  @@index([userId]) // For finding all progress for a user
+  @@index([courseId]) // For finding all progress for a course
+  @@index([lessonId]) // For finding all progress for a lesson
+  @@index([completed]) // For filtering completed/incomplete lessons
+  @@index([userId, courseId]) // For finding user's progress in a course
+  @@index([userId, completed]) // For finding user's completed lessons
+  @@index([lastAccessed]) // For sorting by recently accessed
 }
 
 model Review {
@@ -274,6 +311,10 @@ model Review {
   courseId String
 
   @@unique([userId, courseId])
+  @@index([courseId]) // For finding all reviews for a course
+  @@index([userId]) // For finding all reviews by a user
+  @@index([rating]) // For filtering reviews by rating
+  @@index([createdAt]) // For sorting reviews by date
 }
 
 model Portfolio {
@@ -308,6 +349,12 @@ model Project {
   portfolioId String
   submissions ProjectSubmission[]
   tags        ProjectTag[]
+
+  @@index([portfolioId]) // For finding all projects in a portfolio
+  @@index([isPublic]) // For filtering public/private projects
+  @@index([featured]) // For finding featured projects
+  @@index([engine]) // For filtering projects by game engine
+  @@index([createdAt]) // For sorting projects by date
 }
 
 model ProjectTag {
@@ -333,6 +380,10 @@ model ProjectSubmission {
   userId    String
   project   Project @relation(fields: [projectId], references: [id])
   projectId String
+
+  @@index([userId]) // For finding all submissions by a user
+  @@index([projectId]) // For finding all submissions for a project
+  @@index([submittedAt]) // For sorting submissions by date
 }
 
 model ForumPost {
@@ -351,6 +402,13 @@ model ForumPost {
   authorId String
   replies  Reply[]
   tags     ForumPostTag[]
+
+  @@index([category]) // For filtering forum posts by category
+  @@index([pinned]) // For finding pinned posts
+  @@index([authorId]) // For finding user's forum posts
+  @@index([createdAt]) // For sorting posts by date
+  @@index([category, pinned]) // For showing pinned posts in a category
+  @@index([likes]) // For sorting by popularity
 }
 
 model ForumPostTag {
@@ -378,6 +436,11 @@ model Reply {
   parent   Reply?    @relation("ReplyToReply", fields: [parentId], references: [id])
   parentId String?
   replies  Reply[]   @relation("ReplyToReply")
+
+  @@index([postId]) // For finding all replies to a post
+  @@index([authorId]) // For finding all replies by a user
+  @@index([parentId]) // For finding nested replies
+  @@index([createdAt]) // For sorting replies by date
 }
 
 model Certification {
@@ -393,6 +456,10 @@ model Certification {
 
   user   User   @relation(fields: [userId], references: [id])
   userId String
+
+  @@index([userId]) // For finding all certifications for a user
+  @@index([issuedAt]) // For sorting certifications by date
+  @@index([expiresAt]) // For finding expiring certifications
 }
 
 enum Category {
@@ -454,6 +521,12 @@ model Payment {
   course     Course      @relation(fields: [courseId], references: [id])
   courseId   String
   licenseKey LicenseKey?
+
+  @@index([userId]) // For finding all payments for a user
+  @@index([courseId]) // For finding all payments for a course
+  @@index([status]) // For filtering payments by status
+  @@index([createdAt]) // For sorting payments by date
+  @@index([userId, status]) // For finding user's succeeded/failed payments
 }
 
 model LicenseKey {
@@ -475,6 +548,10 @@ model LicenseKey {
   paymentId String?  @unique
 
   @@unique([userId, courseId])
+  @@index([userId]) // For finding all license keys for a user
+  @@index([courseId]) // For finding all license keys for a course
+  @@index([status]) // For filtering license keys by status
+  @@index([expiresAt]) // For finding expiring/expired licenses
 }
 
 enum PaymentStatus {
