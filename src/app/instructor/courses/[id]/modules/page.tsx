@@ -89,17 +89,93 @@ interface ModuleManagementPageProps {
   params: { id: string }
 }
 
+// Sortable Lesson Component
+function SortableLesson({
+  lesson,
+  getLessonTypeIcon,
+  formatDuration,
+  courseId,
+  moduleId
+}: {
+  lesson: Lesson
+  getLessonTypeIcon: (type: string) => React.ReactNode
+  formatDuration: (minutes: number) => string
+  courseId: string
+  moduleId: string
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: lesson.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`
+        flex items-center justify-between p-3 border rounded-lg
+        hover:bg-muted/50 transition-colors
+        ${isDragging ? 'ring-2 ring-primary z-10' : ''}
+      `}
+    >
+      <div className="flex items-center gap-3 flex-1">
+        <div
+          className="cursor-grab active:cursor-grabbing"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+        </div>
+        {getLessonTypeIcon(lesson.type)}
+        <div className="flex-1">
+          <div className="font-medium text-sm">{lesson.title}</div>
+          <div className="text-xs text-muted-foreground">
+            {lesson.description || `${lesson.type} lesson`} • {formatDuration(lesson.duration)}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-1">
+        <Badge variant="outline" className="text-xs">
+          {lesson.type}
+        </Badge>
+        <Button
+          size="sm"
+          variant="ghost"
+          asChild
+          title="Edit Lesson"
+        >
+          <Link href={`/instructor/courses/${courseId}/modules/${moduleId}/lessons/${lesson.id}/edit`}>
+            <Edit className="h-3 w-3" />
+          </Link>
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 // Sortable Module Component
 function SortableModule({
   module,
   onEdit,
   onDelete,
-  onAddLesson
+  onAddLesson,
+  onLessonReorder
 }: {
   module: Module
   onEdit: (module: Module) => void
   onDelete: (moduleId: string) => void
   onAddLesson: (moduleId: string) => void
+  onLessonReorder: (moduleId: string, event: DragEndEvent) => void
 }) {
   const {
     attributes,
@@ -221,41 +297,30 @@ function SortableModule({
             </Button>
           </div>
         ) : (
-          <div className="space-y-2">
-            {module.lessons
-              .sort((a, b) => a.order - b.order)
-              .map((lesson) => (
-                <div
-                  key={lesson.id}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    {getLessonTypeIcon(lesson.type)}
-                    <div>
-                      <div className="font-medium text-sm">{lesson.title}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {lesson.description || `${lesson.type} lesson`} • {formatDuration(lesson.duration)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Badge variant="outline" className="text-xs">
-                      {lesson.type}
-                    </Badge>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      asChild
-                      title="Edit Lesson"
-                    >
-                      <Link href={`/instructor/courses/${module.id}/modules/${module.id}/lessons/${lesson.id}/edit`}>
-                        <Edit className="h-3 w-3" />
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              ))}
-          </div>
+          <DndContext
+            collisionDetection={closestCenter}
+            onDragEnd={(event) => onLessonReorder(module.id, event)}
+          >
+            <SortableContext
+              items={module.lessons.map(lesson => lesson.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-2">
+                {module.lessons
+                  .sort((a, b) => a.order - b.order)
+                  .map((lesson) => (
+                    <SortableLesson
+                      key={lesson.id}
+                      lesson={lesson}
+                      getLessonTypeIcon={getLessonTypeIcon}
+                      formatDuration={formatDuration}
+                      courseId={module.id}
+                      moduleId={module.id}
+                    />
+                  ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </CardContent>
     </Card>
@@ -468,6 +533,59 @@ export default function ModuleManagementPage({ params }: ModuleManagementPagePro
     router.push(`/instructor/courses/${params.id}/modules/${moduleId}/lessons/create`)
   }
 
+  const handleLessonReorder = async (moduleId: string, event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (!over || !course) return
+
+    if (active.id !== over.id) {
+      const module = course.modules.find(m => m.id === moduleId)
+      if (!module) return
+
+      const oldIndex = module.lessons.findIndex(lesson => lesson.id === active.id)
+      const newIndex = module.lessons.findIndex(lesson => lesson.id === over.id)
+
+      const newLessons = arrayMove(module.lessons, oldIndex, newIndex).map((lesson, index) => ({
+        ...lesson,
+        order: index + 1
+      }))
+
+      // Update state optimistically
+      setCourse(prev => prev ? {
+        ...prev,
+        modules: prev.modules.map(m =>
+          m.id === moduleId ? { ...m, lessons: newLessons } : m
+        )
+      } : null)
+
+      try {
+        const response = await fetch(`/api/courses/${course.id}/modules/${moduleId}/lessons/reorder`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            lessonOrders: newLessons.map(lesson => ({
+              id: lesson.id,
+              order: lesson.order
+            }))
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to reorder lessons')
+        }
+
+        toast.success("Lesson order updated successfully!")
+      } catch (error) {
+        console.error('Failed to reorder lessons:', error)
+        toast.error("Failed to update lesson order")
+        // Revert the change on error
+        fetchCourse()
+      }
+    }
+  }
+
   if (loading || !course) {
     return (
       <SiteLayout>
@@ -571,6 +689,7 @@ export default function ModuleManagementPage({ params }: ModuleManagementPagePro
                       onEdit={openEditDialog}
                       onDelete={(moduleId) => setShowDeleteDialog(moduleId)}
                       onAddLesson={handleAddLesson}
+                      onLessonReorder={handleLessonReorder}
                     />
                   ))}
               </div>
