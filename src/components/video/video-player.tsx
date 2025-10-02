@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { Play, Pause, Volume2, VolumeX, Maximize, Settings, SkipBack, SkipForward } from 'lucide-react'
+import { Play, Pause, Volume2, VolumeX, Maximize, Settings, SkipBack, SkipForward, Minimize, PictureInPicture, Subtitles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import {
@@ -41,6 +41,9 @@ interface VideoState {
   playbackRate: number
   isLoading: boolean
   error: string | null
+  isPiP: boolean
+  showCaptions: boolean
+  thumbnailPreview: { time: number; url: string } | null
 }
 
 const HEARTBEAT_INTERVAL = 10000 // 10 seconds
@@ -63,6 +66,8 @@ function VideoPlayer({
   const controlsTimeoutRef = useRef<NodeJS.Timeout>()
   const heartbeatIntervalRef = useRef<NodeJS.Timeout>()
   const lastAnalyticsRef = useRef<number>(0)
+  const seekBarRef = useRef<HTMLDivElement>(null)
+  const thumbnailCanvasRef = useRef<HTMLCanvasElement>(null)
 
   const [state, setState] = useState<VideoState>({
     isPlaying: false,
@@ -75,7 +80,10 @@ function VideoPlayer({
     quality: '720p',
     playbackRate: 1,
     isLoading: true,
-    error: null
+    error: null,
+    isPiP: false,
+    showCaptions: false,
+    thumbnailPreview: null
   })
 
   const [showControls, setShowControls] = useState(true)
@@ -211,6 +219,138 @@ function VideoPlayer({
       }
     }
   }, [state.isPlaying, isDragging])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyboard = (e: KeyboardEvent) => {
+      const video = videoRef.current
+      if (!video) return
+
+      // Ignore keyboard shortcuts if user is typing in an input
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
+
+      switch (e.key) {
+        case ' ':
+        case 'k':
+          e.preventDefault()
+          togglePlay()
+          break
+        case 'ArrowLeft':
+          e.preventDefault()
+          skip(-5)
+          break
+        case 'ArrowRight':
+          e.preventDefault()
+          skip(5)
+          break
+        case 'ArrowUp':
+          e.preventDefault()
+          handleVolumeChange([Math.min(1, state.volume + 0.1)])
+          break
+        case 'ArrowDown':
+          e.preventDefault()
+          handleVolumeChange([Math.max(0, state.volume - 0.1)])
+          break
+        case 'f':
+          e.preventDefault()
+          toggleFullscreen()
+          break
+        case 'm':
+          e.preventDefault()
+          toggleMute()
+          break
+        case 'p':
+          e.preventDefault()
+          togglePiP()
+          break
+        case 'c':
+          e.preventDefault()
+          toggleCaptions()
+          break
+        case 'j':
+          e.preventDefault()
+          skip(-10)
+          break
+        case 'l':
+          e.preventDefault()
+          skip(10)
+          break
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+          e.preventDefault()
+          const percent = parseInt(e.key) / 10
+          video.currentTime = video.duration * percent
+          break
+        case '<':
+        case ',':
+          e.preventDefault()
+          changePlaybackRate(Math.max(0.25, state.playbackRate - 0.25))
+          break
+        case '>':
+        case '.':
+          e.preventDefault()
+          changePlaybackRate(Math.min(2, state.playbackRate + 0.25))
+          break
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyboard)
+    return () => document.removeEventListener('keydown', handleKeyboard)
+  }, [state.volume, state.playbackRate, state.isPlaying])
+
+  // Picture-in-Picture event listeners
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const handleEnterPiP = () => {
+      setState(prev => ({ ...prev, isPiP: true }))
+    }
+
+    const handleLeavePiP = () => {
+      setState(prev => ({ ...prev, isPiP: false }))
+    }
+
+    video.addEventListener('enterpictureinpicture', handleEnterPiP)
+    video.addEventListener('leavepictureinpicture', handleLeavePiP)
+
+    return () => {
+      video.removeEventListener('enterpictureinpicture', handleEnterPiP)
+      video.removeEventListener('leavepictureinpicture', handleLeavePiP)
+    }
+  }, [])
+
+  // Load saved position from localStorage
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video || !sessionId) return
+
+    const savedPosition = localStorage.getItem(`video-position-${sessionId}`)
+    if (savedPosition) {
+      const position = parseFloat(savedPosition)
+      if (!isNaN(position) && position > 0 && position < video.duration - 5) {
+        video.currentTime = position
+      }
+    }
+
+    // Save position periodically
+    const saveInterval = setInterval(() => {
+      if (video.currentTime > 0) {
+        localStorage.setItem(`video-position-${sessionId}`, video.currentTime.toString())
+      }
+    }, 5000)
+
+    return () => clearInterval(saveInterval)
+  }, [sessionId])
 
   // Analytics and heartbeat functions
   const trackAnalyticsEvent = useCallback(async (eventType: string, position: number, metadata?: any) => {
@@ -372,6 +512,92 @@ function VideoPlayer({
     })
   }
 
+  const togglePiP = async () => {
+    const video = videoRef.current
+    if (!video) return
+
+    try {
+      if (!state.isPiP) {
+        if ('pictureInPictureEnabled' in document) {
+          await video.requestPictureInPicture()
+          setState(prev => ({ ...prev, isPiP: true }))
+          trackAnalyticsEvent('pip_enter', state.currentTime)
+        }
+      } else {
+        await document.exitPictureInPicture()
+        setState(prev => ({ ...prev, isPiP: false }))
+        trackAnalyticsEvent('pip_exit', state.currentTime)
+      }
+    } catch (error) {
+      console.warn('Picture-in-Picture error:', error)
+    }
+  }
+
+  const toggleCaptions = () => {
+    const video = videoRef.current
+    if (!video || !video.textTracks || video.textTracks.length === 0) return
+
+    const newShowCaptions = !state.showCaptions
+
+    // Toggle all text tracks
+    for (let i = 0; i < video.textTracks.length; i++) {
+      video.textTracks[i].mode = newShowCaptions ? 'showing' : 'hidden'
+    }
+
+    setState(prev => ({ ...prev, showCaptions: newShowCaptions }))
+    trackAnalyticsEvent('captions_toggle', state.currentTime, {
+      enabled: newShowCaptions
+    })
+  }
+
+  const generateThumbnailPreview = useCallback(async (seekTime: number) => {
+    const video = videoRef.current
+    const canvas = thumbnailCanvasRef.current
+    if (!video || !canvas) return
+
+    const context = canvas.getContext('2d')
+    if (!context) return
+
+    // Create a temporary video element for thumbnail generation
+    const tempVideo = document.createElement('video')
+    tempVideo.src = video.src
+    tempVideo.currentTime = seekTime
+    tempVideo.muted = true
+    tempVideo.playsInline = true
+
+    return new Promise<string>((resolve) => {
+      tempVideo.onseeked = () => {
+        canvas.width = 160
+        canvas.height = 90
+        context.drawImage(tempVideo, 0, 0, canvas.width, canvas.height)
+        const thumbnailUrl = canvas.toDataURL('image/jpeg', 0.7)
+        resolve(thumbnailUrl)
+      }
+    })
+  }, [])
+
+  const handleSeekBarHover = useCallback(async (e: React.MouseEvent<HTMLDivElement>) => {
+    const seekBar = seekBarRef.current
+    if (!seekBar || state.duration === 0) return
+
+    const rect = seekBar.getBoundingClientRect()
+    const percent = (e.clientX - rect.left) / rect.width
+    const hoverTime = percent * state.duration
+
+    // Generate thumbnail for hover position
+    const thumbnailUrl = await generateThumbnailPreview(hoverTime)
+    if (thumbnailUrl) {
+      setState(prev => ({
+        ...prev,
+        thumbnailPreview: { time: hoverTime, url: thumbnailUrl }
+      }))
+    }
+  }, [state.duration, generateThumbnailPreview])
+
+  const handleSeekBarLeave = useCallback(() => {
+    setState(prev => ({ ...prev, thumbnailPreview: null }))
+  }, [])
+
   if (state.error) {
     return (
       <div className={cn("relative bg-black rounded-lg overflow-hidden", className)}>
@@ -433,6 +659,9 @@ function VideoPlayer({
         </div>
       )}
 
+      {/* Hidden canvas for thumbnail generation */}
+      <canvas ref={thumbnailCanvasRef} className="hidden" />
+
       {/* Controls */}
       <div
         className={cn(
@@ -441,7 +670,33 @@ function VideoPlayer({
         )}
       >
         {/* Progress Bar */}
-        <div className="mb-4">
+        <div
+          ref={seekBarRef}
+          className="mb-4 relative"
+          onMouseMove={handleSeekBarHover}
+          onMouseLeave={handleSeekBarLeave}
+        >
+          {/* Thumbnail Preview */}
+          {state.thumbnailPreview && (
+            <div
+              className="absolute bottom-full mb-2 transform -translate-x-1/2 pointer-events-none"
+              style={{
+                left: `${(state.thumbnailPreview.time / state.duration) * 100}%`
+              }}
+            >
+              <div className="bg-black rounded-lg overflow-hidden shadow-lg">
+                <img
+                  src={state.thumbnailPreview.url}
+                  alt="Preview"
+                  className="w-40 h-auto"
+                />
+                <div className="text-white text-xs text-center py-1 px-2">
+                  {formatTime(state.thumbnailPreview.time)}
+                </div>
+              </div>
+            </div>
+          )}
+
           <Slider
             value={[state.currentTime]}
             max={state.duration}
@@ -520,6 +775,20 @@ function VideoPlayer({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Captions */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleCaptions}
+              className={cn(
+                "text-white hover:text-blue-400",
+                state.showCaptions && "text-blue-400"
+              )}
+              title="Toggle captions (C)"
+            >
+              <Subtitles className="h-4 w-4" />
+            </Button>
+
             {/* Settings Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -559,14 +828,28 @@ function VideoPlayer({
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Picture-in-Picture */}
+            {'pictureInPictureEnabled' in document && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={togglePiP}
+                className="text-white hover:text-blue-400"
+                title="Picture in Picture (P)"
+              >
+                <PictureInPicture className="h-4 w-4" />
+              </Button>
+            )}
+
             {/* Fullscreen */}
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleFullscreen}
               className="text-white hover:text-blue-400"
+              title="Fullscreen (F)"
             >
-              <Maximize className="h-4 w-4" />
+              {state.isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
             </Button>
           </div>
         </div>

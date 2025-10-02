@@ -89,7 +89,8 @@
       "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"yes\" npx prisma db push --force-reset --accept-data-loss)",
       "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes npx prisma db push --force-reset --accept-data-loss)",
       "Bash(tee:*)",
-      "Bash(export PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"yes\")"
+      "Bash(export PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"yes\")",
+      "mcp__task-master-ai__set_task_status"
     ]
   },
   "enableAllProjectMcpServers": true,
