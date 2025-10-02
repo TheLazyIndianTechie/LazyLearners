@@ -1033,8 +1033,286 @@ async function main() {
     ]
   }
 
-  // Helper function to generate courses from templates
+  // Helper functions for comprehensive module and lesson generation
+
+  const lessonTypes: ('VIDEO' | 'INTERACTIVE' | 'QUIZ' | 'PROJECT' | 'READING')[] = ['VIDEO', 'INTERACTIVE', 'QUIZ', 'PROJECT', 'READING']
+
+  function randomDuration(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min
+  }
+
+  function generateLessonsByType(moduleTitle: string, lessonCount: number, moduleOrder: number): any[] {
+    const lessons = []
+    const lessonTypeDistribution = [
+      { type: 'VIDEO', weight: 0.5 },      // 50% video lessons
+      { type: 'READING', weight: 0.2 },    // 20% reading
+      { type: 'INTERACTIVE', weight: 0.15 }, // 15% interactive
+      { type: 'QUIZ', weight: 0.1 },       // 10% quiz
+      { type: 'PROJECT', weight: 0.05 }    // 5% projects
+    ]
+
+    for (let i = 0; i < lessonCount; i++) {
+      const rand = Math.random()
+      let cumulative = 0
+      let lessonType: 'VIDEO' | 'INTERACTIVE' | 'QUIZ' | 'PROJECT' | 'READING' = 'VIDEO'
+
+      for (const dist of lessonTypeDistribution) {
+        cumulative += dist.weight
+        if (rand <= cumulative) {
+          lessonType = dist.type as any
+          break
+        }
+      }
+
+      const lessonNumber = i + 1
+      const lesson = generateLesson(moduleTitle, lessonType, lessonNumber, moduleOrder)
+      lessons.push(lesson)
+    }
+
+    return lessons
+  }
+
+  function generateLesson(moduleTitle: string, lessonType: string, order: number, moduleOrder: number): any {
+    const baseTitles = {
+      VIDEO: ['Introduction to', 'Understanding', 'Deep Dive into', 'Mastering', 'Exploring', 'Advanced'],
+      READING: ['Reading:', 'Documentation:', 'Guide to', 'Best Practices for', 'Reference:'],
+      INTERACTIVE: ['Hands-on:', 'Lab:', 'Exercise:', 'Practice:', 'Workshop:'],
+      QUIZ: ['Quiz:', 'Assessment:', 'Knowledge Check:', 'Test Your Skills:', 'Review:'],
+      PROJECT: ['Project:', 'Build:', 'Create:', 'Implement:', 'Challenge:']
+    }
+
+    const topic = moduleTitle.replace(/Module \d+:/, '').trim()
+    const titlePrefix = baseTitles[lessonType as keyof typeof baseTitles][Math.floor(Math.random() * baseTitles[lessonType as keyof typeof baseTitles].length)]
+
+    const title = `${titlePrefix} ${topic} - Part ${order}`
+    const description = `Detailed coverage of ${topic.toLowerCase()} concepts and practical applications`
+    const duration = randomDuration(15, 90)
+
+    const baseLesson = {
+      title,
+      description,
+      type: lessonType,
+      order,
+      duration
+    }
+
+    switch (lessonType) {
+      case 'VIDEO':
+        return {
+          ...baseLesson,
+          videoUrl: `/videos/modules/${moduleOrder}/lessons/${order}.mp4`,
+          content: JSON.stringify({
+            videoUrl: `/videos/modules/${moduleOrder}/lessons/${order}.mp4`,
+            subtitles: `/videos/modules/${moduleOrder}/lessons/${order}.vtt`,
+            quality: ['1080p', '720p', '480p']
+          }),
+          resources: {
+            create: [
+              {
+                title: 'Lesson Slides',
+                url: `/resources/slides/${moduleOrder}-${order}.pdf`,
+                type: 'document',
+                order: 1
+              },
+              {
+                title: 'Source Code',
+                url: `/resources/code/${moduleOrder}-${order}.zip`,
+                type: 'download',
+                order: 2
+              }
+            ]
+          }
+        }
+
+      case 'READING':
+        return {
+          ...baseLesson,
+          content: JSON.stringify({
+            markdown: `# ${title}\n\nComprehensive reading material covering key concepts...`,
+            estimatedReadTime: Math.floor(duration / 2),
+            references: [
+              `Reference Material 1`,
+              `Reference Material 2`
+            ]
+          }),
+          resources: {
+            create: [
+              {
+                title: 'Reading Material PDF',
+                url: `/resources/reading/${moduleOrder}-${order}.pdf`,
+                type: 'document',
+                order: 1
+              }
+            ]
+          }
+        }
+
+      case 'INTERACTIVE':
+        return {
+          ...baseLesson,
+          content: JSON.stringify({
+            interactiveType: 'code-editor',
+            template: '// Your code here',
+            solution: '// Solution code',
+            tests: ['Test 1', 'Test 2']
+          }),
+          resources: {
+            create: [
+              {
+                title: 'Starter Template',
+                url: `/resources/interactive/${moduleOrder}-${order}-starter.zip`,
+                type: 'download',
+                order: 1
+              }
+            ]
+          }
+        }
+
+      case 'QUIZ':
+        return {
+          ...baseLesson,
+          content: JSON.stringify({
+            questions: [
+              {
+                question: 'Sample question 1',
+                options: ['Option A', 'Option B', 'Option C', 'Option D'],
+                correctAnswer: 0
+              },
+              {
+                question: 'Sample question 2',
+                options: ['Option A', 'Option B', 'Option C', 'Option D'],
+                correctAnswer: 1
+              }
+            ]
+          }),
+          quiz: {
+            create: {
+              title: title,
+              description: 'Test your understanding of the module concepts',
+              questions: JSON.stringify([
+                {
+                  id: 1,
+                  question: `What is the key concept in ${topic}?`,
+                  type: 'multiple-choice',
+                  options: ['Option A', 'Option B', 'Option C', 'Option D'],
+                  correctAnswer: 0,
+                  explanation: 'Detailed explanation of the correct answer'
+                },
+                {
+                  id: 2,
+                  question: `How do you implement ${topic}?`,
+                  type: 'multiple-choice',
+                  options: ['Method A', 'Method B', 'Method C', 'Method D'],
+                  correctAnswer: 1,
+                  explanation: 'Step-by-step explanation'
+                }
+              ]),
+              timeLimit: 30,
+              passingScore: 70
+            }
+          }
+        }
+
+      case 'PROJECT':
+        return {
+          ...baseLesson,
+          content: JSON.stringify({
+            projectType: 'guided-build',
+            requirements: [
+              'Requirement 1',
+              'Requirement 2',
+              'Requirement 3'
+            ],
+            deliverables: [
+              'Deliverable 1',
+              'Deliverable 2'
+            ]
+          }),
+          resources: {
+            create: [
+              {
+                title: 'Project Starter Kit',
+                url: `/resources/projects/${moduleOrder}-${order}-starter.zip`,
+                type: 'download',
+                order: 1
+              },
+              {
+                title: 'Project Assets',
+                url: `/resources/projects/${moduleOrder}-${order}-assets.zip`,
+                type: 'download',
+                order: 2
+              }
+            ]
+          }
+        }
+
+      default:
+        return baseLesson
+    }
+  }
+
+  function generateModules(template: any, difficulty: string): any[] {
+    // Determine number of modules based on difficulty and course duration
+    const baseDuration = template.duration
+    let moduleCount: number
+
+    if (difficulty === 'BEGINNER') {
+      moduleCount = Math.floor(Math.random() * 2) + 3 // 3-4 modules
+    } else if (difficulty === 'INTERMEDIATE') {
+      moduleCount = Math.floor(Math.random() * 3) + 4 // 4-6 modules
+    } else {
+      moduleCount = Math.floor(Math.random() * 3) + 6 // 6-8 modules
+    }
+
+    const modules = []
+    const moduleTemplates = [
+      { title: 'Introduction and Setup', description: 'Getting started with course fundamentals' },
+      { title: 'Core Concepts', description: 'Essential concepts and theories' },
+      { title: 'Practical Fundamentals', description: 'Hands-on practice with basic techniques' },
+      { title: 'Intermediate Techniques', description: 'Building on core knowledge' },
+      { title: 'Advanced Topics', description: 'Deep dive into advanced concepts' },
+      { title: 'Real-World Applications', description: 'Applying skills to practical scenarios' },
+      { title: 'Optimization and Best Practices', description: 'Professional-level techniques' },
+      { title: 'Final Project', description: 'Comprehensive capstone project' }
+    ]
+
+    const totalModuleDuration = baseDuration
+    const durationPerModule = Math.floor(totalModuleDuration / moduleCount)
+
+    for (let i = 0; i < moduleCount; i++) {
+      const moduleTemplate = moduleTemplates[i] || moduleTemplates[moduleTemplates.length - 1]
+      const lessonCount = Math.floor(Math.random() * 9) + 4 // 4-12 lessons per module
+
+      const lessons = generateLessonsByType(
+        `Module ${i + 1}: ${moduleTemplate.title}`,
+        lessonCount,
+        i + 1
+      )
+
+      // Calculate actual module duration from lessons
+      const calculatedDuration = lessons.reduce((sum: number, lesson: any) => sum + (lesson.duration || 30), 0)
+
+      modules.push({
+        title: `${moduleTemplate.title}`,
+        description: moduleTemplate.description,
+        order: i + 1,
+        duration: calculatedDuration,
+        lessons: {
+          create: lessons
+        }
+      })
+    }
+
+    return modules
+  }
+
+  // Main course data generation function
   function generateCourseData(category: string, template: any, instructor: any) {
+    const modules = generateModules(template, template.difficulty)
+
+    // Calculate total duration from all modules
+    const calculatedDuration = modules.reduce((sum: number, module: any) => sum + module.duration, 0)
+
     return {
       title: template.title,
       description: template.description,
@@ -1044,7 +1322,7 @@ async function main() {
       category: category,
       engine: category.includes('UNITY') ? 'UNITY' : category.includes('UNREAL') ? 'UNREAL' : category.includes('GODOT') ? 'GODOT' : null,
       difficulty: template.difficulty,
-      duration: template.duration,
+      duration: calculatedDuration, // Use calculated duration from lessons
       requirements: {
         create: template.requirements.map((req: string, idx: number) => ({
           requirement: req,
@@ -1062,55 +1340,7 @@ async function main() {
       },
       instructorId: instructor.id,
       modules: {
-        create: [
-          {
-            title: `${template.title.split(' ')[0]} Fundamentals`,
-            description: `Core concepts and foundations`,
-            order: 1,
-            duration: Math.floor(template.duration * 0.4),
-            lessons: {
-              create: [
-                {
-                  title: 'Getting Started',
-                  description: 'Introduction and setup',
-                  type: 'VIDEO',
-                  content: '{"videoUrl": "/videos/intro.mp4"}',
-                  order: 1,
-                  duration: 30,
-                  videoUrl: '/videos/intro.mp4'
-                },
-                {
-                  title: 'Core Concepts',
-                  description: 'Understanding the fundamentals',
-                  type: 'VIDEO',
-                  content: '{"videoUrl": "/videos/concepts.mp4"}',
-                  order: 2,
-                  duration: 45,
-                  videoUrl: '/videos/concepts.mp4'
-                }
-              ]
-            }
-          },
-          {
-            title: 'Practical Applications',
-            description: 'Hands-on projects and implementation',
-            order: 2,
-            duration: Math.floor(template.duration * 0.6),
-            lessons: {
-              create: [
-                {
-                  title: 'Building Your First Project',
-                  description: 'Step-by-step project creation',
-                  type: 'VIDEO',
-                  content: '{"videoUrl": "/videos/project.mp4"}',
-                  order: 1,
-                  duration: 60,
-                  videoUrl: '/videos/project.mp4'
-                }
-              ]
-            }
-          }
-        ]
+        create: modules
       }
     }
   }

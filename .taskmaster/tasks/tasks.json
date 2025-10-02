@@ -28,10 +28,10 @@
             "description": "Create diverse test user accounts for all roles (students, instructors, admins) with realistic profiles, skills, and OAuth provider compatibility",
             "dependencies": [],
             "details": "Expand user creation in seed.ts to generate 20+ students, 10+ instructors, and 3 admin users. Include realistic names, emails, bios, locations, and skills for each user. Create Account records for OAuth providers (Google, GitHub) for testing authentication flows. Ensure each instructor has expertise in specific game engines and categories. Students should have varied skill levels and interests. Include profile images, websites, and portfolio data where appropriate.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Verify seeded users can authenticate via both credentials and OAuth providers, instructor profiles display relevant expertise, student profiles show appropriate skill levels, and all role-based permissions function correctly",
             "parentId": "undefined",
-            "updatedAt": "2025-10-02T11:45:47.312Z"
+            "updatedAt": "2025-10-02T13:50:54.537Z"
           },
           {
             "id": 3,
@@ -39,9 +39,10 @@
             "description": "Generate realistic course module structures with 3-8 modules per course, each containing 4-12 lessons with proper lesson types and placeholder video content",
             "dependencies": [],
             "details": "For each of the 50+ courses, create a realistic module structure. Each course should have 3-8 modules with logical progression (Introduction, Fundamentals, Intermediate Concepts, Advanced Topics, Projects, Publishing). Each module should contain 4-12 lessons with varied types (VIDEO, INTERACTIVE, QUIZ, PROJECT, READING). Include realistic lesson titles, descriptions, durations (15-90 minutes), and placeholder video URLs. Add lesson resources, quiz data, and proper content JSON structures. Ensure total course duration matches the calculated sum of lesson durations.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Verify courses display proper module hierarchy, lessons load with correct metadata, video placeholder URLs are accessible, quiz data is properly structured, and course duration calculations are accurate",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-10-02T13:51:15.119Z"
           },
           {
             "id": 4,
@@ -64,7 +65,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2025-10-02T11:45:47.312Z"
+        "updatedAt": "2025-10-02T13:51:15.119Z"
       },
       {
         "id": "2",
@@ -662,7 +663,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-02T11:45:47.312Z",
+      "lastModified": "2025-10-02T13:51:15.120Z",
       "taskCount": 30,
       "completedCount": 0,
       "tags": [
