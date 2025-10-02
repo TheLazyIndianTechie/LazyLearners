@@ -28,10 +28,12 @@ import {
   Plus,
   X,
   AlertCircle,
-  Trash2
+  Trash2,
+  Clock
 } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
+import { VideoUploadZone, type VideoFile } from "@/components/video/video-upload-zone"
 
 interface Module {
   id: string
@@ -133,6 +135,7 @@ export default function LessonEditPage({ params }: LessonEditPageProps) {
 
   const [activeTab, setActiveTab] = useState("details")
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [uploadedVideo, setUploadedVideo] = useState<VideoFile | null>(null)
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -264,6 +267,24 @@ export default function LessonEditPage({ params }: LessonEditPageProps) {
       ...prev,
       resources: prev.resources.filter((_, i) => i !== index)
     }) : null)
+  }
+
+  const handleVideoUploadComplete = (files: VideoFile[]) => {
+    if (files.length > 0 && lesson) {
+      const uploadedFile = files[0] // Use the first uploaded file
+      setUploadedVideo(uploadedFile)
+
+      // Update lesson with video URL
+      if (uploadedFile.videoUrl) {
+        setLesson(prev => prev ? ({
+          ...prev,
+          videoUrl: uploadedFile.videoUrl,
+          duration: uploadedFile.metadata?.duration ? Math.round(uploadedFile.metadata.duration / 60) : prev.duration
+        }) : null)
+
+        toast.success("Video uploaded successfully! Don't forget to save your changes.")
+      }
+    }
   }
 
   const getContentPlaceholder = () => {
@@ -462,17 +483,77 @@ export default function LessonEditPage({ params }: LessonEditPageProps) {
               </CardHeader>
               <CardContent className="space-y-6">
                 {lesson.type === 'VIDEO' && (
-                  <div>
-                    <Label htmlFor="videoUrl">Video URL</Label>
-                    <Input
-                      id="videoUrl"
-                      value={lesson.videoUrl || ""}
-                      onChange={(e) => setLesson(prev => prev ? ({ ...prev, videoUrl: e.target.value }) : null)}
-                      placeholder="https://example.com/video.mp4 or YouTube/Vimeo URL"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Supports direct video files, YouTube, Vimeo, and other video platforms
-                    </p>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Video Upload</Label>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Upload a video file or provide a direct URL to the video
+                      </p>
+
+                      <Tabs defaultValue="upload" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="upload">Upload Video</TabsTrigger>
+                          <TabsTrigger value="url">Video URL</TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="upload" className="space-y-4">
+                          <VideoUploadZone
+                            courseId={course?.id}
+                            maxFiles={1}
+                            onUploadComplete={handleVideoUploadComplete}
+                            enableProcessing={true}
+                          />
+
+                          {uploadedVideo && uploadedVideo.status === 'completed' && (
+                            <Card className="bg-green-50 border-green-200">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center gap-2">
+                                  <PlayCircle className="h-4 w-4 text-green-600" />
+                                  <div className="text-sm text-green-700">
+                                    <p className="font-medium">Video uploaded successfully</p>
+                                    <p className="text-xs mt-1">
+                                      {uploadedVideo.name}
+                                      {uploadedVideo.metadata && (
+                                        <span> • Duration: {Math.floor(uploadedVideo.metadata.duration / 60)}:{String(Math.floor(uploadedVideo.metadata.duration % 60)).padStart(2, '0')}</span>
+                                      )}
+                                    </p>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
+                        </TabsContent>
+
+                        <TabsContent value="url" className="space-y-4">
+                          <div>
+                            <Label htmlFor="videoUrl">Video URL</Label>
+                            <Input
+                              id="videoUrl"
+                              value={lesson.videoUrl || ""}
+                              onChange={(e) => setLesson(prev => prev ? ({ ...prev, videoUrl: e.target.value }) : null)}
+                              placeholder="https://example.com/video.mp4 or YouTube/Vimeo URL"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Supports direct video files, YouTube, Vimeo, and other video platforms
+                            </p>
+                          </div>
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+
+                    {lesson.videoUrl && (
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-2">
+                            <PlayCircle className="h-4 w-4 text-blue-600" />
+                            <div className="text-sm text-blue-700">
+                              <p className="font-medium">Current video URL</p>
+                              <p className="text-xs mt-1 break-all">{lesson.videoUrl}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
                 )}
 

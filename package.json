@@ -12,6 +12,7 @@
     "bcryptjs": "^3.0.2",
     "dompurify": "^3.2.7",
     "isomorphic-dompurify": "^2.28.0",
+    "react-dropzone": "^14.3.8",
     "svix": "^1.76.1"
   }
 }
