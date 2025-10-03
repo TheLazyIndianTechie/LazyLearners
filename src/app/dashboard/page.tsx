@@ -266,11 +266,11 @@ export default function DashboardPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="progress">Progress</TabsTrigger>
-            <TabsTrigger value="courses">My Courses</TabsTrigger>
-            <TabsTrigger value="achievements">Achievements</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+            <TabsTrigger value="overview" className="min-h-[44px]">Overview</TabsTrigger>
+            <TabsTrigger value="progress" className="min-h-[44px]">Progress</TabsTrigger>
+            <TabsTrigger value="courses" className="min-h-[44px]">My Courses</TabsTrigger>
+            <TabsTrigger value="achievements" className="min-h-[44px]">Achievements</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -284,7 +284,7 @@ export default function DashboardPage() {
                       <PlayCircle className="h-5 w-5 text-blue-500" />
                       Continue Learning
                     </CardTitle>
-                    <Button variant="outline" size="sm" onClick={() => router.push("/courses")}>
+                    <Button variant="outline" size="sm" onClick={() => router.push("/courses")} className="min-h-[44px]">
                       View All
                     </Button>
                   </div>
@@ -293,8 +293,15 @@ export default function DashboardPage() {
                   {enrolledCourses.slice(0, 3).map((course) => (
                     <div
                       key={course.id}
-                      className="flex items-center gap-4 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                      className="flex items-center gap-4 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer min-h-[44px]"
                       onClick={() => router.push(`/courses/${course.id}`)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          router.push(`/courses/${course.id}`)
+                        }
+                      }}
                     >
                       <img
                         src={course.thumbnail || '/placeholder-course.jpg'}
@@ -371,10 +378,10 @@ export default function DashboardPage() {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Button
                       variant="outline"
-                      className="h-auto p-4 flex flex-col items-center gap-2"
+                      className="h-auto p-4 flex flex-col items-center gap-2 min-h-[44px]"
                       onClick={() => router.push("/portfolio")}
                     >
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -384,7 +391,7 @@ export default function DashboardPage() {
                     </Button>
                     <Button
                       variant="outline"
-                      className="h-auto p-4 flex flex-col items-center gap-2"
+                      className="h-auto p-4 flex flex-col items-center gap-2 min-h-[44px]"
                       onClick={() => router.push("/community")}
                     >
                       <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -394,7 +401,7 @@ export default function DashboardPage() {
                     </Button>
                     <Button
                       variant="outline"
-                      className="h-auto p-4 flex flex-col items-center gap-2"
+                      className="h-auto p-4 flex flex-col items-center gap-2 min-h-[44px]"
                     >
                       <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                         <Award className="w-4 h-4" />
@@ -403,7 +410,7 @@ export default function DashboardPage() {
                     </Button>
                     <Button
                       variant="outline"
-                      className="h-auto p-4 flex flex-col items-center gap-2"
+                      className="h-auto p-4 flex flex-col items-center gap-2 min-h-[44px]"
                       onClick={() => router.push("/courses")}
                     >
                       <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -507,7 +514,7 @@ export default function DashboardPage() {
           <TabsContent value="courses" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">My Courses</h2>
-              <Button variant="outline" onClick={() => router.push("/courses")}>
+              <Button variant="outline" onClick={() => router.push("/courses")} className="min-h-[44px]">
                 Browse All Courses
               </Button>
             </div>
@@ -531,7 +538,7 @@ export default function DashboardPage() {
                   <p className="text-muted-foreground mb-6">
                     Start your game development journey by enrolling in your first course.
                   </p>
-                  <Button onClick={() => router.push("/courses")}>
+                  <Button onClick={() => router.push("/courses")} className="min-h-[44px]">
                     Explore Courses
                   </Button>
                 </CardContent>

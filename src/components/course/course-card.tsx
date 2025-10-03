@@ -125,7 +125,7 @@ export function CourseCard({ course, showProgress = false, progress = 0 }: Cours
           </div>
 
           <Button
-            className="bg-coral-400 hover:bg-coral-500 text-slate-950 font-semibold btn-glow"
+            className="bg-coral-400 hover:bg-coral-500 text-slate-950 font-semibold btn-glow min-h-[44px] px-6"
             asChild
           >
             <Link href={`/courses/${course.id}`}>

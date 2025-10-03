@@ -84,7 +84,7 @@ export function MainNav() {
           {/* Mobile Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]" aria-label="Toggle menu">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
@@ -104,7 +104,7 @@ export function MainNav() {
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
                       className={cn(
-                        "text-lg font-medium transition-colors hover:text-primary px-4 py-2 rounded-md",
+                        "text-lg font-medium transition-colors hover:text-primary px-4 py-3 rounded-md min-h-[44px] flex items-center",
                         pathname === item.href
                           ? "bg-muted text-foreground"
                           : "text-muted-foreground"
@@ -119,10 +119,10 @@ export function MainNav() {
                 {!isLoggedIn && (
                   <div className="flex flex-col gap-2 mt-4 px-4">
                     <SignInButton>
-                      <Button variant="outline" className="w-full">Sign In</Button>
+                      <Button variant="outline" className="w-full min-h-[44px]">Sign In</Button>
                     </SignInButton>
                     <SignUpButton>
-                      <Button className="w-full">Start Learning</Button>
+                      <Button className="w-full min-h-[44px]">Start Learning</Button>
                     </SignUpButton>
                   </div>
                 )}

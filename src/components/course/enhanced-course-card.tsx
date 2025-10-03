@@ -134,7 +134,7 @@ export function EnhancedCourseCard({ course, showProgress = false, progress = 0 
           {/* CTA Button */}
           <div className="pt-2">
             <Button
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2.5 rounded-lg transition-all duration-200"
+              className="w-full min-h-[44px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 rounded-lg transition-all duration-200"
             >
               {showProgress ? "Continue Learning" : "View Course"}
             </Button>

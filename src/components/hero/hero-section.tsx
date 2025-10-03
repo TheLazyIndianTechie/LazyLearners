@@ -54,7 +54,7 @@ export function HeroSection() {
             <div className="flex flex-wrap gap-4">
               <Button
                 size="lg"
-                className="px-8 py-6 text-lg bg-coral-400 hover:bg-coral-500 text-slate-950 font-semibold btn-glow group"
+                className="px-4 sm:px-6 md:px-8 py-4 md:py-6 text-base md:text-lg min-h-[44px] bg-coral-400 hover:bg-coral-500 text-slate-950 font-semibold btn-glow group"
                 asChild
               >
                 <Link href="/courses">
@@ -65,7 +65,7 @@ export function HeroSection() {
               <Button
                 size="lg"
                 variant="outline"
-                className="px-8 py-6 text-lg border-2 border-slate-700 hover:border-cyan-400 hover:text-cyan-400"
+                className="px-4 sm:px-6 md:px-8 py-4 md:py-6 text-base md:text-lg min-h-[44px] border-2 border-slate-700 hover:border-cyan-400 hover:text-cyan-400"
                 asChild
               >
                 <Link href="/test/video">Watch Demo</Link>
@@ -73,17 +73,17 @@ export function HeroSection() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-slate-800">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-slate-800">
               <div className="space-y-1">
-                <div className="text-3xl font-mono font-bold text-coral-400">500K+</div>
+                <div className="text-2xl sm:text-3xl font-mono font-bold text-coral-400">500K+</div>
                 <div className="text-sm text-slate-400 uppercase tracking-wide">Learners</div>
               </div>
               <div className="space-y-1">
-                <div className="text-3xl font-mono font-bold text-cyan-400">5K+</div>
+                <div className="text-2xl sm:text-3xl font-mono font-bold text-cyan-400">5K+</div>
                 <div className="text-sm text-slate-400 uppercase tracking-wide">Courses</div>
               </div>
               <div className="space-y-1">
-                <div className="text-3xl font-mono font-bold text-forest-400">50K+</div>
+                <div className="text-2xl sm:text-3xl font-mono font-bold text-forest-400">50K+</div>
                 <div className="text-sm text-slate-400 uppercase tracking-wide">Games</div>
               </div>
             </div>

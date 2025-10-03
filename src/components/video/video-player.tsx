@@ -88,10 +88,22 @@ function VideoPlayer({
 
   const [showControls, setShowControls] = useState(true)
   const [isDragging, setIsDragging] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   // Available qualities and playback speeds
   const qualities = ['240p', '360p', '480p', '720p', '1080p']
   const playbackSpeeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Initialize video and setup event listeners
   useEffect(() => {
@@ -672,12 +684,12 @@ function VideoPlayer({
         {/* Progress Bar */}
         <div
           ref={seekBarRef}
-          className="mb-4 relative"
+          className={cn("mb-3 md:mb-4 relative", isMobile && "py-2")}
           onMouseMove={handleSeekBarHover}
           onMouseLeave={handleSeekBarLeave}
         >
           {/* Thumbnail Preview */}
-          {state.thumbnailPreview && (
+          {state.thumbnailPreview && !isMobile && (
             <div
               className="absolute bottom-full mb-2 transform -translate-x-1/2 pointer-events-none"
               style={{
@@ -704,89 +716,117 @@ function VideoPlayer({
             onValueChange={handleSeek}
             onPointerDown={() => setIsDragging(true)}
             onPointerUp={() => setIsDragging(false)}
-            className="w-full"
+            className={cn(
+              "w-full touch-manipulation",
+              isMobile && "[&_[role=slider]]:h-5 [&_[role=slider]]:w-5"
+            )}
+            aria-label="Video progress"
           />
-          <div className="flex justify-between text-xs text-gray-300 mt-1">
+          <div className={cn(
+            "flex justify-between text-gray-300 mt-1",
+            isMobile ? "text-sm" : "text-xs"
+          )}>
             <span>{formatTime(state.currentTime)}</span>
             <span>{formatTime(state.duration)}</span>
           </div>
         </div>
 
         {/* Control Buttons */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between flex-wrap md:flex-nowrap gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
             {/* Skip Back */}
             <Button
               variant="ghost"
-              size="sm"
+              size={isMobile ? "default" : "sm"}
               onClick={() => skip(-10)}
-              className="text-white hover:text-blue-400"
+              className={cn(
+                "text-white hover:text-blue-400",
+                isMobile && "min-h-[44px] min-w-[44px] p-2"
+              )}
+              aria-label="Skip back 10 seconds"
             >
-              <SkipBack className="h-4 w-4" />
+              <SkipBack className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
             </Button>
 
             {/* Play/Pause */}
             <Button
               variant="ghost"
-              size="sm"
+              size={isMobile ? "default" : "sm"}
               onClick={togglePlay}
-              className="text-white hover:text-blue-400"
+              className={cn(
+                "text-white hover:text-blue-400",
+                isMobile && "min-h-[44px] min-w-[44px] p-2"
+              )}
+              aria-label={state.isPlaying ? "Pause" : "Play"}
             >
               {state.isPlaying ? (
-                <Pause className="h-5 w-5" />
+                <Pause className={isMobile ? "h-6 w-6" : "h-5 w-5"} />
               ) : (
-                <Play className="h-5 w-5" />
+                <Play className={isMobile ? "h-6 w-6" : "h-5 w-5"} />
               )}
             </Button>
 
             {/* Skip Forward */}
             <Button
               variant="ghost"
-              size="sm"
+              size={isMobile ? "default" : "sm"}
               onClick={() => skip(10)}
-              className="text-white hover:text-blue-400"
+              className={cn(
+                "text-white hover:text-blue-400",
+                isMobile && "min-h-[44px] min-w-[44px] p-2"
+              )}
+              aria-label="Skip forward 10 seconds"
             >
-              <SkipForward className="h-4 w-4" />
+              <SkipForward className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
             </Button>
 
             {/* Volume */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2">
               <Button
                 variant="ghost"
-                size="sm"
+                size={isMobile ? "default" : "sm"}
                 onClick={toggleMute}
-                className="text-white hover:text-blue-400"
+                className={cn(
+                  "text-white hover:text-blue-400",
+                  isMobile && "min-h-[44px] min-w-[44px] p-2"
+                )}
+                aria-label={state.isMuted ? "Unmute" : "Mute"}
               >
                 {state.isMuted || state.volume === 0 ? (
-                  <VolumeX className="h-4 w-4" />
+                  <VolumeX className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
                 ) : (
-                  <Volume2 className="h-4 w-4" />
+                  <Volume2 className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
                 )}
               </Button>
-              <div className="w-20">
+              {/* Hide volume slider on very small screens */}
+              <div className={cn("hidden sm:block", isMobile ? "w-24" : "w-20")}>
                 <Slider
                   value={[state.isMuted ? 0 : state.volume]}
                   max={1}
                   step={0.1}
                   onValueChange={handleVolumeChange}
+                  className="touch-manipulation"
+                  aria-label="Volume"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
             {/* Captions */}
             <Button
               variant="ghost"
-              size="sm"
+              size={isMobile ? "default" : "sm"}
               onClick={toggleCaptions}
               className={cn(
                 "text-white hover:text-blue-400",
-                state.showCaptions && "text-blue-400"
+                state.showCaptions && "text-blue-400",
+                isMobile && "min-h-[44px] min-w-[44px] p-2"
               )}
               title="Toggle captions (C)"
+              aria-label="Toggle captions"
             >
-              <Subtitles className="h-4 w-4" />
+              <Subtitles className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
             </Button>
 
             {/* Settings Menu */}
@@ -794,32 +834,42 @@ function VideoPlayer({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="text-white hover:text-blue-400"
+                  size={isMobile ? "default" : "sm"}
+                  className={cn(
+                    "text-white hover:text-blue-400",
+                    isMobile && "min-h-[44px] min-w-[44px] p-2"
+                  )}
+                  aria-label="Settings"
                 >
-                  <Settings className="h-4 w-4" />
+                  <Settings className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent align="end" className={isMobile ? "min-w-[200px]" : ""}>
                 <div className="p-2">
-                  <div className="text-sm font-medium mb-2">Quality</div>
+                  <div className={cn("font-medium mb-2", isMobile ? "text-base" : "text-sm")}>Quality</div>
                   {qualities.map((quality) => (
                     <DropdownMenuItem
                       key={quality}
                       onClick={() => changeQuality(quality)}
-                      className={state.quality === quality ? "bg-blue-100" : ""}
+                      className={cn(
+                        state.quality === quality ? "bg-blue-100 dark:bg-blue-900" : "",
+                        isMobile && "min-h-[44px] text-base"
+                      )}
                     >
                       {quality}
                     </DropdownMenuItem>
                   ))}
                 </div>
                 <div className="p-2 border-t">
-                  <div className="text-sm font-medium mb-2">Speed</div>
+                  <div className={cn("font-medium mb-2", isMobile ? "text-base" : "text-sm")}>Speed</div>
                   {playbackSpeeds.map((speed) => (
                     <DropdownMenuItem
                       key={speed}
                       onClick={() => changePlaybackRate(speed)}
-                      className={state.playbackRate === speed ? "bg-blue-100" : ""}
+                      className={cn(
+                        state.playbackRate === speed ? "bg-blue-100 dark:bg-blue-900" : "",
+                        isMobile && "min-h-[44px] text-base"
+                      )}
                     >
                       {speed}x
                     </DropdownMenuItem>
@@ -828,28 +878,40 @@ function VideoPlayer({
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Picture-in-Picture */}
+            {/* Picture-in-Picture - Hide on very small mobile */}
             {'pictureInPictureEnabled' in document && (
               <Button
                 variant="ghost"
-                size="sm"
+                size={isMobile ? "default" : "sm"}
                 onClick={togglePiP}
-                className="text-white hover:text-blue-400"
+                className={cn(
+                  "text-white hover:text-blue-400 hidden sm:inline-flex",
+                  isMobile && "min-h-[44px] min-w-[44px] p-2"
+                )}
                 title="Picture in Picture (P)"
+                aria-label="Picture in Picture"
               >
-                <PictureInPicture className="h-4 w-4" />
+                <PictureInPicture className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
               </Button>
             )}
 
             {/* Fullscreen */}
             <Button
               variant="ghost"
-              size="sm"
+              size={isMobile ? "default" : "sm"}
               onClick={toggleFullscreen}
-              className="text-white hover:text-blue-400"
+              className={cn(
+                "text-white hover:text-blue-400",
+                isMobile && "min-h-[44px] min-w-[44px] p-2"
+              )}
               title="Fullscreen (F)"
+              aria-label={state.isFullscreen ? "Exit fullscreen" : "Fullscreen"}
             >
-              {state.isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+              {state.isFullscreen ? (
+                <Minimize className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
+              ) : (
+                <Maximize className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
+              )}
             </Button>
           </div>
         </div>

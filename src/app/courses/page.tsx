@@ -347,7 +347,7 @@ export default function CoursesPage() {
           </div>
 
           {/* Featured Categories */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {categories.slice(1).map((category) => {
               const IconComponent = category.icon
               const courseCount = mockCourses.filter(c => c.category === category.id).length
@@ -355,14 +355,22 @@ export default function CoursesPage() {
               return (
                 <Card
                   key={category.id}
-                  className={`cursor-pointer transition-all hover:shadow-md ${
+                  className={`cursor-pointer transition-all hover:shadow-md min-h-[80px] ${
                     selectedCategory === category.id ? 'ring-2 ring-primary bg-primary/5' : ''
                   }`}
                   onClick={() => setSelectedCategory(category.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      setSelectedCategory(category.id)
+                    }
+                  }}
+                  aria-label={`Filter by ${category.label}`}
                 >
                   <CardContent className="p-4 text-center">
                     <IconComponent className="h-8 w-8 mx-auto mb-2 text-primary" />
-                    <h3 className="font-medium text-sm">{category.label}</h3>
+                    <h3 className="font-medium text-sm sm:text-base">{category.label}</h3>
                     <p className="text-xs text-muted-foreground">{courseCount} courses</p>
                   </CardContent>
                 </Card>
@@ -388,7 +396,7 @@ export default function CoursesPage() {
             {/* Quick Filters */}
             <div className="flex gap-2">
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48 min-h-[44px]">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -402,7 +410,7 @@ export default function CoursesPage() {
 
               <Sheet open={showFilters} onOpenChange={setShowFilters}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" className="h-12">
+                  <Button variant="outline" className="min-h-[44px]">
                     <SlidersHorizontal className="h-4 w-4 mr-2" />
                     Filters
                     {hasActiveFilters && (
@@ -412,7 +420,7 @@ export default function CoursesPage() {
                     )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="w-80 overflow-y-auto">
+                <SheetContent className="w-full sm:w-80 overflow-y-auto">
                   <SheetHeader>
                     <SheetTitle>Filter Courses</SheetTitle>
                     <SheetDescription>
@@ -431,7 +439,7 @@ export default function CoursesPage() {
                             variant={selectedDifficulty === level.value ? "default" : "outline"}
                             size="sm"
                             onClick={() => setSelectedDifficulty(level.value)}
-                            className="justify-start"
+                            className="justify-start min-h-[44px]"
                           >
                             {level.label}
                           </Button>
@@ -531,7 +539,7 @@ export default function CoursesPage() {
                       <Button
                         variant="outline"
                         onClick={clearAllFilters}
-                        className="w-full"
+                        className="w-full min-h-[44px]"
                       >
                         <X className="h-4 w-4 mr-2" />
                         Clear All Filters
@@ -547,17 +555,19 @@ export default function CoursesPage() {
                   variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("grid")}
-                  className="rounded-r-none"
+                  className="rounded-r-none min-h-[44px] min-w-[44px]"
+                  aria-label="Grid view"
                 >
-                  <Grid className="h-4 w-4" />
+                  <Grid className="h-5 w-5" />
                 </Button>
                 <Button
                   variant={viewMode === "list" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("list")}
-                  className="rounded-l-none"
+                  className="rounded-l-none min-h-[44px] min-w-[44px]"
+                  aria-label="List view"
                 >
-                  <List className="h-4 w-4" />
+                  <List className="h-5 w-5" />
                 </Button>
               </div>
             </div>
@@ -627,7 +637,7 @@ export default function CoursesPage() {
               <p className="text-muted-foreground mb-6">
                 Try adjusting your search criteria or browse our featured categories above.
               </p>
-              <Button onClick={clearAllFilters}>
+              <Button onClick={clearAllFilters} className="min-h-[44px]">
                 Clear All Filters
               </Button>
             </CardContent>
@@ -648,11 +658,11 @@ export default function CoursesPage() {
                       <img
                         src={course.thumbnail || '/placeholder-course.jpg'}
                         alt={course.title}
-                        className="w-48 h-32 object-cover"
+                        className="w-32 sm:w-40 md:w-48 h-24 sm:h-28 md:h-32 object-cover"
                       />
                       <div className="flex-1 p-6">
                         <div className="flex justify-between items-start mb-2">
-                          <h3 className="text-xl font-semibold line-clamp-1">{course.title}</h3>
+                          <h3 className="text-lg sm:text-xl font-semibold line-clamp-1">{course.title}</h3>
                           <div className="text-right">
                             {course.price === 0 ? (
                               <Badge variant="secondary">Free</Badge>
@@ -678,7 +688,7 @@ export default function CoursesPage() {
                               <span>{course.instructor.name}</span>
                             </div>
                           </div>
-                          <Button>View Course</Button>
+                          <Button className="min-h-[44px]">View Course</Button>
                         </div>
                       </div>
                     </div>
