@@ -1,8 +1,29 @@
 {
-  "devDependencies": {
-    "@types/dompurify": "^3.0.5",
-    "prisma": "^6.16.3",
-    "shadcn": "^3.3.1"
+  "name": "LazyLearners",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:unit": "jest --testPathPattern=__tests__/unit",
+    "test:integration": "jest --testPathPattern=__tests__/integration",
+    "test:critical": "jest --testPathPattern=__tests__/critical",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:video-streaming": "jest --testPathPattern=video-streaming",
+    "test:full-suite": "npm run test && npm run test:e2e",
+    "test:accessibility": "playwright test tests/e2e/accessibility",
+    "security:test": "npm audit && npm run lint",
+    "security:test:comprehensive": "npm audit && npm run lint && npm run test:critical",
+    "production:deploy": "vercel --prod",
+    "production:verify": "curl -f https://gamelearn-platform.vercel.app/api/health || exit 1",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.2",
@@ -21,5 +42,11 @@
     "react-dropzone": "^14.3.8",
     "svix": "^1.76.1",
     "swagger-ui-react": "^5.18.2"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@types/dompurify": "^3.0.5",
+    "prisma": "^6.16.3",
+    "shadcn": "^3.3.1"
   }
 }
