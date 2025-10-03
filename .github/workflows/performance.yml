@@ -1,0 +1,265 @@
+name: Performance & Load Tests
+
+on:
+  schedule:
+    # Run weekly on Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to test'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  video-performance-tests:
+    name: Video Streaming Performance Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+      ENABLE_VIDEO_TEST: true
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      APP_URL: http://localhost:3000
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Apply database migrations
+        run: npx prisma db push --skip-generate
+
+      - name: Seed database
+        run: npm run db:seed
+
+      - name: Build application
+        run: npm run build
+
+      - name: Run video performance tests
+        run: npm run test:e2e -- --grep @performance
+
+      - name: Upload performance report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: video-performance-report
+          path: playwright-report/
+          retention-days: 30
+
+  load-tests:
+    name: Load Testing with k6
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install k6
+        run: |
+          curl https://github.com/grafana/k6/releases/download/v0.45.0/k6-v0.45.0-linux-amd64.tar.gz -L | tar xvz
+          sudo mv k6-v0.45.0-linux-amd64/k6 /usr/bin/k6
+          k6 version
+
+      - name: Setup test database
+        run: |
+          docker run -d \
+            --name postgres-load-test \
+            -e POSTGRES_USER=testuser \
+            -e POSTGRES_PASSWORD=testpass \
+            -e POSTGRES_DB=testdb \
+            -p 5433:5432 \
+            postgres:15
+
+      - name: Wait for database
+        run: |
+          until docker exec postgres-load-test pg_isready -U testuser; do
+            echo "Waiting for database..."
+            sleep 2
+          done
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Apply database migrations
+        run: DATABASE_URL=postgresql://testuser:testpass@localhost:5433/testdb npx prisma db push --skip-generate
+
+      - name: Seed database
+        run: DATABASE_URL=postgresql://testuser:testpass@localhost:5433/testdb npm run db:seed
+
+      - name: Build application
+        run: npm run build
+
+      - name: Start application
+        run: |
+          DATABASE_URL=postgresql://testuser:testpass@localhost:5433/testdb \
+          ENABLE_VIDEO_TEST=true \
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
+          CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }} \
+          npm start &
+
+          # Wait for app to be ready
+          timeout 60 bash -c 'until curl -f http://localhost:3000/api/health; do sleep 2; done'
+
+      - name: Run load tests
+        run: k6 run --out json=load-test-results.json tests/load/load-test-scenarios.js
+        env:
+          BASE_URL: http://localhost:3000
+
+      - name: Upload load test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: load-test-results
+          path: load-test-results.json
+          retention-days: 30
+
+      - name: Stop application
+        if: always()
+        run: |
+          pkill -f "npm start" || true
+          docker stop postgres-load-test || true
+          docker rm postgres-load-test || true
+
+  lighthouse-performance:
+    name: Lighthouse Performance Audit
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+      ENABLE_VIDEO_TEST: true
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      APP_URL: http://localhost:3000
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Apply database migrations
+        run: npx prisma db push --skip-generate
+
+      - name: Seed database
+        run: npm run db:seed
+
+      - name: Build application
+        run: npm run build
+
+      - name: Start application
+        run: npm start &
+
+      - name: Wait for app to be ready
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:3000/api/health; do sleep 2; done'
+
+      - name: Run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli
+          lhci autorun --config=.lighthouserc.json || true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-results
+          path: .lighthouseci/
+          retention-days: 30
+
+  performance-summary:
+    name: Performance Summary
+    runs-on: ubuntu-latest
+    needs: [video-performance-tests, load-tests, lighthouse-performance]
+    if: always()
+
+    steps:
+      - name: Check performance test results
+        run: |
+          echo "Video Performance Tests: ${{ needs.video-performance-tests.result }}"
+          echo "Load Tests: ${{ needs.load-tests.result }}"
+          echo "Lighthouse Audit: ${{ needs.lighthouse-performance.result }}"
+
+          if [[ "${{ needs.video-performance-tests.result }}" != "success" ]] || \
+             [[ "${{ needs.load-tests.result }}" != "success" ]]; then
+            echo "   Some performance tests failed or degraded"
+          else
+            echo " All performance tests passed"
+          fi
