@@ -1,6 +1,7 @@
 "use client"
 
 import { MainNav } from "./main-nav"
+import { SkipLinks } from "@/components/accessibility/skip-links"
 
 interface SiteLayoutProps {
   children: React.ReactNode
@@ -9,9 +10,12 @@ interface SiteLayoutProps {
 export function SiteLayout({ children }: SiteLayoutProps) {
   return (
     <div className="relative flex min-h-screen flex-col">
+      <SkipLinks />
       <MainNav />
-      <main className="flex-1">{children}</main>
-      <footer className="border-t bg-background">
+      <main id="main-content" className="flex-1" role="main">
+        {children}
+      </main>
+      <footer id="footer" className="border-t bg-background" role="contentinfo">
         <div className="container py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
@@ -28,34 +32,40 @@ export function SiteLayout({ children }: SiteLayoutProps) {
 
             <div className="space-y-4">
               <h4 className="font-semibold">Platform</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <nav aria-label="Footer platform links">
+                <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><a href="/courses" className="hover:text-foreground">Courses</a></li>
                 <li><a href="/features" className="hover:text-foreground">Features</a></li>
                 <li><a href="/pricing" className="hover:text-foreground">Pricing</a></li>
                 <li><a href="/dashboard" className="hover:text-foreground">Dashboard</a></li>
                 <li><a href="/portfolio" className="hover:text-foreground">Portfolio</a></li>
               </ul>
+              </nav>
             </div>
 
             <div className="space-y-4">
               <h4 className="font-semibold">Learning</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <nav aria-label="Footer learning links">
+                <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><a href="/courses/unity" className="hover:text-foreground">Unity Development</a></li>
                 <li><a href="/courses/unreal" className="hover:text-foreground">Unreal Engine</a></li>
                 <li><a href="/courses/godot" className="hover:text-foreground">Godot</a></li>
                 <li><a href="/courses/programming" className="hover:text-foreground">Game Programming</a></li>
               </ul>
+              </nav>
             </div>
 
             <div className="space-y-4">
               <h4 className="font-semibold">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <nav aria-label="Footer company links">
+                <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><a href="/about" className="hover:text-foreground">About Us</a></li>
                 <li><a href="/contact" className="hover:text-foreground">Contact</a></li>
                 <li><a href="/help" className="hover:text-foreground">Help Center</a></li>
                 <li><a href="/privacy" className="hover:text-foreground">Privacy Policy</a></li>
                 <li><a href="/terms" className="hover:text-foreground">Terms of Service</a></li>
               </ul>
+              </nav>
             </div>
           </div>
 

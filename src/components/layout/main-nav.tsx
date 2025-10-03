@@ -26,18 +26,18 @@ export function MainNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" role="banner">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+        <Link href="/" className="flex items-center space-x-2" aria-label="GameLearn home">
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center" aria-hidden="true">
             <span className="text-primary-foreground font-bold text-lg">G</span>
           </div>
           <span className="font-bold text-xl">GameLearn</span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav className="hidden md:flex items-center space-x-6" role="navigation" aria-label="Main navigation">
           {navigation.map((item) => {
             // Hide auth-required items when not logged in
             if (item.authRequired && !isLoggedIn) return null
@@ -52,6 +52,7 @@ export function MainNav() {
                     ? "text-foreground"
                     : "text-muted-foreground"
                 )}
+                aria-current={pathname === item.href ? "page" : undefined}
               >
                 {item.name}
               </Link>
@@ -84,16 +85,22 @@ export function MainNav() {
           {/* Mobile Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]" aria-label="Toggle menu">
-                <Menu className="h-6 w-6" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="min-h-[44px] min-w-[44px]"
+                aria-label="Open navigation menu"
+                aria-expanded={mobileMenuOpen}
+              >
+                <Menu className="h-6 w-6" aria-hidden="true" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]" aria-label="Mobile navigation">
               <SheetHeader>
                 <SheetTitle>Menu</SheetTitle>
               </SheetHeader>
-              <nav className="flex flex-col gap-4 mt-8">
+              <nav className="flex flex-col gap-4 mt-8" role="navigation" aria-label="Mobile navigation menu">
                 {navigation.map((item) => {
                   // Hide auth-required items when not logged in
                   if (item.authRequired && !isLoggedIn) return null
@@ -109,6 +116,7 @@ export function MainNav() {
                           ? "bg-muted text-foreground"
                           : "text-muted-foreground"
                       )}
+                      aria-current={pathname === item.href ? "page" : undefined}
                     >
                       {item.name}
                     </Link>

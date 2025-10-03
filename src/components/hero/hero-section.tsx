@@ -73,17 +73,17 @@ export function HeroSection() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-slate-800">
-              <div className="space-y-1">
-                <div className="text-2xl sm:text-3xl font-mono font-bold text-coral-400">500K+</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-slate-800" role="region" aria-label="Platform statistics">
+              <div className="space-y-1" aria-label="Over 500,000 learners on the platform">
+                <div className="text-2xl sm:text-3xl font-mono font-bold text-coral-400" aria-hidden="true">500K+</div>
                 <div className="text-sm text-slate-400 uppercase tracking-wide">Learners</div>
               </div>
-              <div className="space-y-1">
-                <div className="text-2xl sm:text-3xl font-mono font-bold text-cyan-400">5K+</div>
+              <div className="space-y-1" aria-label="Over 5,000 courses available">
+                <div className="text-2xl sm:text-3xl font-mono font-bold text-cyan-400" aria-hidden="true">5K+</div>
                 <div className="text-sm text-slate-400 uppercase tracking-wide">Courses</div>
               </div>
-              <div className="space-y-1">
-                <div className="text-2xl sm:text-3xl font-mono font-bold text-forest-400">50K+</div>
+              <div className="space-y-1" aria-label="Over 50,000 games created by students">
+                <div className="text-2xl sm:text-3xl font-mono font-bold text-forest-400" aria-hidden="true">50K+</div>
                 <div className="text-sm text-slate-400 uppercase tracking-wide">Games</div>
               </div>
             </div>
@@ -107,7 +107,7 @@ export function HeroSection() {
         </div>
 
         {/* Feature Cards */}
-        <div className="grid md:grid-cols-3 gap-6 pb-24">
+        <div className="grid md:grid-cols-3 gap-6 pb-24" role="region" aria-label="Platform features">
           {[
             {
               icon: "🎮",
@@ -131,12 +131,12 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 + (i * 0.1) }}
             >
-              <Card className="group border-2 border-slate-800 bg-slate-900/50 hover:border-coral-400/50 card-lift">
+              <Card className="group border-2 border-slate-800 bg-slate-900/50 hover:border-coral-400/50 card-lift" role="article" aria-labelledby={`feature-${i}-title`}>
                 <CardContent className="p-6 space-y-4">
-                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-coral-400/20 to-cyan-400/20 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-coral-400/20 to-cyan-400/20 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform" aria-hidden="true">
                     {feature.icon}
                   </div>
-                  <h3 className="heading-card text-slate-50">{feature.title}</h3>
+                  <h3 id={`feature-${i}-title`} className="heading-card text-slate-50">{feature.title}</h3>
                   <p className="text-slate-400 leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>

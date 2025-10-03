@@ -66,22 +66,24 @@ export function LessonNavigation({
   return (
     <div className="space-y-6">
       {/* Navigation Buttons */}
-      <div className="flex justify-between items-center">
+      <nav className="flex justify-between items-center" aria-label="Lesson navigation">
         <Button
           variant="outline"
           onClick={handlePrevious}
           disabled={!hasPrevious}
           className="flex items-center gap-2"
+          aria-label={hasPrevious ? `Go to previous lesson: ${lessons[currentIndex - 1]?.title}` : "No previous lesson"}
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           Previous Lesson
         </Button>
 
         <Button
           onClick={handleMarkCompleted}
           className="bg-green-600 hover:bg-green-700 text-white"
+          aria-label={`Mark ${lessons[currentIndex]?.title} as complete`}
         >
-          <CheckCircle className="w-4 h-4 mr-2" />
+          <CheckCircle className="w-4 h-4 mr-2" aria-hidden="true" />
           Mark as Complete
         </Button>
 
@@ -90,24 +92,33 @@ export function LessonNavigation({
           onClick={handleNext}
           disabled={!hasNext}
           className="flex items-center gap-2"
+          aria-label={hasNext ? `Go to next lesson: ${lessons[currentIndex + 1]?.title}` : "No next lesson"}
         >
           Next Lesson
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Button>
-      </div>
+      </nav>
 
       {/* Lesson List */}
       <Card>
         <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Course Lessons</h3>
-          <div className="space-y-3">
+          <h3 className="text-lg font-semibold mb-4" id="lesson-list-heading">Course Lessons</h3>
+          <ul className="space-y-3" role="list" aria-labelledby="lesson-list-heading">
             {lessons.map((lesson, index) => {
               const isActive = lesson.id === currentLessonId
               const canAccess = canAccessLesson(lesson)
+              const statusLabel = lesson.isCompleted ? "Completed" : isActive ? "Currently playing" : canAccess ? "Available" : "Locked"
+              const durationMinutes = Math.floor(lesson.duration / 60)
+              const durationSeconds = lesson.duration % 60
 
               return (
-                <div
+                <li
                   key={lesson.id}
+                  role="button"
+                  tabIndex={canAccess ? 0 : -1}
+                  aria-disabled={!canAccess}
+                  aria-current={isActive ? "true" : undefined}
+                  aria-label={`Lesson ${index + 1}: ${lesson.title}. ${statusLabel}. Duration: ${durationMinutes} minutes ${durationSeconds} seconds. ${lesson.type === "QUIZ" ? "Quiz lesson." : ""} ${lesson.isFree ? "Free preview." : ""}`}
                   className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                     isActive
                       ? "border-blue-200 bg-blue-50"
@@ -116,9 +127,15 @@ export function LessonNavigation({
                       : "border-gray-100 bg-gray-50 cursor-not-allowed opacity-60"
                   }`}
                   onClick={() => canAccess && onLessonChange(lesson.id)}
+                  onKeyDown={(e) => {
+                    if (canAccess && (e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault()
+                      onLessonChange(lesson.id)
+                    }
+                  }}
                 >
                   {/* Lesson Number */}
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium" aria-hidden="true">
                     {lesson.isCompleted ? (
                       <CheckCircle className="w-5 h-5 text-green-600" />
                     ) : canAccess ? (
@@ -141,12 +158,12 @@ export function LessonNavigation({
                         {lesson.title}
                       </h4>
                       {lesson.isFree && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-xs" aria-label="Free preview available">
                           Free
                         </Badge>
                       )}
                       {lesson.type === "QUIZ" && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs" aria-label="Quiz lesson">
                           Quiz
                         </Badge>
                       )}
@@ -159,13 +176,13 @@ export function LessonNavigation({
                   </div>
 
                   {/* Duration */}
-                  <div className="flex-shrink-0 text-sm text-slate-600">
-                    {Math.floor(lesson.duration / 60)}:{(lesson.duration % 60).toString().padStart(2, '0')}
+                  <div className="flex-shrink-0 text-sm text-slate-600" aria-hidden="true">
+                    {durationMinutes}:{durationSeconds.toString().padStart(2, '0')}
                   </div>
-                </div>
+                </li>
               )
             })}
-          </div>
+          </ul>
         </CardContent>
       </Card>
     </div>

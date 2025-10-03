@@ -17,8 +17,11 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:video-streaming": "jest --testPathPattern=video-streaming",
+    "test:a11y": "jest --testPathPattern=a11y",
+    "test:e2e:a11y": "playwright test --grep @a11y",
+    "test:accessibility": "npm run test:a11y && npm run test:e2e:a11y",
     "test:full-suite": "npm run test && npm run test:e2e",
-    "test:accessibility": "playwright test tests/e2e/accessibility",
+    "lint:a11y": "eslint . --ext .tsx,.ts",
     "security:test": "npm audit && npm run lint",
     "security:test:comprehensive": "npm audit && npm run lint && npm run test:critical",
     "production:deploy": "vercel --prod",
@@ -46,6 +49,8 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
     "@types/dompurify": "^3.0.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "jest-axe": "^10.0.0",
     "prisma": "^6.16.3",
     "shadcn": "^3.3.1"
   }

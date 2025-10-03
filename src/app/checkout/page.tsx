@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
 import { Cart as CartType } from "@/lib/types/payment"
 import Image from "next/image"
+import { LoadingAnnouncement, StatusMessage } from "@/components/accessibility/live-region"
 
 export default function CheckoutPage() {
   const { isSignedIn, user } = useUser()
@@ -229,7 +230,8 @@ export default function CheckoutPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin" />
+        <LoadingAnnouncement isLoading={true} loadingMessage="Loading checkout information" />
+        <Loader2 className="w-8 h-8 animate-spin" aria-hidden="true" />
       </div>
     )
   }
@@ -237,16 +239,20 @@ export default function CheckoutPage() {
   if (success) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <StatusMessage
+          message="Payment successful! You have been enrolled in your courses. Redirecting to dashboard."
+          type="success"
+        />
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4" aria-hidden="true">
               <Check className="w-8 h-8 text-green-600" />
             </div>
             <h2 className="text-2xl font-bold mb-2">Payment Successful!</h2>
             <p className="text-slate-600 dark:text-slate-400 mb-4">
               You have been enrolled in your courses. Redirecting to dashboard...
             </p>
-            <Loader2 className="w-6 h-6 animate-spin mx-auto" />
+            <Loader2 className="w-6 h-6 animate-spin mx-auto" aria-hidden="true" />
           </CardContent>
         </Card>
       </div>
@@ -467,10 +473,13 @@ export default function CheckoutPage() {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <AlertCircle className="w-5 h-5 text-red-600" />
-                <span className="text-red-600 text-sm">{error}</span>
-              </div>
+              <>
+                <StatusMessage message={error} type="error" />
+                <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg" role="alert">
+                  <AlertCircle className="w-5 h-5 text-red-600" aria-hidden="true" />
+                  <span className="text-red-600 text-sm">{error}</span>
+                </div>
+              </>
             )}
           </div>
 
@@ -552,18 +561,26 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <Button
-                  className="w-full gap-2"
-                  onClick={processPayment}
-                  disabled={processing}
-                >
-                  {processing ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Lock className="w-4 h-4" />
-                  )}
-                  {processing ? "Processing..." : `Pay $${cart.total.toFixed(2)}`}
-                </Button>
+                <>
+                  <LoadingAnnouncement
+                    isLoading={processing}
+                    loadingMessage="Processing payment"
+                    completeMessage="Payment processing complete"
+                  />
+                  <Button
+                    className="w-full gap-2"
+                    onClick={processPayment}
+                    disabled={processing}
+                    aria-busy={processing}
+                  >
+                    {processing ? (
+                      <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Lock className="w-4 h-4" aria-hidden="true" />
+                    )}
+                    {processing ? "Processing..." : `Pay $${cart.total.toFixed(2)}`}
+                  </Button>
+                </>
 
                 <p className="text-xs text-slate-500 text-center">
                   Your payment information is secure and encrypted

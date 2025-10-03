@@ -45,18 +45,18 @@ export function CourseCard({ course, showProgress = false, progress = 0 }: Cours
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         {/* Engine Badge */}
-        <Badge className={`absolute top-3 left-3 border ${engineStyles[course.engine]} backdrop-blur-sm`}>
-          <span className="font-mono text-xs uppercase">{course.engine}</span>
+        <Badge className={`absolute top-3 left-3 border ${engineStyles[course.engine]} backdrop-blur-sm`} aria-label={`Game engine: ${course.engine}`}>
+          <span className="font-mono text-xs uppercase" aria-hidden="true">{course.engine}</span>
         </Badge>
 
         {/* Difficulty Badge */}
-        <Badge className={`absolute top-3 right-3 border ${difficultyStyles[course.difficulty]} backdrop-blur-sm`}>
-          <span className="font-mono text-xs uppercase">{course.difficulty}</span>
+        <Badge className={`absolute top-3 right-3 border ${difficultyStyles[course.difficulty]} backdrop-blur-sm`} aria-label={`Difficulty level: ${course.difficulty}`}>
+          <span className="font-mono text-xs uppercase" aria-hidden="true">{course.difficulty}</span>
         </Badge>
 
         {/* Duration */}
-        <div className="absolute bottom-3 right-3 bg-slate-950/90 backdrop-blur-sm text-slate-50 px-3 py-1.5 rounded-lg text-sm font-mono border border-slate-700">
-          {Math.floor(course.duration / 60)}h {course.duration % 60}m
+        <div className="absolute bottom-3 right-3 bg-slate-950/90 backdrop-blur-sm text-slate-50 px-3 py-1.5 rounded-lg text-sm font-mono border border-slate-700" aria-label={`Course duration: ${Math.floor(course.duration / 60)} hours ${course.duration % 60} minutes`}>
+          <span aria-hidden="true">{Math.floor(course.duration / 60)}h {course.duration % 60}m</span>
         </div>
       </div>
 
@@ -83,8 +83,8 @@ export function CourseCard({ course, showProgress = false, progress = 0 }: Cours
         </div>
 
         {/* Rating */}
-        <div className="flex items-center gap-2">
-          <div className="flex text-coral-400 text-lg">
+        <div className="flex items-center gap-2" role="group" aria-label={`Rating: ${course.rating.toFixed(1)} out of 5 stars from ${course.reviewCount} reviews`}>
+          <div className="flex text-coral-400 text-lg" aria-hidden="true">
             {[...Array(5)].map((_, i) => (
               <span key={i}>{i < Math.floor(course.rating) ? "★" : "☆"}</span>
             ))}
@@ -128,7 +128,7 @@ export function CourseCard({ course, showProgress = false, progress = 0 }: Cours
             className="bg-coral-400 hover:bg-coral-500 text-slate-950 font-semibold btn-glow min-h-[44px] px-6"
             asChild
           >
-            <Link href={`/courses/${course.id}`}>
+            <Link href={`/courses/${course.id}`} aria-label={`${showProgress ? "Continue" : "Enroll in"} ${course.title}`}>
               {showProgress ? "Continue" : "Enroll"}
             </Link>
           </Button>

@@ -14,6 +14,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         "aria-invalid:ring-destructive/30 aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive/50",
         className
       )}
+      aria-required={props.required}
       {...props}
     />
   )
