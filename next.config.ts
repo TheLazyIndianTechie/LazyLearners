@@ -133,6 +133,21 @@ const nextConfig: NextConfig = {
     formats: ['image/webp', 'image/avif'],
     // Allow SVGs from our own API placeholder route
     dangerouslyAllowSVG: true,
+    // Mobile-optimized device sizes (saves bandwidth on mobile)
+    deviceSizes: [320, 375, 390, 428, 640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    // Mobile-optimized image sizes for responsive images
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Minimum cache time for optimized images (1 year)
+    minimumCacheTTL: 31536000,
+  },
+
+  // Mobile performance optimizations
+  compress: true, // Enable gzip compression for faster mobile loading
+
+  // Turbopack optimizations for development
+  experimental: {
+    // Enable optimized package imports for faster builds
+    optimizePackageImports: ['lucide-react', '@clerk/nextjs', 'recharts'],
   },
 };
 
