@@ -91,7 +91,8 @@
       "Bash(tee:*)",
       "Bash(export PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"yes\")",
       "mcp__task-master-ai__set_task_status",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(grep:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

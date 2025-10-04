@@ -23,7 +23,11 @@ npm install                      # Install dependencies (runs postinstall Prisma
 npx prisma generate              # Generate Prisma client
 npx prisma db push               # Push schema to database
 npx prisma studio                # Open Prisma Studio
-npm run db:seed                  # Seed database with sample data
+npm run db:seed                  # Seed database with comprehensive sample data (50+ students, 50+ courses)
+npm run db:seed:minimal          # Seed with minimal data (1 admin, 1 instructor, 3 students, 3 courses)
+npm run db:reset                 # Reset database (delete all data, preserve schema)
+npm run db:validate              # Validate database integrity and relationships
+npm run db:refresh               # Reset and re-seed database with full dataset
 ```
 
 **Testing:**

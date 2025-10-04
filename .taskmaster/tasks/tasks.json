@@ -1007,8 +1007,70 @@
         "testStrategy": "Seed data integrity validation, database constraint verification, performance testing with seeded data, data consistency checks, and environment-specific seeding verification",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Extend course seed data to 20+ comprehensive courses",
+            "description": "Expand existing seed-course.ts to create 20+ realistic courses across Unity, Unreal Engine, Godot, and other game development categories with complete course structures",
+            "dependencies": [],
+            "details": "Modify existing seed-course.ts file to generate diverse courses including: beginner to advanced Unity courses (2D/3D game development, UI systems, physics), Unreal Engine courses (blueprints, C++, materials, lighting), Godot courses (GDScript, 2D/3D development), specialized topics (VR development, mobile games, indie game marketing). Each course should have realistic titles, descriptions, pricing, difficulty levels, estimated duration, and proper category assignment.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create comprehensive instructor and student profiles",
+            "description": "Generate 5+ detailed instructor profiles and 50+ student accounts with realistic personal information and varied backgrounds",
+            "dependencies": [],
+            "details": "Create instructor seed data with complete profiles including bio, expertise areas, social links, profile images, teaching experience, and specializations. Generate 50+ student accounts with varied demographics, learning preferences, skill levels, and enrollment histories. Include realistic names, email addresses, profile pictures, join dates, and activity patterns to simulate a diverse user base.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Generate enrollment history and progress tracking data",
+            "description": "Create realistic enrollment patterns, course progress, lesson completions, and learning analytics for all seeded users",
+            "dependencies": [
+              "23.1",
+              "23.2"
+            ],
+            "details": "Generate enrollment records linking students to courses with realistic enrollment dates and patterns. Create progress tracking data showing varied completion rates, lesson view history, quiz attempts and scores, time spent on lessons, and course completion certificates. Include dropped courses, active learning paths, and seasonal enrollment patterns to simulate real user behavior.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Create payment records and license key data",
+            "description": "Generate sample payment transactions, license keys, and financial records for testing payment flows and course access",
+            "dependencies": [
+              "23.3"
+            ],
+            "details": "Create payment records with various payment methods (credit card, PayPal, etc.), payment statuses (completed, pending, failed, refunded), and transaction amounts. Generate corresponding license keys for successful payments, including activation dates, expiry dates, and usage limits. Include sample subscription data, discount codes, and promotional pricing to test all payment scenarios.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Implement environment-specific seeding and data management scripts",
+            "description": "Create scripts for different environments (development, staging) and data reset/refresh functionality",
+            "dependencies": [
+              "23.1",
+              "23.2",
+              "23.3",
+              "23.4"
+            ],
+            "details": "Develop environment-specific seed configurations in prisma/seed.ts with different data volumes for development (smaller dataset) and staging (full dataset). Create npm scripts for data reset, refresh, and selective seeding. Implement database cleanup utilities, data export/import functionality, and seed data validation checks. Add error handling and rollback mechanisms for failed seeding operations.",
+            "status": "pending",
+            "testStrategy": "",
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2025-10-04T02:45:06.588Z"
       },
       {
         "id": "24",
@@ -1094,9 +1156,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-03T16:29:53.687Z",
+      "lastModified": "2025-10-04T02:45:06.589Z",
       "taskCount": 30,
-      "completedCount": 10,
+      "completedCount": 11,
       "tags": [
         "master"
       ]

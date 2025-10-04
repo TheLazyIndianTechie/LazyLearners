@@ -26,7 +26,11 @@
     "security:test:comprehensive": "npm audit && npm run lint && npm run test:critical",
     "production:deploy": "vercel --prod",
     "production:verify": "curl -f https://gamelearn-platform.vercel.app/api/health || exit 1",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "ts-node prisma/seed.ts",
+    "db:seed:minimal": "ts-node prisma/seed-minimal.ts",
+    "db:reset": "ts-node scripts/db-reset.ts",
+    "db:validate": "ts-node scripts/db-validate.ts",
+    "db:refresh": "npm run db:reset && npm run db:seed"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.2",
@@ -39,19 +43,26 @@
     "@tiptap/react": "^3.6.2",
     "@tiptap/starter-kit": "^3.6.2",
     "@types/bcryptjs": "^2.4.6",
+    "autoprefixer": "^10.4.21",
     "bcryptjs": "^3.0.2",
     "dompurify": "^3.2.7",
     "isomorphic-dompurify": "^2.28.0",
+    "postcss": "^8.5.6",
     "react-dropzone": "^14.3.8",
     "svix": "^1.76.1",
-    "swagger-ui-react": "^5.18.2"
+    "swagger-ui-react": "^5.18.2",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
     "@types/dompurify": "^3.0.5",
+    "@types/node": "^24.6.2",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "jest-axe": "^10.0.0",
     "prisma": "^6.16.3",
-    "shadcn": "^3.3.1"
+    "shadcn": "^3.3.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
+    "typescript": "5.9.3"
   }
 }

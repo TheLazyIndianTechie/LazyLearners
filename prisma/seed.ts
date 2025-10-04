@@ -350,6 +350,222 @@ async function main() {
       location: 'Vienna, Austria',
       skills: ['Game Design', 'Balancing', 'Systems Design', 'Analytics'],
       interests: ['GAME_DESIGN', 'GAME_PROGRAMMING']
+    },
+    {
+      email: 'harper.scott@student.com',
+      name: 'Harper Scott',
+      bio: 'Game AI programmer interested in machine learning for NPCs',
+      location: 'Tokyo, Japan',
+      skills: ['C++', 'Python', 'AI Programming', 'Machine Learning'],
+      interests: ['GAME_PROGRAMMING']
+    },
+    {
+      email: 'evelyn.green@student.com',
+      name: 'Evelyn Green',
+      bio: 'UI/UX designer specializing in game interfaces',
+      location: 'Dublin, Ireland',
+      skills: ['UI Design', 'UX Research', 'Figma', 'Unity UI'],
+      interests: ['GAME_DESIGN', 'GAME_ART']
+    },
+    {
+      email: 'sebastian.baker@student.com',
+      name: 'Sebastian Baker',
+      bio: 'Multiplayer game programmer learning netcode and server architecture',
+      location: 'Zurich, Switzerland',
+      skills: ['C#', 'Networking', 'Server Development', 'Unity'],
+      interests: ['GAME_PROGRAMMING', 'UNITY_DEVELOPMENT']
+    },
+    {
+      email: 'aria.nelson@student.com',
+      name: 'Aria Nelson',
+      bio: 'Level designer creating challenging platformer experiences',
+      location: 'Oslo, Norway',
+      skills: ['Level Design', 'Unity', 'Game Design', 'Playtesting'],
+      interests: ['GAME_DESIGN', 'UNITY_DEVELOPMENT']
+    },
+    {
+      email: 'james.mitchell@student.com',
+      name: 'James Mitchell',
+      bio: 'Blockchain game developer exploring NFT integration',
+      location: 'Dubai, UAE',
+      skills: ['Solidity', 'Web3', 'Unity', 'Smart Contracts'],
+      interests: ['GAME_PROGRAMMING', 'MOBILE_GAMES']
+    },
+    {
+      email: 'scarlett.carter@student.com',
+      name: 'Scarlett Carter',
+      bio: 'Character artist mastering stylized art for games',
+      location: 'Paris, France',
+      skills: ['Character Design', 'ZBrush', '3D Modeling', 'Texturing'],
+      interests: ['GAME_ART']
+    },
+    {
+      email: 'elijah.perez@student.com',
+      name: 'Elijah Perez',
+      bio: 'Procedural generation enthusiast building infinite worlds',
+      location: 'São Paulo, Brazil',
+      skills: ['C#', 'Procedural Generation', 'Mathematics', 'Unity'],
+      interests: ['GAME_PROGRAMMING', 'INDIE_DEVELOPMENT']
+    },
+    {
+      email: 'lily.roberts@student.com',
+      name: 'Lily Roberts',
+      bio: 'Game producer learning project management for indie teams',
+      location: 'Melbourne, Australia',
+      skills: ['Project Management', 'Agile', 'Team Coordination', 'Trello'],
+      interests: ['GAME_DESIGN']
+    },
+    {
+      email: 'william.turner@student.com',
+      name: 'William Turner',
+      bio: 'Technical artist bridging art and programming',
+      location: 'Montreal, Canada',
+      skills: ['Shader Development', 'Python', 'Maya', 'Unreal Engine'],
+      interests: ['GAME_ART', 'UNREAL_DEVELOPMENT']
+    },
+    {
+      email: 'grace.phillips@student.com',
+      name: 'Grace Phillips',
+      bio: 'VR interaction designer focusing on hand tracking',
+      location: 'Seoul, South Korea',
+      skills: ['VR Development', 'Unity', 'UX Design', 'Hand Tracking'],
+      interests: ['VR_AR_DEVELOPMENT']
+    },
+    {
+      email: 'henry.campbell@student.com',
+      name: 'Henry Campbell',
+      bio: 'Game economy designer balancing virtual currencies',
+      location: 'Singapore',
+      skills: ['Economics', 'Game Design', 'Analytics', 'Excel'],
+      interests: ['GAME_DESIGN', 'MOBILE_GAMES']
+    },
+    {
+      email: 'zoey.parker@student.com',
+      name: 'Zoey Parker',
+      bio: 'Environment artist creating immersive fantasy worlds',
+      location: 'Reykjavik, Iceland',
+      skills: ['Environment Art', 'Unreal Engine', 'Landscape Design', 'Lighting'],
+      interests: ['GAME_ART', 'UNREAL_DEVELOPMENT']
+    },
+    {
+      email: 'jack.evans@student.com',
+      name: 'Jack Evans',
+      bio: 'AR developer building mobile augmented reality games',
+      location: 'San Diego, CA',
+      skills: ['AR Foundation', 'Unity', 'C#', 'Computer Vision'],
+      interests: ['VR_AR_DEVELOPMENT', 'MOBILE_GAMES']
+    },
+    {
+      email: 'luna.edwards@student.com',
+      name: 'Luna Edwards',
+      bio: 'Accessibility advocate ensuring games are playable by everyone',
+      location: 'Brussels, Belgium',
+      skills: ['Game Design', 'Accessibility Testing', 'Unity', 'User Research'],
+      interests: ['GAME_DESIGN']
+    },
+    {
+      email: 'daniel.collins@student.com',
+      name: 'Daniel Collins',
+      bio: 'Performance optimization specialist for mobile games',
+      location: 'Bangalore, India',
+      skills: ['Optimization', 'Profiling', 'Unity', 'Mobile Development'],
+      interests: ['MOBILE_GAMES', 'GAME_PROGRAMMING']
+    },
+    {
+      email: 'stella.stewart@student.com',
+      name: 'Stella Stewart',
+      bio: 'Narrative designer crafting branching storylines',
+      location: 'Prague, Czech Republic',
+      skills: ['Writing', 'Narrative Design', 'Ink Language', 'Dialogue Systems'],
+      interests: ['GAME_DESIGN']
+    },
+    {
+      email: 'matthew.morris@student.com',
+      name: 'Matthew Morris',
+      bio: 'Godot plugin developer contributing to the ecosystem',
+      location: 'Wellington, New Zealand',
+      skills: ['Godot', 'GDScript', 'C++', 'Plugin Development'],
+      interests: ['GODOT_DEVELOPMENT', 'INDIE_DEVELOPMENT']
+    },
+    {
+      email: 'hazel.cook@student.com',
+      name: 'Hazel Cook',
+      bio: 'Combat designer creating satisfying melee systems',
+      location: 'Lisbon, Portugal',
+      skills: ['Combat Design', 'Animation', 'Unity', 'Game Feel'],
+      interests: ['GAME_DESIGN', 'GAME_PROGRAMMING']
+    },
+    {
+      email: 'samuel.rogers@student.com',
+      name: 'Samuel Rogers',
+      bio: 'VFX artist creating stunning particle effects',
+      location: 'Warsaw, Poland',
+      skills: ['VFX', 'Particle Systems', 'Shaders', 'Unity'],
+      interests: ['GAME_ART', 'UNITY_DEVELOPMENT']
+    },
+    {
+      email: 'nora.reed@student.com',
+      name: 'Nora Reed',
+      bio: 'Esports enthusiast designing competitive FPS mechanics',
+      location: 'Los Angeles, CA',
+      skills: ['Game Design', 'Balancing', 'Unreal Engine', 'Competitive Analysis'],
+      interests: ['GAME_DESIGN', 'UNREAL_DEVELOPMENT']
+    },
+    {
+      email: 'wyatt.bailey@student.com',
+      name: 'Wyatt Bailey',
+      bio: 'Rhythm game developer passionate about music and gameplay',
+      location: 'Austin, TX',
+      skills: ['Unity', 'Audio Programming', 'Music Theory', 'C#'],
+      interests: ['GAME_PROGRAMMING', 'MOBILE_GAMES']
+    },
+    {
+      email: 'violet.rivera@student.com',
+      name: 'Violet Rivera',
+      bio: 'Localization specialist making games accessible worldwide',
+      location: 'Madrid, Spain',
+      skills: ['Localization', 'Translation', 'Cultural Adaptation', 'Project Management'],
+      interests: ['GAME_DESIGN']
+    },
+    {
+      email: 'owen.cooper@student.com',
+      name: 'Owen Cooper',
+      bio: 'Physics programmer building realistic vehicle simulations',
+      location: 'Detroit, MI',
+      skills: ['Physics Programming', 'C++', 'Mathematics', 'Unreal Engine'],
+      interests: ['GAME_PROGRAMMING', 'UNREAL_DEVELOPMENT']
+    },
+    {
+      email: 'aurora.richardson@student.com',
+      name: 'Aurora Richardson',
+      bio: 'Pixel artist creating retro-style game graphics',
+      location: 'Kyoto, Japan',
+      skills: ['Pixel Art', 'Aseprite', 'Animation', 'Color Theory'],
+      interests: ['GAME_ART', 'INDIE_DEVELOPMENT']
+    },
+    {
+      email: 'dylan.cox@student.com',
+      name: 'Dylan Cox',
+      bio: 'Roguelike developer studying procedural content generation',
+      location: 'Portland, OR',
+      skills: ['C#', 'Procedural Generation', 'Unity', 'Game Design'],
+      interests: ['GAME_PROGRAMMING', 'INDIE_DEVELOPMENT']
+    },
+    {
+      email: 'penelope.howard@student.com',
+      name: 'Penelope Howard',
+      bio: 'Social game designer creating engaging multiplayer experiences',
+      location: 'Stockholm, Sweden',
+      skills: ['Social Design', 'Psychology', 'Unity', 'Analytics'],
+      interests: ['GAME_DESIGN', 'MOBILE_GAMES']
+    },
+    {
+      email: 'leo.ward@student.com',
+      name: 'Leo Ward',
+      bio: 'Game tools programmer building editor extensions',
+      location: 'Seattle, WA',
+      skills: ['C#', 'Unity Editor', 'Tool Development', 'Python'],
+      interests: ['GAME_PROGRAMMING', 'UNITY_DEVELOPMENT']
     }
   ]
 
@@ -2916,13 +3132,14 @@ async function main() {
   console.log('🎉 Database seeding completed successfully!')
   console.log('')
   console.log('📊 Sample Data Summary:')
-  console.log('👥 Users: 1 Admin, 4 Instructors, 3 Students')
-  console.log('📚 Courses: 5 complete courses with modules and lessons')
-  console.log('📝 Enrollments: Multiple active and completed enrollments')
-  console.log('💳 Payments: 2 successful payments with license keys')
-  console.log('🏆 Certifications: 1 completion certificate')
-  console.log('💬 Forum: 2 posts with replies and engagement')
-  console.log('🎨 Portfolios: 2 portfolios with showcase projects')
+  console.log(`👥 Users: ${adminUsers.length} Admins, ${instructors.length} Instructors, ${students.length} Students`)
+  console.log(`📚 Courses: ${allCourses.length} complete courses with modules and lessons`)
+  console.log('📝 Enrollments: Multiple active and completed enrollments with progress tracking')
+  console.log('💳 Payments: Multiple payment scenarios (successful, failed, refunds, chargebacks, payment plans)')
+  console.log('🔑 License Keys: Generated for all successful course purchases')
+  console.log('🏆 Certifications: Completion certificates for finished courses')
+  console.log('💬 Forum: Posts with replies and engagement')
+  console.log('🎨 Portfolios: Student portfolios with showcase projects')
   console.log('')
   console.log('🔑 Login Credentials:')
   console.log('Admin: admin@lazygamedevs.com / demo123')
