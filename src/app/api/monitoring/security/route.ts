@@ -5,11 +5,11 @@
 
 import { NextRequest } from 'next/server'
 import { createSuccessResponse, createAuthorizationErrorResponse } from '@/lib/api-response'
-import { getAuthStats } from '@/lib/auth-protection'
-import { databaseMonitor } from '@/lib/monitoring/database'
 import { auth } from '@clerk/nextjs/server'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const revalidate = 0
 
 /**
  * Get comprehensive security metrics
@@ -30,6 +30,15 @@ export async function GET(request: NextRequest) {
   // }
 
   try {
+    // Lazy-load monitoring modules to avoid build-time execution
+    const [
+      { getAuthStats },
+      { databaseMonitor }
+    ] = await Promise.all([
+      import('@/lib/auth-protection'),
+      import('@/lib/monitoring/database')
+    ])
+
     // Gather security metrics
     const [authStats, dbStats] = await Promise.all([
       getAuthStats(),

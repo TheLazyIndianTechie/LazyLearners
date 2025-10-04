@@ -335,22 +335,24 @@ class RedisService {
   }
 
   // Rate limiting
-  async incrementKey(key: string, ttlSeconds: number): Promise<number> {
+  async incrementKey(key: string, ttlSeconds: number, amount: number = 1): Promise<number> {
     if (useMemoryFallback || !redisClient) {
-      const result = memoryStore.incr(key)
+      const current = memoryStore.get(key) || 0
+      const result = (typeof current === 'number' ? current : 0) + amount
       memoryStore.set(key, result, ttlSeconds)
       return result
     }
 
     try {
       const pipeline = redisClient.pipeline()
-      pipeline.incr(key)
+      pipeline.incrby(key, amount)
       pipeline.expire(key, ttlSeconds)
       const results = await pipeline.exec()
-      return results?.[0]?.[1] as number || 1
+      return results?.[0]?.[1] as number || amount
     } catch (error) {
       console.warn('Redis incrementKey failed, using memory fallback:', error)
-      const result = memoryStore.incr(key)
+      const current = memoryStore.get(key) || 0
+      const result = (typeof current === 'number' ? current : 0) + amount
       memoryStore.set(key, result, ttlSeconds)
       return result
     }

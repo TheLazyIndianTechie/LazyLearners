@@ -12,9 +12,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, X, Plus, Save, Eye, Trash2, GripVertical } from "lucide-react"
+import { ArrowLeft, X, Plus, Save, Eye, Trash2, GripVertical, Upload } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import { VideoUploadZone, VideoFile } from "@/components/video/video-upload-zone"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 const categories = [
   { value: "GAME_PROGRAMMING", label: "Game Programming" },
@@ -82,6 +107,259 @@ interface CourseEditPageProps {
   params: { id: string }
 }
 
+// Sortable Module Component
+function SortableModule({
+  module,
+  index,
+  course,
+  selectedModuleId,
+  newLessonTitle,
+  newLessonType,
+  saving,
+  setSelectedModuleId,
+  setNewLessonTitle,
+  setNewLessonType,
+  deleteModule,
+  addLesson,
+  deleteLesson,
+  onLessonsReorder,
+  onEditVideo,
+}: {
+  module: Module
+  index: number
+  course: Course
+  selectedModuleId: string | null
+  newLessonTitle: string
+  newLessonType: "VIDEO" | "TEXT" | "QUIZ"
+  saving: boolean
+  setSelectedModuleId: (id: string | null) => void
+  setNewLessonTitle: (title: string) => void
+  setNewLessonType: (type: "VIDEO" | "TEXT" | "QUIZ") => void
+  deleteModule: (id: string) => void
+  addLesson: (moduleId: string) => void
+  deleteLesson: (moduleId: string, lessonId: string) => void
+  onLessonsReorder: (moduleId: string, lessons: Lesson[]) => void
+  onEditVideo?: (moduleId: string, lessonId: string) => void
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: module.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  const handleLessonDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const oldIndex = module.lessons.findIndex((l) => l.id === active.id)
+    const newIndex = module.lessons.findIndex((l) => l.id === over.id)
+
+    const reorderedLessons = arrayMove(module.lessons, oldIndex, newIndex).map(
+      (lesson, idx) => ({ ...lesson, order: idx })
+    )
+
+    onLessonsReorder(module.id, reorderedLessons)
+  }
+
+  return (
+    <Card ref={setNodeRef} style={style}>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
+              <GripVertical className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">{module.title}</CardTitle>
+              <CardDescription>{module.description}</CardDescription>
+            </div>
+          </div>
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              title="Add Lesson"
+              onClick={() => setSelectedModuleId(selectedModuleId === module.id ? null : module.id)}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => deleteModule(module.id)}
+              title="Delete Module"
+              disabled={saving}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {module.lessons.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No lessons yet</p>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleLessonDragEnd}
+          >
+            <SortableContext
+              items={module.lessons.map((l) => l.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-2">
+                {module.lessons.map((lesson) => (
+                  <SortableLesson
+                    key={lesson.id}
+                    lesson={lesson}
+                    moduleId={module.id}
+                    saving={saving}
+                    deleteLesson={deleteLesson}
+                    onEditVideo={onEditVideo}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+
+        {/* Add Lesson Form */}
+        {selectedModuleId === module.id && (
+          <div className="border-t pt-4 mt-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Lesson title..."
+                value={newLessonTitle}
+                onChange={(e) => setNewLessonTitle(e.target.value)}
+                className="flex-1"
+              />
+              <Select value={newLessonType} onValueChange={(value: "VIDEO" | "TEXT" | "QUIZ") => setNewLessonType(value)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="VIDEO">Video</SelectItem>
+                  <SelectItem value="TEXT">Text</SelectItem>
+                  <SelectItem value="QUIZ">Quiz</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                size="sm"
+                onClick={() => addLesson(module.id)}
+                disabled={saving || !newLessonTitle.trim()}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setSelectedModuleId(null)
+                  setNewLessonTitle("")
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// Sortable Lesson Component
+function SortableLesson({
+  lesson,
+  moduleId,
+  saving,
+  deleteLesson,
+  onEditVideo,
+}: {
+  lesson: Lesson
+  moduleId: string
+  saving: boolean
+  deleteLesson: (moduleId: string, lessonId: string) => void
+  onEditVideo?: (moduleId: string, lessonId: string) => void
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: lesson.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center justify-between p-2 border rounded bg-background"
+    >
+      <div className="flex items-center gap-2 flex-1">
+        <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
+          <GripVertical className="h-3 w-3 text-muted-foreground" />
+        </div>
+        <span className="text-sm">{lesson.title}</span>
+        <Badge variant="outline" className="text-xs">
+          {lesson.type}
+        </Badge>
+        {lesson.videoUrl && (
+          <Badge variant="default" className="text-xs bg-green-600">
+            Video uploaded
+          </Badge>
+        )}
+      </div>
+      <div className="flex gap-1">
+        {lesson.type === "VIDEO" && onEditVideo && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => onEditVideo(moduleId, lesson.id)}
+            title="Upload/Edit Video"
+          >
+            <Upload className="h-3 w-3" />
+          </Button>
+        )}
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => deleteLesson(moduleId, lesson.id)}
+          disabled={saving}
+          title="Delete Lesson"
+        >
+          <Trash2 className="h-3 w-3" />
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 export default function CourseEditPage({ params }: CourseEditPageProps) {
   const { isSignedIn, user } = useUser()
   const router = useRouter()
@@ -101,6 +379,15 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
   const [newLessonTitle, setNewLessonTitle] = useState("")
   const [newLessonType, setNewLessonType] = useState<"VIDEO" | "TEXT" | "QUIZ">("VIDEO")
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null)
+  const [editingLesson, setEditingLesson] = useState<{ moduleId: string; lessonId: string } | null>(null)
+
+  // Initialize DnD sensors for modules
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   useEffect(() => {
     if (!user?.id) {
@@ -108,7 +395,7 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
       return
     }
     fetchCourse()
-  }, [session, params.id])
+  }, [user, params.id])
 
   const fetchCourse = async () => {
     try {
@@ -355,6 +642,126 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
       toast.error(error.message || "Failed to delete lesson")
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleModuleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || !course || active.id === over.id) return
+
+    const oldIndex = course.modules.findIndex((m) => m.id === active.id)
+    const newIndex = course.modules.findIndex((m) => m.id === over.id)
+
+    const reorderedModules = arrayMove(course.modules, oldIndex, newIndex).map(
+      (module, idx) => ({ ...module, order: idx })
+    )
+
+    // Optimistically update UI
+    setCourse(prev => prev ? { ...prev, modules: reorderedModules } : null)
+
+    // Persist to database
+    try {
+      const response = await fetch(`/api/courses/${course.id}/modules/reorder`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          modules: reorderedModules.map(m => ({ id: m.id, order: m.order }))
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to save module order")
+      }
+    } catch (error) {
+      console.error("Failed to save module order:", error)
+      toast.error("Failed to save module order")
+      // Revert on error
+      fetchCourse()
+    }
+  }
+
+  const handleLessonsReorder = async (moduleId: string, reorderedLessons: Lesson[]) => {
+    if (!course) return
+
+    // Optimistically update UI
+    setCourse(prev => prev ? {
+      ...prev,
+      modules: prev.modules.map(module =>
+        module.id === moduleId ? { ...module, lessons: reorderedLessons } : module
+      )
+    } : null)
+
+    // Persist to database
+    try {
+      const response = await fetch(`/api/courses/${course.id}/modules/${moduleId}/lessons/reorder`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lessons: reorderedLessons.map(l => ({ id: l.id, order: l.order }))
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to save lesson order")
+      }
+    } catch (error) {
+      console.error("Failed to save lesson order:", error)
+      toast.error("Failed to save lesson order")
+      // Revert on error
+      fetchCourse()
+    }
+  }
+
+  const handleEditVideo = (moduleId: string, lessonId: string) => {
+    setEditingLesson({ moduleId, lessonId })
+  }
+
+  const handleVideoUploadComplete = async (files: VideoFile[]) => {
+    if (!files.length || !editingLesson || !course) return
+
+    const uploadedFile = files[0]
+
+    if (uploadedFile.videoUrl && uploadedFile.metadata) {
+      try {
+        const response = await fetch(
+          `/api/courses/${course.id}/modules/${editingLesson.moduleId}/lessons/${editingLesson.lessonId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              videoUrl: uploadedFile.videoUrl,
+              duration: Math.round(uploadedFile.metadata.duration / 60), // Convert to minutes
+            }),
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error("Failed to update lesson with video")
+        }
+
+        // Update local state
+        setCourse(prev => prev ? {
+          ...prev,
+          modules: prev.modules.map(module =>
+            module.id === editingLesson.moduleId
+              ? {
+                  ...module,
+                  lessons: module.lessons.map(lesson =>
+                    lesson.id === editingLesson.lessonId
+                      ? { ...lesson, videoUrl: uploadedFile.videoUrl, duration: Math.round(uploadedFile.metadata!.duration / 60) }
+                      : lesson
+                  )
+                }
+              : module
+          )
+        } : null)
+
+        toast.success("Video uploaded and linked to lesson!")
+        setEditingLesson(null)
+      } catch (error: any) {
+        console.error("Failed to link video:", error)
+        toast.error(error.message || "Failed to link video to lesson")
+      }
     }
   }
 
@@ -654,7 +1061,7 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
               <CardHeader>
                 <CardTitle>Course Modules</CardTitle>
                 <CardDescription>
-                  Organize your course content into modules and lessons
+                  Organize your course content into modules and lessons. Drag to reorder.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -683,112 +1090,37 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {course.modules.map((module, index) => (
-                      <Card key={module.id}>
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <GripVertical className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <CardTitle className="text-lg">{module.title}</CardTitle>
-                                <CardDescription>{module.description}</CardDescription>
-                              </div>
-                            </div>
-                            <div className="flex gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                title="Add Lesson"
-                                onClick={() => setSelectedModuleId(selectedModuleId === module.id ? null : module.id)}
-                              >
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => deleteModule(module.id)}
-                                title="Delete Module"
-                                disabled={saving}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          {module.lessons.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">No lessons yet</p>
-                          ) : (
-                            <div className="space-y-2">
-                              {module.lessons.map((lesson) => (
-                                <div key={lesson.id} className="flex items-center justify-between p-2 border rounded">
-                                  <div className="flex items-center gap-2">
-                                    <GripVertical className="h-3 w-3 text-muted-foreground" />
-                                    <span className="text-sm">{lesson.title}</span>
-                                    <Badge variant="outline" size="sm">
-                                      {lesson.type}
-                                    </Badge>
-                                  </div>
-                                  <div className="flex gap-1">
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => deleteLesson(module.id, lesson.id)}
-                                      disabled={saving}
-                                      title="Delete Lesson"
-                                    >
-                                      <Trash2 className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Add Lesson Form */}
-                          {selectedModuleId === module.id && (
-                            <div className="border-t pt-4 mt-4">
-                              <div className="flex gap-2">
-                                <Input
-                                  placeholder="Lesson title..."
-                                  value={newLessonTitle}
-                                  onChange={(e) => setNewLessonTitle(e.target.value)}
-                                  className="flex-1"
-                                />
-                                <Select value={newLessonType} onValueChange={(value: "VIDEO" | "TEXT" | "QUIZ") => setNewLessonType(value)}>
-                                  <SelectTrigger className="w-32">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="VIDEO">Video</SelectItem>
-                                    <SelectItem value="TEXT">Text</SelectItem>
-                                    <SelectItem value="QUIZ">Quiz</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <Button
-                                  size="sm"
-                                  onClick={() => addLesson(module.id)}
-                                  disabled={saving || !newLessonTitle.trim()}
-                                >
-                                  <Plus className="h-4 w-4 mr-1" />
-                                  Add
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => {
-                                    setSelectedModuleId(null)
-                                    setNewLessonTitle("")
-                                  }}
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleModuleDragEnd}
+                    >
+                      <SortableContext
+                        items={course.modules.map((m) => m.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {course.modules.map((module, index) => (
+                          <SortableModule
+                            key={module.id}
+                            module={module}
+                            index={index}
+                            course={course}
+                            selectedModuleId={selectedModuleId}
+                            newLessonTitle={newLessonTitle}
+                            newLessonType={newLessonType}
+                            saving={saving}
+                            setSelectedModuleId={setSelectedModuleId}
+                            setNewLessonTitle={setNewLessonTitle}
+                            setNewLessonType={setNewLessonType}
+                            deleteModule={deleteModule}
+                            addLesson={addLesson}
+                            deleteLesson={deleteLesson}
+                            onLessonsReorder={handleLessonsReorder}
+                            onEditVideo={handleEditVideo}
+                          />
+                        ))}
+                      </SortableContext>
+                    </DndContext>
 
                     {/* Add New Module */}
                     <Card className="border-dashed">
@@ -864,6 +1196,29 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Video Upload Dialog */}
+        <Dialog open={!!editingLesson} onOpenChange={() => setEditingLesson(null)}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Upload Lesson Video</DialogTitle>
+              <DialogDescription>
+                Upload a video for this lesson. The video will be automatically linked once upload is complete.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <VideoUploadZone
+                courseId={course.id}
+                maxFiles={1}
+                onUploadComplete={handleVideoUploadComplete}
+                metadata={{
+                  moduleId: editingLesson?.moduleId,
+                  lessonId: editingLesson?.lessonId,
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </SiteLayout>
   )

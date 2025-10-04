@@ -427,17 +427,20 @@ export class DatabaseMonitor {
       const metricsKey = `db_metrics:${today}`
 
       const [totalQueries, totalDuration, slowQueries] = await Promise.all([
-        redis.get(`${metricsKey}:total_queries`) || 0,
-        redis.get(`${metricsKey}:total_duration`) || 0,
-        redis.get(`${metricsKey}:slow_queries`) || 0
+        redis.get(`${metricsKey}:total_queries`).catch(() => 0),
+        redis.get(`${metricsKey}:total_duration`).catch(() => 0),
+        redis.get(`${metricsKey}:slow_queries`).catch(() => 0)
       ])
 
-      const averageResponseTime = totalQueries > 0 ? totalDuration / totalQueries : 0
+      const totalQueriesNum = typeof totalQueries === 'number' ? totalQueries : 0
+      const totalDurationNum = typeof totalDuration === 'number' ? totalDuration : 0
+      const slowQueriesNum = typeof slowQueries === 'number' ? slowQueries : 0
+      const averageResponseTime = totalQueriesNum > 0 ? totalDurationNum / totalQueriesNum : 0
 
       return {
-        totalQueries,
+        totalQueries: totalQueriesNum,
         averageResponseTime,
-        slowQueries,
+        slowQueries: slowQueriesNum,
         errorRate: 0, // Calculate from error data
         connectionCount: 0, // Would get from connection pool
         topSlowQueries: this.getTopSlowQueries()
