@@ -85,3 +85,32 @@ export {
   type ButtonVariant,
   type ButtonSize,
 } from "./templates";
+
+// Queue
+export {
+  queueEmail,
+  queueTemplateEmail,
+  getEmailQueue,
+  startEmailWorker,
+  stopEmailWorker,
+  closeEmailQueue,
+  type EmailJobData,
+} from "./queue";
+
+// Tracking
+export {
+  handleResendWebhook,
+  logEmailEvent,
+  getEmailAnalytics,
+  type EmailEvent,
+} from "./tracking";
+
+// Preferences
+export {
+  getUserPreferences,
+  updateUserPreferences,
+  unsubscribeUser,
+  generateUnsubscribeToken,
+  validateUnsubscribeToken,
+  type EmailPreferences,
+} from "./preferences";

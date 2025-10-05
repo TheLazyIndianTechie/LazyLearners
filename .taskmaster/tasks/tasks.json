@@ -1671,7 +1671,7 @@
             "description": "Build a reusable React Email template system and implement all required transactional templates.",
             "dependencies": [],
             "details": "Create React Email based template system with a shared BaseLayout, theme, and partials (header, footer, button). Implement templates: Welcome, Enrollment Confirmation, Payment Receipt (itemized, taxes), License Key Delivery, Progress Milestone, Certificate Delivery. Support plain-text variants, localization, preheaders, and dark mode. Implement a local preview server and HTML/CSS inlining. Define TypeScript types for each template's data payload and a template registry mapping template keys to components and default subjects.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Snapshot test rendered HTML and text for each template with sample payloads. Visual regression via Storybook or React Email preview. Validate responsiveness at common widths. Accessibility checks (semantic tags, contrast). Ensure all dynamic placeholders render and gracefully handle missing optional fields."
           },
           {
@@ -1683,7 +1683,7 @@
               "24.2"
             ],
             "details": "Implement BullMQ-based email queue backed by Redis. Define job schema {recipient, templateKey, payload, category, correlationId, dedupeKey}. Add rate limiting, exponential backoff, retries, dead-letter queue, and concurrency controls. Enforce idempotency with dedupeKey and provider messageId storage. Processor composes template using the registry, performs preference gating hook, and calls the provider adapter. Provide metrics and structured logs, and enable delayed scheduling (e.g., milestone reminders). Containerize a separate worker process with graceful shutdown.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Unit-test job processor happy path and failure modes (template error, provider 429/500). Integration tests with Redis to verify retry/backoff and DLQ. Concurrency and rate-limit tests. Ensure deduplication prevents duplicates under concurrent enqueue. Verify delayed jobs fire at expected times and survive restarts."
           },
           {
@@ -2106,7 +2106,7 @@
       ],
       "created": "2025-10-05T05:10:02.779Z",
       "description": "Tasks for master context",
-      "updated": "2025-10-05T07:45:48.321Z"
+      "updated": "2025-10-05T07:55:26.381Z"
     }
   }
 }
