@@ -1753,7 +1753,7 @@
               "25.1"
             ],
             "details": "• UI: Q&A panel with create question, threaded replies, markdown editor, code blocks, attachments, and instructor badges.\n• Features: upvote, accept/resolve answer, pin by instructor, sort by newest/top/resolved, pagination or infinite scroll.\n• Backend: endpoints for CRUD on questions/replies, voting, resolve/pin; rate limiting and spam protection.\n• Realtime: live updates via WebSocket/SSE (fallback to polling); optimistic posting.\n• Moderation: report/flag flow, soft delete, audit logs; permission checks (enrolled users only).\n• Notifications: subscribe to thread, in-app toasts for replies; deep-link to specific posts.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1764,7 +1764,7 @@
               "25.1"
             ],
             "details": "• UI: Resources panel listing files/links with type icons, sizes, last updated, and per-item descriptions.\n• Functionality: secure download URLs, support external links, checksum display for large files, bulk download where applicable.\n• Access: enforce enrollment/entitlements; handle expired links and error states; show license/usage notes.\n• Tracking: log download events, prevent duplicate counters via debounce; display per-lesson resource count in sidebar.\n• Performance: prefetch resource metadata; resume support for large files where supported.\n• Admin metadata surfaced from existing lesson attachments; fallback when none available.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1775,7 +1775,7 @@
               "25.1"
             ],
             "details": "• Trigger on video end (or completion threshold) to show overlay with next lesson title/thumbnail and countdown (default 8s).\n• Controls: cancel, play now, previous lesson; global autoplay toggle persisted per user; remember per-device in localStorage and sync to profile.\n• Prefetch next lesson metadata and prewarm route; handle last-lesson edge case with course-complete CTA.\n• Accessibility: focus management, screen reader announcements, keyboard shortcuts, and reduced-motion support.\n• Resilience: cancel autoplay if Q&A composer is open or user is interacting; pause on tab hidden if configured.\n• Analytics: capture autoplay shown, canceled, expedited, and completed events.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1787,7 +1787,7 @@
               "25.5"
             ],
             "details": "• Shortcuts: '?' or Shift+/ opens modal; keys for play/pause, seek ±5/10s, speed ±, captions toggle, mute, fullscreen, toggle autoplay, open Notes/Q&A/Resources panels, mark complete, next/prev lesson.\n• Modal: searchable list, context-aware hints, and link to settings; ensure discoverability via UI icon.\n• Progress tracking: auto-mark complete at 90% watched (configurable) using video time updates and visibility checks; manual toggle with confirmation.\n• Sync: POST progress to server, update sidebar badges and overall course progress; cross-tab sync via storage events.\n• Edge cases: resume position on revisit, handle variable playback speeds, buffering gaps, and user seek behavior to prevent false positives.\n• QA: unit and E2E tests for events, persistence, and UI states; emit analytics for completion and shortcut usage.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -2106,7 +2106,7 @@
       ],
       "created": "2025-10-05T05:10:02.779Z",
       "description": "Tasks for master context",
-      "updated": "2025-10-05T06:05:09.971Z"
+      "updated": "2025-10-05T06:06:39.501Z"
     }
   }
 }
