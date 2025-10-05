@@ -70,6 +70,8 @@ model User {
   videoProgress     VideoProgress[]
   videoBookmarks    VideoBookmark[]
   lessonNotes       LessonNote[]
+  lessonQuestions   LessonQuestion[]
+  lessonAnswers     LessonAnswer[]
 
   @@index([role]) // For filtering users by role (instructors, students, etc.)
   @@index([createdAt]) // For sorting users by registration date
@@ -231,6 +233,7 @@ model Lesson {
   videoProgress  VideoProgress[]
   videoBookmarks VideoBookmark[]
   lessonNotes    LessonNote[]
+  questions      LessonQuestion[]
 
   @@index([moduleId]) // For finding all lessons in a module
   @@index([moduleId, order]) // For ordered lesson retrieval
@@ -676,4 +679,41 @@ model LessonNote {
 
   @@index([userId, lessonId])
   @@index([createdAt])
+}
+
+model LessonQuestion {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  resolved  Boolean  @default(false)
+  pinned    Boolean  @default(false)
+  upvotes   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  lesson   Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId String
+  answers  LessonAnswer[]
+
+  @@index([lessonId, createdAt])
+  @@index([userId])
+  @@index([resolved])
+}
+
+model LessonAnswer {
+  id         String   @id @default(cuid())
+  content    String
+  accepted   Boolean  @default(false)
+  upvotes    Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  question   LessonQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+
+  @@index([questionId, createdAt])
 }
