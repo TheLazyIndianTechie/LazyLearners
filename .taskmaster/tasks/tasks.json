@@ -1731,7 +1731,7 @@
             "description": "Create responsive player layout extending lesson pages with a collapsible lesson sidebar and visual progress indicators.",
             "dependencies": [],
             "details": "• Implement PlayerLayout shell with header, video area, right/left side panels, and responsive breakpoints (desktop sidebar, mobile drawer).\n• Build LessonSidebar component: module/lesson tree, completion checkmarks, overall course progress bar, current lesson highlight, hover tooltips.\n• Integrate routing (/courses/:courseId/lessons/:lessonId) and data fetching for course structure and user progress; include loading skeletons and error states.\n• Add sticky behavior, keyboard focus order, and ARIA roles for accessibility; support virtualized lists for large courses.\n• Expose slots/regions for Notes, Q&A, Resources panels; persist sidebar open/closed state in localStorage.\n<info added on 2025-10-05T05:55:02.959Z>\nDelivered production-ready CoursePlayerLayout and LessonSidebar implementations covering responsive shell, sticky header with autoplay preferences, keyboard shortcuts, and persistent sidebar state, plus module navigation with progress tracking, auto-scroll/highlighting, and lesson type badges. Routing for /courses/:courseId/lessons/:lessonId now wired with data fetching, skeletons, and error handling, completing the immersive layout subtask.\n</info added on 2025-10-05T05:55:02.959Z>",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2106,7 +2106,7 @@
       ],
       "created": "2025-10-05T05:10:02.779Z",
       "description": "Tasks for master context",
-      "updated": "2025-10-05T07:57:29.497Z"
+      "updated": "2025-10-05T09:41:11.407Z"
     }
   }
 }

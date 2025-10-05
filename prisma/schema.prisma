@@ -69,6 +69,7 @@ model User {
   wishlist          Wishlist[]
   videoProgress     VideoProgress[]
   videoBookmarks    VideoBookmark[]
+  lessonNotes       LessonNote[]
 
   @@index([role]) // For filtering users by role (instructors, students, etc.)
   @@index([createdAt]) // For sorting users by registration date
@@ -229,6 +230,7 @@ model Lesson {
   resources      LessonResource[]
   videoProgress  VideoProgress[]
   videoBookmarks VideoBookmark[]
+  lessonNotes    LessonNote[]
 
   @@index([moduleId]) // For finding all lessons in a module
   @@index([moduleId, order]) // For ordered lesson retrieval
@@ -658,4 +660,20 @@ model Template {
   @@index([createdBy]) // For finding user's templates
   @@index([isPublic]) // For finding public templates
   @@index([type, category]) // For finding templates by type and category
+}
+
+model LessonNote {
+  id        String   @id @default(cuid())
+  content   String   // Rich text content
+  timecode  Int?     // Optional video timestamp (seconds)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId String
+
+  @@index([userId, lessonId])
+  @@index([createdAt])
 }
