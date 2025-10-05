@@ -1654,7 +1654,7 @@
         "testStrategy": "Email delivery testing, template rendering verification, queue processing tests, email tracking validation, and spam filter testing",
         "priority": "medium",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1683,7 +1683,7 @@
               "24.2"
             ],
             "details": "Implement BullMQ-based email queue backed by Redis. Define job schema {recipient, templateKey, payload, category, correlationId, dedupeKey}. Add rate limiting, exponential backoff, retries, dead-letter queue, and concurrency controls. Enforce idempotency with dedupeKey and provider messageId storage. Processor composes template using the registry, performs preference gating hook, and calls the provider adapter. Provide metrics and structured logs, and enable delayed scheduling (e.g., milestone reminders). Containerize a separate worker process with graceful shutdown.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Unit-test job processor happy path and failure modes (template error, provider 429/500). Integration tests with Redis to verify retry/backoff and DLQ. Concurrency and rate-limit tests. Ensure deduplication prevents duplicates under concurrent enqueue. Verify delayed jobs fire at expected times and survive restarts."
           },
           {
@@ -1695,7 +1695,7 @@
               "24.3"
             ],
             "details": "Implement webhook ingestion and analytics. Expose /api/webhooks/email to receive provider events (processed, delivered, open, click, bounce, spamreport, unsubscribe). Verify signatures (SendGrid signed payload, Resend HMAC). Persist to email_messages (message metadata) and email_events (time-series events) tables. Update message status and maintain suppression lists on bounce/complaint. Build lightweight analytics queries (deliverability, open/click rates by template). Add open tracking pixel and click redirector if provider tracking is disabled. Implement transactional email logging with correlationId and providerMessageId.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Replay provider sample payloads and assert signature validation, idempotent upserts, and status transitions. E2E: send email, receive webhook, ensure logs and analytics updated. Test suppression on hard bounce blocks future sends. Verify privacy controls and data retention windows."
           },
           {
@@ -1708,7 +1708,7 @@
               "24.4"
             ],
             "details": "Implement email preference management and compliance. Design DB schema for email_preferences with per-user per-category status. Define categories mapping for each template: transactional.enrollment, transactional.billing, transactional.progress, transactional.certificate, transactional.general (always-on), product.updates. Build public preference center UI and API with signed tokens (List-Unsubscribe and List-Unsubscribe-Post headers) and one-click unsubscribe. Integrate preference checks in the queue gating hook before enqueue/send, honoring suppression lists. Add audit logging, double opt-in for marketing, and i18n. Ensure CAN-SPAM/GDPR/CCPA compliance.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests for preference evaluation and token signature validation. Integration tests to ensure unsubscribed users do not receive non-essential emails while transactional.general still sends. Verify List-Unsubscribe headers present and functional. E2E flow for marketing double opt-in. Pen-test unsubscribe links for tampering."
           }
         ]
@@ -2106,7 +2106,7 @@
       ],
       "created": "2025-10-05T05:10:02.779Z",
       "description": "Tasks for master context",
-      "updated": "2025-10-05T07:55:26.381Z"
+      "updated": "2025-10-05T07:57:29.497Z"
     }
   }
 }
