@@ -1,0 +1,11 @@
+# Task ID: 20
+# Title: Video processing pipeline implementation
+# Status: pending
+# Dependencies: 11
+# Priority: high
+# Description: Create video transcoding pipeline for multiple qualities, thumbnail generation, and metadata extraction
+# Details:
+Implement video transcoding using FFmpeg.js or cloud service (AWS MediaConvert, Cloudinary), create job queue using Bull/Agenda for background processing, generate video thumbnails using canvas or video frame extraction, implement video validation for format/size/duration limits, add video storage integration with AWS S3 or Cloudinary, create progress tracking for transcoding jobs, and implement adaptive bitrate streaming manifests (HLS/DASH).
+
+# Test Strategy:
+Video processing quality tests, transcoding performance benchmarks, storage integration tests, job queue reliability tests, and end-to-end video upload-to-playback testing

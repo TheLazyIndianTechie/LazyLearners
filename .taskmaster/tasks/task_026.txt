@@ -1,0 +1,11 @@
+# Task ID: 26
+# Title: Quiz and assessment builder
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Create comprehensive quiz builder with multiple question types, drag-and-drop reordering, and analytics
+# Details:
+Extend existing quiz components in src/components/quiz/ to create quiz builder interface with question type selection (multiple choice, true/false, short answer, code challenges), drag-and-drop question reordering using @dnd-kit, answer validation rules, quiz settings (time limits, passing scores, retake policies), quiz preview functionality, question bank for reusability, and quiz analytics dashboard with performance metrics.
+
+# Test Strategy:
+Quiz creation workflow testing, question type validation, drag-and-drop functionality tests, quiz taking simulation, analytics accuracy verification, and accessibility testing for quiz interfaces

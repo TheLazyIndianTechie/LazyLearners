@@ -1,0 +1,11 @@
+# Task ID: 13
+# Title: Module and lesson management interface
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Create comprehensive module and lesson management UI with drag-and-drop reordering and content editor
+# Details:
+Build React components using @dnd-kit/sortable for drag-and-drop module reordering, rich text editor with @tiptap/react for lesson content, lesson type selection (video, quiz, reading, project), module creation form with validation, bulk lesson import functionality via CSV/JSON, and lesson duration estimation calculator. Integrate with existing API endpoints /api/courses/[id]/modules and lessons endpoints.
+
+# Test Strategy:
+Unit tests for drag-and-drop logic, integration tests for module/lesson CRUD operations, E2E tests for complete content creation workflow, and performance tests with large content datasets

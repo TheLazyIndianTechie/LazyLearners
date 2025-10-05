@@ -1,0 +1,73 @@
+# Task ID: 1
+# Title: Complete Database Seeding and Sample Content Generation
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Populate the database with comprehensive sample data including courses, users, lessons, and test content to enable full platform functionality testing
+# Details:
+Create Prisma seed script (prisma/seed.ts) with realistic sample data: 1) Generate 50+ sample courses across Unity, Unreal, and Godot with proper categories and difficulty levels 2) Create test user accounts for all roles (students, instructors, admins) with proper OAuth integration 3) Add sample course modules and lessons with placeholder video content 4) Generate mock payment records and license keys for testing enrollment flows 5) Include forum posts, reviews, and user progress data 6) Ensure all database relationships are properly populated with referential integrity
+
+# Test Strategy:
+Run seed script and verify: database contains sample courses accessible via API, user authentication works with seeded accounts, course enrollment flows function with sample license keys, all relationships properly established without foreign key errors
+
+# Subtasks:
+## 1. Enhance existing seed script with comprehensive course data generation [done]
+### Dependencies: None
+### Description: Expand the current prisma/seed.ts to generate 50+ courses across all categories (Unity, Unreal, Godot) with proper distribution, realistic metadata, and comprehensive content structure
+### Details:
+Modify the existing seed.ts file to create 50+ courses instead of the current 5. Use the existing course structure as a template but expand it to cover all categories (GAME_PROGRAMMING, GAME_DESIGN, GAME_ART, GAME_AUDIO, UNITY_DEVELOPMENT, UNREAL_DEVELOPMENT, GODOT_DEVELOPMENT, MOBILE_GAMES, INDIE_DEVELOPMENT, VR_AR_DEVELOPMENT). Each course should have realistic titles, descriptions, pricing ($29.99-$199.99), proper difficulty distribution (30% BEGINNER, 50% INTERMEDIATE, 20% ADVANCED), and varied course durations (1200-4800 minutes). Include course requirements, objectives, and tags for each course.
+
+## 2. Generate comprehensive user accounts with OAuth integration support [done]
+### Dependencies: None
+### Description: Create diverse test user accounts for all roles (students, instructors, admins) with realistic profiles, skills, and OAuth provider compatibility
+### Details:
+Expand user creation in seed.ts to generate 20+ students, 10+ instructors, and 3 admin users. Include realistic names, emails, bios, locations, and skills for each user. Create Account records for OAuth providers (Google, GitHub) for testing authentication flows. Ensure each instructor has expertise in specific game engines and categories. Students should have varied skill levels and interests. Include profile images, websites, and portfolio data where appropriate.
+
+## 3. Create extensive course modules and lessons with placeholder video content [done]
+### Dependencies: None
+### Description: Generate realistic course module structures with 3-8 modules per course, each containing 4-12 lessons with proper lesson types and placeholder video content
+### Details:
+For each of the 50+ courses, create a realistic module structure. Each course should have 3-8 modules with logical progression (Introduction, Fundamentals, Intermediate Concepts, Advanced Topics, Projects, Publishing). Each module should contain 4-12 lessons with varied types (VIDEO, INTERACTIVE, QUIZ, PROJECT, READING). Include realistic lesson titles, descriptions, durations (15-90 minutes), and placeholder video URLs. Add lesson resources, quiz data, and proper content JSON structures. Ensure total course duration matches the calculated sum of lesson durations.
+
+## 4. Generate mock payment records and license key system data [done]
+### Dependencies: None
+### Description: Create comprehensive payment history with successful transactions, license key generation, and enrollment flows for testing the complete purchase-to-access pipeline
+### Details:
+Generate 100+ payment records using Dodo Payment format with varied statuses (SUCCEEDED, FAILED, PENDING). Create corresponding license keys for successful payments with proper key formats (ENGINE-COURSE-YEAR-HASH), activation limits (1-5), and expiration dates. Include payment metadata with realistic payment methods (card, paypal), amounts matching course prices, and proper timestamps. Ensure license keys properly link to payments and enable course access. Create failed payment scenarios for testing error handling.
+
+## 5. Populate community features with forum posts, reviews, and user progress data [done]
+### Dependencies: None
+### Description: Generate engaging forum discussions, course reviews, user progress tracking, portfolios, and certification data to create a vibrant learning community environment
+### Details:
+Create 50+ forum posts across categories (Unity, Unreal, Godot, General, Help) with realistic titles, content, and threaded replies. Generate course reviews (3-5 star ratings) with detailed comments for each course. Create user progress records showing various completion states (0-100%) across enrolled courses. Build student portfolios with 2-4 showcase projects each, including game screenshots, descriptions, and links. Generate certifications for completed courses and add user achievements. Include forum post likes, views, and engagement metrics.
+
+## 6. Expand payment record generation with comprehensive payment scenarios [done]
+### Dependencies: None
+### Description: Enhance the existing seed script to generate 100+ diverse payment records covering all payment statuses (SUCCEEDED, FAILED, PENDING, CANCELLED, PROCESSING, REQUIRES_PAYMENT_METHOD), multiple payment methods (card, paypal, bank_transfer), and realistic metadata patterns matching Dodo Payments format
+### Details:
+Modify the existing payment generation section in prisma/seed.ts (around lines 2084-2140) to create comprehensive payment scenarios: 70% SUCCEEDED payments, 15% FAILED, 10% PENDING, 3% CANCELLED, 2% PROCESSING. Include realistic Dodo payment IDs, varied amounts matching course prices, different payment methods with metadata (card types, last4 digits, transaction fees), timestamps spread across the last 6 months, and proper currency handling for international users.
+
+## 7. Generate comprehensive license key system with proper key formats and activation tracking [done]
+### Dependencies: 1.6
+### Description: Create extensive license key records following the ENGINE-COURSE-YEAR-HASH format, with proper activation limits, expiration dates, and status management covering all license key statuses and realistic usage patterns
+### Details:
+Expand license key generation to create keys for all successful payments with format like 'UNITY-COURSE-2024-ABC123', 'UNREAL-ADV-2024-XYZ789'. Set varied activation limits (1-5), track realistic activation counts, implement proper expiration dates (6 months to 2 years), and include different statuses (80% ACTIVE, 15% EXPIRED, 4% DISABLED, 1% REVOKED). Ensure all successful payments have corresponding license keys that enable course access.
+
+## 8. Create failed payment scenarios with realistic failure patterns and retry mechanisms [done]
+### Dependencies: 1.6
+### Description: Generate failed payment records with realistic failure reasons, metadata indicating why payments failed, and simulate retry patterns that match real-world payment processing scenarios
+### Details:
+Create failed payment scenarios including insufficient funds, expired cards, declined transactions, network timeouts, and fraud detection triggers. Add failure metadata with error codes, bank responses, and retry attempts. Include both immediate failures and payments that failed after initial success. Ensure failed payments don't generate license keys and maintain proper audit trails for debugging payment flows.
+
+## 9. Implement enrollment flow simulation linking payments to course access [done]
+### Dependencies: 1.6, 1.7
+### Description: Create the complete purchase-to-access pipeline by linking payment records to course enrollments, ensuring successful payments enable course access while failed payments block access, with proper enrollment status tracking
+### Details:
+Connect payment success to automatic enrollment creation with ACTIVE status, link license key activation to enrollment permissions, implement enrollment blocking for failed/cancelled payments, and create enrollment history tracking. Include scenarios where users purchase multiple courses, have mixed payment statuses, and simulate the complete user journey from payment to course access. Ensure the enrollment table properly reflects payment status and license key validity.
+
+## 10. Add payment analytics data and comprehensive reporting scenarios [done]
+### Dependencies: 1.6, 1.7, 1.8, 1.9
+### Description: Generate payment analytics data including refunds, partial payments, subscription renewals, and bulk purchase scenarios to enable comprehensive testing of payment reporting and financial tracking features
+### Details:
+Create advanced payment scenarios including refund records with original payment references, partial payment handling for payment plans, subscription-based payments with renewal tracking, bulk course purchases with group discounts, international payments with currency conversion data, and chargeback scenarios. Include comprehensive metadata for analytics: payment processor fees, tax calculations, discount applications, affiliate commissions, and financial reporting data needed for dashboard metrics.
+

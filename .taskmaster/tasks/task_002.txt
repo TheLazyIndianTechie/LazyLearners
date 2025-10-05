@@ -1,0 +1,61 @@
+# Task ID: 2
+# Title: Implement Comprehensive Course Management Interface for Instructors
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Build complete course creation and management UI enabling instructors to create, edit, and publish courses with modules and lessons
+# Details:
+Create instructor course management system: 1) Course creation form with title, description, category, difficulty, pricing using shadcn/ui components 2) Module and lesson management with drag-and-drop reordering using @dnd-kit 3) Rich text editor for course descriptions and lesson content 4) Video upload interface with progress tracking and thumbnail generation 5) Course preview functionality for content validation 6) Publishing workflow with course status management (draft/published/archived) 7) Course analytics dashboard showing enrollment and completion metrics 8) Integration with existing payment system for course pricing
+
+# Test Strategy:
+Test instructor workflow: create course from scratch, add multiple modules and lessons, upload video content, preview course as student, publish course and verify it appears in marketplace, check analytics dashboard displays correct data
+
+# Subtasks:
+## 1. Integrate @dnd-kit for module and lesson drag-and-drop reordering [done]
+### Dependencies: None
+### Description: Implement drag-and-drop functionality for reordering modules and lessons within the course content tab using @dnd-kit library which is already installed in the project
+### Details:
+Import DndContext, closestCenter, SortableContext, sortableKeyboardCoordinates, useSortable from @dnd-kit libraries. Wrap the modules list in course edit page with DndContext and SortableContext. Create a SortableModule component for each module that can be dragged and dropped. Add drag handle (GripVertical icon) and implement onDragEnd handler to update module order in the database via API call to /api/courses/[id]/modules/[moduleId] with new order. Similarly implement lesson reordering within modules.
+
+## 2. Integrate VideoUploadZone component into course editor [done]
+### Dependencies: None
+### Description: Add the existing VideoUploadZone component to lesson editing pages and enhance the course content management workflow with video upload capabilities
+### Details:
+Import VideoUploadZone from src/components/video/video-upload-zone.tsx into the course edit page and lesson edit pages. Add video upload functionality to the lesson creation/editing workflow. Integrate with the existing lesson video field in the database. Add a video tab in lesson editing that uses VideoUploadZone with courseId and lessonId metadata. Handle upload completion to automatically update lesson videoUrl field and duration based on video metadata.
+
+## 3. Enhance rich text editor with advanced features [done]
+### Dependencies: None
+### Description: Extend the existing RichTextEditor component with additional features like image/video embedding, code syntax highlighting, and link insertion
+### Details:
+Extend the existing rich-text-editor.tsx by adding @tiptap/extension-link, @tiptap/extension-image, and @tiptap/extension-code-block-lowlight extensions. Add toolbar buttons for inserting links, images, and embedded videos. Implement image upload functionality that integrates with the video upload system. Add syntax highlighting for code blocks using lowlight. Create modal dialogs for link insertion and image/video embedding with proper URL validation.
+
+## 4. Implement course preview functionality [done]
+### Dependencies: 2.2
+### Description: Create a comprehensive course preview system that shows instructors how their course appears to students before publishing
+### Details:
+Create a new preview mode in the course edit page that renders the course exactly as students will see it. Add a Preview tab or modal that displays course details, modules, lessons, and video content in student view. Implement preview navigation between lessons and modules. Add preview controls for instructors to test video playback, lesson progression, and content formatting. Include preview access to quiz functionality if lessons contain quizzes.
+
+## 5. Build publishing workflow with validation checklist [done]
+### Dependencies: 2.3
+### Description: Create a comprehensive course publishing system with validation requirements and status management
+### Details:
+Create a publishing workflow component that validates course readiness before allowing publication. Implement validation checklist: course has title/description, at least one module, modules have lessons, video lessons have uploaded videos, pricing is set. Create course status management (draft/review/published/archived) with appropriate UI indicators. Add publishing confirmation dialog with final checklist review. Implement auto-save for draft courses and version control for published course updates.
+
+## 6. Create course settings panel for advanced configuration [done]
+### Dependencies: None
+### Description: Build a comprehensive settings panel for course pricing, access control, drip content scheduling, and enrollment management
+### Details:
+Extend the existing Settings tab in course edit page with advanced options. Add pricing configuration with discount options and bulk pricing. Implement access control settings (free/paid/subscription). Create drip content scheduling interface for releasing lessons over time. Add enrollment limits and enrollment period settings. Include course visibility settings (public/private/unlisted) and prerequisite course selection.
+
+## 7. Add module and lesson duplication and templates features [done]
+### Dependencies: 2.1
+### Description: Implement functionality to duplicate existing modules/lessons and create reusable templates for course creation efficiency
+### Details:
+Add duplicate buttons to module and lesson components that create copies with 'Copy of' prefix. Implement template system where instructors can save modules/lessons as templates for reuse across courses. Create template library interface accessible from course creation. Add template categories (introduction, project-based, quiz, etc.). Implement template sharing between instructors with permission controls. Include template preview and customization before applying to courses.
+
+## 8. Implement auto-save functionality for draft courses [done]
+### Dependencies: 2.5
+### Description: Add automatic saving of course changes to prevent data loss and improve user experience during course creation and editing
+### Details:
+Implement auto-save functionality using debounced API calls when course data changes. Add visual indicators for save status (saving/saved/error). Create auto-save for all course fields including title, description, modules, lessons, and settings. Implement conflict resolution for concurrent edits. Add manual save button and keyboard shortcuts (Ctrl+S). Store auto-save timestamps and provide recovery options for unsaved changes. Include auto-save preferences in user settings.
+

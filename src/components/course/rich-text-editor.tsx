@@ -3,6 +3,8 @@
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
+import Link from '@tiptap/extension-link'
+import Image from '@tiptap/extension-image'
 import { Button } from '@/components/ui/button'
 import {
   Bold,
@@ -18,6 +20,17 @@ import {
   Image as ImageIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useState } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 interface RichTextEditorProps {
   content: string
@@ -34,6 +47,13 @@ export function RichTextEditor({
   className,
   editable = true
 }: RichTextEditorProps) {
+  const [showLinkDialog, setShowLinkDialog] = useState(false)
+  const [showImageDialog, setShowImageDialog] = useState(false)
+  const [linkUrl, setLinkUrl] = useState('')
+  const [linkText, setLinkText] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
+  const [imageAlt, setImageAlt] = useState('')
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -43,7 +63,18 @@ export function RichTextEditor({
       }),
       Placeholder.configure({
         placeholder
-      })
+      }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-primary underline cursor-pointer',
+        },
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-lg',
+        },
+      }),
     ],
     content,
     editable,
@@ -64,6 +95,37 @@ export function RichTextEditor({
 
   if (!editor) {
     return null
+  }
+
+  const handleAddLink = () => {
+    if (!linkUrl) return
+
+    if (linkUrl) {
+      editor
+        .chain()
+        .focus()
+        .extendMarkRange('link')
+        .setLink({ href: linkUrl })
+        .run()
+    }
+
+    setLinkUrl('')
+    setLinkText('')
+    setShowLinkDialog(false)
+  }
+
+  const handleRemoveLink = () => {
+    editor.chain().focus().unsetLink().run()
+  }
+
+  const handleAddImage = () => {
+    if (!imageUrl) return
+
+    editor.chain().focus().setImage({ src: imageUrl, alt: imageAlt || 'Image' }).run()
+
+    setImageUrl('')
+    setImageAlt('')
+    setShowImageDialog(false)
   }
 
   const MenuButton = ({
@@ -175,6 +237,31 @@ export function RichTextEditor({
 
           <div className="w-px h-8 bg-border mx-1" />
 
+          {/* Link */}
+          <MenuButton
+            onClick={() => {
+              if (editor.isActive('link')) {
+                handleRemoveLink()
+              } else {
+                setShowLinkDialog(true)
+              }
+            }}
+            active={editor.isActive('link')}
+            title={editor.isActive('link') ? 'Remove Link' : 'Add Link'}
+          >
+            <LinkIcon className="h-4 w-4" />
+          </MenuButton>
+
+          {/* Image */}
+          <MenuButton
+            onClick={() => setShowImageDialog(true)}
+            title="Insert Image"
+          >
+            <ImageIcon className="h-4 w-4" />
+          </MenuButton>
+
+          <div className="w-px h-8 bg-border mx-1" />
+
           {/* Undo/Redo */}
           <MenuButton
             onClick={() => editor.chain().focus().undo().run()}
@@ -209,6 +296,81 @@ export function RichTextEditor({
           {editor.storage.characterCount?.words() || 0} words
         </div>
       )}
+
+      {/* Link Dialog */}
+      <Dialog open={showLinkDialog} onOpenChange={setShowLinkDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Insert Link</DialogTitle>
+            <DialogDescription>
+              Add a hyperlink to your content
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="link-url">URL</Label>
+              <Input
+                id="link-url"
+                type="url"
+                placeholder="https://example.com"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddLink()}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowLinkDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddLink} disabled={!linkUrl}>
+              Insert Link
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Dialog */}
+      <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Insert Image</DialogTitle>
+            <DialogDescription>
+              Add an image to your content from a URL
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="image-url">Image URL</Label>
+              <Input
+                id="image-url"
+                type="url"
+                placeholder="https://example.com/image.jpg"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="image-alt">Alt Text (Optional)</Label>
+              <Input
+                id="image-alt"
+                placeholder="Description of the image"
+                value={imageAlt}
+                onChange={(e) => setImageAlt(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddImage()}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImageDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddImage} disabled={!imageUrl}>
+              Insert Image
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

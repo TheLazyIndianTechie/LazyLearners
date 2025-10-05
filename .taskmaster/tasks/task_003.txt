@@ -1,0 +1,85 @@
+# Task ID: 3
+# Title: Integrate Video Streaming with Course Lesson Content
+# Status: pending
+# Dependencies: 1, 2
+# Priority: high
+# Description: Connect the existing video streaming infrastructure with course lessons to enable seamless video playback within the learning experience
+# Details:
+Implement video-lesson integration: 1) Extend lesson model to include video metadata (duration, quality options, thumbnails) 2) Create lesson video player component with progress tracking and resume functionality 3) Implement video access control using license key validation from existing system 4) Add video quality selection and adaptive streaming integration 5) Create video progress tracking that updates user completion status 6) Implement video bookmarking and note-taking features 7) Add video analytics for engagement metrics 8) Ensure mobile-responsive video playback with touch controls
+
+# Test Strategy:
+Verify video integration: enrolled students can watch lesson videos, progress is tracked and resumable, video quality adapts to connection, unauthorized users cannot access content, mobile video playback functions properly
+
+# Subtasks:
+## 1. Extend Prisma schema with video metadata and progress models [pending]
+### Dependencies: None
+### Description: Add video-specific fields to Lesson model and create new VideoProgress and VideoBookmark models for comprehensive video tracking
+### Details:
+Modify prisma/schema.prisma to add: 1) Lesson model extensions - videoMetadata (JSON: qualities, bitrate, resolution, frameRate), videoThumbnails (String array), videoDuration (Int seconds). 2) Create VideoProgress model - fields: id, userId, lessonId, watchTime (Int), completionPercentage (Float), lastPosition (Int), resumePosition (Int), qualityPreference (String), playbackSpeed (Float), timestamps. 3) Create VideoBookmark model - id, userId, lessonId, position (Int), note (String), createdAt. Add indexes and relations. Run prisma generate and prisma db push.
+
+## 2. Create lesson video streaming API routes [pending]
+### Dependencies: None
+### Description: Build API endpoints for lesson video operations including streaming initialization, progress updates, and session management
+### Details:
+Create src/app/api/lessons/[lessonId]/video/route.ts - GET endpoint to initialize video streaming session with enrollment and license validation. Create src/app/api/lessons/[lessonId]/progress/route.ts - POST to save progress, GET to retrieve. Create src/app/api/lessons/[lessonId]/bookmarks/route.ts - CRUD operations for video bookmarks. Add Zod validation schemas in src/lib/validations/video.ts for request/response validation. Return SecureStreamingManifest with lesson context.
+
+## 3. Integrate enrollment and license validation into video access control [pending]
+### Dependencies: None
+### Description: Extend VideoStreamingService.verifyVideoAccess to check user enrollment status and license key validity before allowing lesson video access
+### Details:
+Modify src/lib/video/streaming.ts - Update verifyVideoAccess method to: 1) Query Prisma for user enrollment via Enrollment model. 2) Validate active LicenseKey for the course. 3) Check lesson ownership via Course → Module → Lesson relationship. 4) Return appropriate VideoAccess with restrictions based on enrollment type (free preview vs full access). 5) Log security events for unauthorized access attempts. Add helper methods: checkEnrollment(userId, courseId), validateLicense(userId, courseId), getLessonCourse(lessonId).
+
+## 4. Build LessonVideoPlayer component with progress tracking [pending]
+### Dependencies: None
+### Description: Create a lesson-aware video player component that wraps the existing VideoPlayer with automatic progress saving and resume functionality
+### Details:
+Create src/components/video/lesson-video-player.tsx - Component that: 1) Accepts lessonId, courseId props. 2) Fetches lesson video metadata and user progress on mount. 3) Wraps VideoPlayer with onProgress callback that saves position to localStorage every 10s and database every 30s. 4) Implements resume logic - loads lastPosition from database, offers resume UI if position > 30s. 5) Tracks completion - calls /api/lessons/[id]/progress when 90% watched. 6) Integrates bookmark UI. 7) Handles loading states and error boundaries. Use React Query for data fetching and mutations.
+
+## 5. Implement video progress synchronization system [pending]
+### Dependencies: None
+### Description: Create a robust progress sync mechanism using localStorage for immediate updates and database for persistence with conflict resolution
+### Details:
+Create src/lib/video/progress-sync.ts - Service with: 1) saveProgressLocal(lessonId, position, watchTime) - localStorage save. 2) saveProgressRemote(lessonId, data) - API call with debouncing (30s). 3) loadProgress(lessonId) - Load from DB, fallback to localStorage. 4) syncOnVisibilityChange - Sync when tab becomes hidden. 5) conflictResolution - Use max(local.position, remote.position) strategy. 6) useVideoProgress hook for React components. Add background sync using Service Worker API for offline support. Handle edge cases: multiple tabs, network failures, stale data.
+
+## 6. Implement lesson completion logic based on video watch percentage [pending]
+### Dependencies: None
+### Description: Create automatic lesson completion system that marks lessons complete at 90% video watch threshold and updates course progress
+### Details:
+Create src/lib/video/completion.ts - Functions: 1) calculateCompletionPercentage(watchTime, videoDuration). 2) shouldMarkComplete(percentage) - returns true if >= 90%. 3) markLessonComplete(userId, lessonId) - Update Progress model with completed: true, completedAt timestamp. 4) updateCourseProgress(userId, courseId) - Recalculate overall course completion based on all lesson statuses. 5) triggerCompletionEvents - Send notifications, unlock next lesson, award points. Modify /api/lessons/[id]/progress POST endpoint to call these functions. Add database transaction to ensure atomicity. Create completion webhooks for integrations.
+
+## 7. Create video bookmarking and note-taking system [pending]
+### Dependencies: None
+### Description: Build a feature allowing students to bookmark video timestamps with notes for future reference and review
+### Details:
+1) Database: VideoBookmark model (already defined in subtask 3.1). 2) API: src/app/api/lessons/[lessonId]/bookmarks/route.ts - GET list, POST create, PATCH update, DELETE remove. Add GET /api/users/[userId]/bookmarks for all user bookmarks. 3) UI Component: src/components/video/video-bookmarks.tsx - Bookmark list sidebar, add bookmark button on video player timeline, edit/delete actions, timestamp click to seek video. 4) Integration: Add bookmark controls to LessonVideoPlayer, sync bookmark positions with video timeline, export bookmarks as PDF/Markdown. Use optimistic UI updates with React Query mutations.
+
+## 8. Build instructor video analytics dashboard [pending]
+### Dependencies: None
+### Description: Create analytics aggregation system and dashboard for instructors to view student engagement with lesson videos
+### Details:
+1) Analytics Service: src/lib/video/analytics.ts - aggregateVideoMetrics(lessonId, timeRange) - total views, unique viewers, avg watch time, completion rate, drop-off points. 2) API: src/app/api/instructor/lessons/[lessonId]/analytics/route.ts - GET endpoint returning analytics data. 3) Dashboard UI: src/app/instructor/courses/[courseId]/analytics/page.tsx - Charts for watch time distribution, completion funnel, engagement heatmap (which parts watched most), quality selection stats, device breakdown. Use recharts for visualizations. 4) Cache analytics data in Redis with 1-hour TTL. 5) Export analytics as CSV/PDF reports.
+
+## 9. Add adaptive quality selection and bandwidth optimization [pending]
+### Dependencies: None
+### Description: Integrate existing adaptive streaming infrastructure with lesson videos for automatic quality switching based on network conditions
+### Details:
+1) Extend src/lib/video/streaming.ts - Add getOptimalQuality(bandwidth, deviceCapabilities) method. 2) Modify LessonVideoPlayer to monitor buffer health and network speed via Navigator.connection API. 3) Implement automatic quality downgrade when buffer < 5s, upgrade when buffer > 15s. 4) Store user manual quality preference in VideoProgress.qualityPreference. 5) Add quality adaptation events to analytics tracking. 6) Test with network throttling (3G, 4G, WiFi scenarios). 7) Add UI indicators for quality changes and buffering states.
+
+## 10. Implement mobile-optimized video streaming [pending]
+### Dependencies: None
+### Description: Optimize video playback for mobile devices with touch controls, reduced bandwidth usage, and native fullscreen support
+### Details:
+1) Add touch gesture support to LessonVideoPlayer - double-tap to skip 10s forward/back, swipe up/down for volume, pinch for seeking. 2) Implement mobile-specific quality limits (max 720p on cellular, 1080p on WiFi). 3) Add Picture-in-Picture support for iOS Safari. 4) Optimize video preloading - reduce preload buffer on mobile to save bandwidth. 5) Add mobile-friendly UI - larger touch targets (44px minimum), simplified controls overlay. 6) Test on iOS Safari, Chrome Android, various screen sizes. 7) Add data saver mode toggle in settings.
+
+## 11. Create comprehensive integration tests for video-lesson workflows [pending]
+### Dependencies: None
+### Description: Build test suite covering end-to-end video streaming scenarios including enrollment, playback, progress tracking, and completion
+### Details:
+Create src/__tests__/integration/video-lesson-integration.test.ts with tests: 1) Enrolled user can stream lesson video. 2) Unenrolled user receives 403 error. 3) Expired license blocks access. 4) Progress saves correctly every 30s. 5) Resume functionality works after page reload. 6) Lesson marks complete at 90% watch. 7) Course progress updates after lesson completion. 8) Bookmarks persist and sync. 9) Analytics data aggregates correctly. 10) Concurrent session limits enforced. Use Jest, React Testing Library, MSW for API mocking. Add E2E tests with Playwright for critical paths.
+
+## 12. Implement video streaming performance optimizations and caching [pending]
+### Dependencies: None
+### Description: Add Redis caching, video CDN integration, and performance monitoring to ensure smooth playback experience
+### Details:
+1) Cache video metadata in Redis with 24h TTL - lesson video URLs, qualities, thumbnails. 2) Implement CDN integration for video delivery - use STREAMING_CONFIG.cdn.baseUrl. 3) Add video preloading - prefetch next lesson video when current reaches 80%. 4) Optimize database queries - add eager loading for lesson video data, use database indexes. 5) Implement stale-while-revalidate pattern for progress data. 6) Add performance monitoring - track video load time, time-to-first-frame, buffering events. 7) Create /api/video/health endpoint for monitoring. 8) Add metrics to Sentry/observability platform.
+

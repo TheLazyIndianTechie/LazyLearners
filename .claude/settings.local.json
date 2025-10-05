@@ -93,7 +93,10 @@
       "mcp__task-master-ai__set_task_status",
       "Bash(git restore:*)",
       "Bash(grep:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "mcp__task-master-ai__get_tasks",
+      "mcp__task-master-ai__clear_subtasks",
+      "mcp__task-master-ai__add_subtask"
     ]
   },
   "enableAllProjectMcpServers": true,

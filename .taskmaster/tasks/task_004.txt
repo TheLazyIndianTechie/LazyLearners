@@ -1,0 +1,85 @@
+# Task ID: 4
+# Title: Build Comprehensive Student Dashboard and Learning Experience
+# Status: pending
+# Dependencies: 1, 3
+# Priority: medium
+# Description: Create complete student interface for course discovery, enrollment, learning progress tracking, and achievement management
+# Details:
+Develop student learning experience: 1) Personal dashboard showing enrolled courses, progress indicators, and recent activity 2) Course discovery with advanced filtering by engine (Unity/Unreal/Godot), difficulty, and categories 3) One-click enrollment flow with license key activation integration 4) Learning path visualization with prerequisite management 5) Achievement and certification system with blockchain credential integration 6) Study streak tracking and gamification elements 7) Course completion certificates with PDF generation 8) Social features for course discussions and peer interaction
+
+# Test Strategy:
+Test student journey: discover and enroll in courses, track learning progress across multiple courses, earn achievements and certificates, interact with course discussions, verify all progress persists across sessions
+
+# Subtasks:
+## 1. Real-time Analytics Dashboard Integration [pending]
+### Dependencies: None
+### Description: Convert mock charts in dashboard to real API data with interactive visualizations for weekly activity, skill progression, and learning trends
+### Details:
+Replace hardcoded weeklyProgress and courseDistribution data in src/app/dashboard/page.tsx with real API calls. Create /api/dashboard/analytics endpoint to fetch user activity data, learning time, skill progression, and course distribution. Add interactive tooltips, zoom/pan on charts, and export chart data functionality. Use recharts with proper data transformation.
+
+## 2. AI-Powered Course Recommendation Engine [pending]
+### Dependencies: None
+### Description: Build personalized course recommendation system based on user's completed courses, skill level, and learning goals
+### Details:
+Create RecommendationsSection component displaying recommended courses on dashboard. Implement /api/courses/recommendations endpoint with collaborative filtering algorithm. Add skill gap analysis showing which courses fill knowledge gaps. Include career path templates (Unity Developer, Game Designer, etc.) with recommended course sequences.
+
+## 3. Learning Streak System with Calendar Visualization [pending]
+### Dependencies: None
+### Description: Replace hardcoded 7-day streak with real calculation and add calendar heatmap visualization similar to GitHub contributions
+### Details:
+Create /api/progress/streak endpoint to calculate current streak from UserProgress records. Add streak recovery mechanics (1-day grace period). Implement calendar heatmap using react-calendar-heatmap showing daily learning activity. Add streak milestones (7, 30, 100 days) with badge rewards. Include push notification reminders for streak maintenance.
+
+## 4. Interactive Progress Tracking with Module View [pending]
+### Dependencies: None
+### Description: Add detailed lesson-by-lesson progress view with completion animations and predictive completion times
+### Details:
+Create CourseProgressDetail component showing module/lesson tree with completion checkmarks. Add progress comparison charts (weekly/monthly/yearly views). Implement goal setting UI allowing users to set target completion dates. Calculate and display estimated time to complete based on learning velocity. Add confetti animation on module completion.
+
+## 5. Advanced Search with Autocomplete and Wishlist [pending]
+### Dependencies: None
+### Description: Enhance course discovery with autocomplete suggestions, search history, saved filters, and course wishlists
+### Details:
+Add SearchAutocomplete component using Combobox from shadcn/ui. Create /api/courses/autocomplete endpoint returning suggestions for skills, instructors, topics. Implement search history stored in localStorage. Add save filter presets functionality. Create Wishlist model and /api/wishlist endpoints for bookmarking courses. Add course comparison tool showing side-by-side feature matrix.
+
+## 6. Social Learning Hub with Forums and Study Groups [pending]
+### Dependencies: None
+### Description: Implement discussion forums, study groups, and peer interaction features for collaborative learning
+### Details:
+Create CourseDiscussions component with forum threads per course. Add study group creation UI with scheduling calendar. Implement /api/forums and /api/study-groups endpoints. Add real-time messaging using WebSocket or polling. Create project showcase gallery with voting and comments. Include mentor-mentee matching system based on skills and goals.
+
+## 7. Achievement System with Leaderboards [pending]
+### Dependencies: None
+### Description: Build real achievement tracking system with unlock animations, leaderboards, and XP progression
+### Details:
+Create achievement unlock detection in /api/progress endpoints checking milestones. Add achievement unlock modal with celebration animation. Implement Leaderboard component showing top learners by course, global, and friends. Add XP and leveling system with level-up animations. Create badge collection gallery with rarity tiers (common, rare, epic, legendary). Include daily/weekly challenges.
+
+## 8. Certificate Generation and Blockchain Verification [pending]
+### Dependencies: None
+### Description: Implement course completion certificate generation with PDF export and blockchain credential verification
+### Details:
+Create CertificateGenerator component using react-pdf or jsPDF. Design certificate templates with course info, student name, completion date, instructor signature. Add /api/certificates/generate endpoint creating Certificate records. Implement blockchain credential verification using digital signatures. Add certificate gallery view in dashboard. Include social sharing buttons for LinkedIn, Twitter with Open Graph meta tags. Generate QR codes for certificate verification.
+
+## 9. Visual Learning Path Builder with Skill Trees [pending]
+### Dependencies: None
+### Description: Create interactive learning path visualization showing course prerequisites and skill progression as tree diagrams
+### Details:
+Build LearningPathVisualizer component using react-flow or D3.js showing courses as nodes with prerequisite connections. Add drag-and-drop custom path creator allowing users to build personalized learning sequences. Create career path templates (Unity Developer, Unreal Artist, Game Designer, Technical Artist) with pre-configured course sequences. Show progress tracking across entire learning path with completion percentages.
+
+## 10. Dashboard Customization with Widget System [pending]
+### Dependencies: None
+### Description: Implement drag-and-drop dashboard customization allowing users to personalize their learning hub layout
+### Details:
+Create CustomizableDashboard component using react-grid-layout for drag-and-drop positioning. Add widget library (progress charts, recent activity, quick links, achievements, upcoming deadlines, recommendations). Implement dashboard layout persistence in user preferences. Add dark/light theme toggle with system preference detection. Create dashboard templates (student, professional, casual learner) for quick setup.
+
+## 11. Streamlined Enrollment and Payment Flow [pending]
+### Dependencies: None
+### Description: Optimize enrollment UX with streamlined checkout, license activation UI, and multi-course shopping cart
+### Details:
+Create EnrollmentFlow component with step-by-step wizard (course selection, payment, confirmation). Integrate Dodo Payments with existing payment system. Add license key activation UI showing activation status and key details. Implement shopping cart for multiple course purchases with bundle discounts. Create payment history page showing past transactions. Add enrollment confirmation animations and email notifications. Include retry logic for failed payments with user-friendly error messages.
+
+## 12. Mobile Responsiveness and PWA Features [pending]
+### Dependencies: None
+### Description: Enhance mobile experience with optimized layouts, touch interactions, and progressive web app capabilities
+### Details:
+Add bottom navigation bar for mobile devices replacing sidebar. Make all tabs swipeable using react-swipeable-views. Ensure all interactive elements meet 44px minimum touch target size. Create mobile-specific layouts for dashboard widgets and course cards. Implement PWA manifest and service worker for offline support. Add install prompt for iOS and Android. Optimize images with responsive srcset. Add pull-to-refresh functionality on mobile. Test with Chrome DevTools mobile emulation and real devices.
+

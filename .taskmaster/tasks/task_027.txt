@@ -1,0 +1,11 @@
+# Task ID: 27
+# Title: Instructor analytics dashboard
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Create comprehensive analytics dashboard for instructors with course performance, revenue, and engagement metrics
+# Details:
+Build instructor analytics dashboard extending existing instructor pages with course performance metrics (enrollments, completion rates), revenue analytics with charts using Recharts or similar, student engagement metrics (video watch time, quiz scores), video analytics (watch time, dropout points), export functionality for reports, date range filtering, real-time statistics, and comparative analysis across multiple courses.
+
+# Test Strategy:
+Analytics data accuracy verification, chart rendering tests, export functionality validation, performance testing with large datasets, and user interface usability testing

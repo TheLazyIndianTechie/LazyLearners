@@ -1,0 +1,11 @@
+# Task ID: 14
+# Title: Database optimization and indexing
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Add database indexes for common query patterns and optimize N+1 queries in Prisma schema
+# Details:
+Analyze prisma/schema.prisma for index opportunities on Course.category, User.role, Enrollment.userId/courseId, Progress.userId/lessonId, and Payment.status fields. Implement Prisma include statements optimization to prevent N+1 queries in course listings and user enrollments. Add database connection pooling configuration in DATABASE_URL and implement query performance monitoring using Prisma metrics. Create database migration files using prisma migrate dev.
+
+# Test Strategy:
+Performance benchmarks before/after optimization, query analysis with EXPLAIN ANALYZE, load testing with concurrent users, and monitoring query execution times

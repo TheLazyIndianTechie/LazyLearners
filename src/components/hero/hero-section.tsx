@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { AutocompleteSearch } from "@/components/search/autocomplete-search"
 import { motion } from "framer-motion"
 
 export function HeroSection() {
@@ -48,6 +49,14 @@ export function HeroSection() {
                 Master game development with industry-grade courses.
                 From pixel art to published titles—your journey starts here.
               </p>
+            </div>
+
+            {/* Search Bar */}
+            <div className="max-w-2xl">
+              <AutocompleteSearch
+                placeholder="Search for Unity, Unreal, Godot courses..."
+                className="w-full"
+              />
             </div>
 
             {/* CTA Buttons */}

@@ -1,21 +1,21 @@
 {
   "models": {
     "main": {
-      "provider": "claude-code",
-      "modelId": "sonnet",
-      "maxTokens": 64000,
+      "provider": "openrouter",
+      "modelId": "openai/gpt-5-codex",
+      "maxTokens": 100000,
       "temperature": 0.2
     },
     "research": {
-      "provider": "claude-code",
-      "modelId": "sonnet",
+      "provider": "openrouter",
+      "modelId": "openai/gpt-5",
       "maxTokens": 64000,
       "temperature": 0.1
     },
     "fallback": {
-      "provider": "claude-code",
-      "modelId": "sonnet",
-      "maxTokens": 64000,
+      "provider": "openrouter",
+      "modelId": "x-ai/grok-code-fast-1",
+      "maxTokens": 1000000,
       "temperature": 0.2
     }
   },

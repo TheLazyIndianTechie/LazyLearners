@@ -1,8 +1,10 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback, useRef } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { SiteLayout } from "@/components/layout/site-layout"
 import { EnhancedCourseCard } from "@/components/course/enhanced-course-card"
+import { FeaturedTrendingSection } from "@/components/course/featured-trending-section"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -29,7 +31,8 @@ import {
   TrendingUp,
   Award,
   ChevronDown,
-  X
+  X,
+  Loader2
 } from "lucide-react"
 
 // Mock data for demonstration
@@ -261,44 +264,163 @@ const sortOptions = [
 ]
 
 export default function CoursesPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [selectedDifficulty, setSelectedDifficulty] = useState("all")
-  const [priceRange, setPriceRange] = useState([0, 200])
-  const [durationRange, setDurationRange] = useState([0, 60])
-  const [selectedEngines, setSelectedEngines] = useState<string[]>([])
-  const [onlyFree, setOnlyFree] = useState(false)
-  const [minRating, setMinRating] = useState(0)
-  const [sortBy, setSortBy] = useState("popular")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Initialize state from URL query parameters
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || "")
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchParams.get('q') || "")
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || "all")
+  const [selectedDifficulty, setSelectedDifficulty] = useState(searchParams.get('difficulty') || "all")
+  const [priceRange, setPriceRange] = useState([
+    parseInt(searchParams.get('minPrice') || '0'),
+    parseInt(searchParams.get('maxPrice') || '200')
+  ])
+  const [durationRange, setDurationRange] = useState([
+    parseInt(searchParams.get('minDuration') || '0'),
+    parseInt(searchParams.get('maxDuration') || '60')
+  ])
+  const [selectedEngines, setSelectedEngines] = useState<string[]>(
+    searchParams.get('engines')?.split(',').filter(Boolean) || []
+  )
+  const [onlyFree, setOnlyFree] = useState(searchParams.get('free') === 'true')
+  const [minRating, setMinRating] = useState(parseFloat(searchParams.get('rating') || '0'))
+  const [sortBy, setSortBy] = useState(searchParams.get('sort') || "popular")
+  const [viewMode, setViewMode] = useState<"grid" | "list">(
+    (searchParams.get('view') as "grid" | "list") || "grid"
+  )
   const [showFilters, setShowFilters] = useState(false)
+  const [courses, setCourses] = useState<Course[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [pagination, setPagination] = useState({
+    page: parseInt(searchParams.get('page') || '1'),
+    limit: 12,
+    total: 0,
+    totalPages: 0,
+  })
 
   const engines = ["unity", "unreal", "godot", "custom"]
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Sync filters to URL
+  useEffect(() => {
+    const params = new URLSearchParams()
+
+    if (searchQuery) params.set('q', searchQuery)
+    if (selectedCategory !== 'all') params.set('category', selectedCategory)
+    if (selectedDifficulty !== 'all') params.set('difficulty', selectedDifficulty)
+    if (priceRange[0] > 0) params.set('minPrice', priceRange[0].toString())
+    if (priceRange[1] < 200) params.set('maxPrice', priceRange[1].toString())
+    if (durationRange[0] > 0) params.set('minDuration', durationRange[0].toString())
+    if (durationRange[1] < 60) params.set('maxDuration', durationRange[1].toString())
+    if (selectedEngines.length > 0) params.set('engines', selectedEngines.join(','))
+    if (onlyFree) params.set('free', 'true')
+    if (minRating > 0) params.set('rating', minRating.toString())
+    if (sortBy !== 'popular') params.set('sort', sortBy)
+    if (viewMode !== 'grid') params.set('view', viewMode)
+    if (pagination.page > 1) params.set('page', pagination.page.toString())
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `?${queryString}` : '/courses'
+
+    // Update URL without causing a page reload
+    router.replace(newUrl, { scroll: false })
+  }, [
+    searchQuery,
+    selectedCategory,
+    selectedDifficulty,
+    priceRange,
+    durationRange,
+    selectedEngines,
+    onlyFree,
+    minRating,
+    sortBy,
+    viewMode,
+    pagination.page,
+    router,
+  ])
+
+  // Debounce search query
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery)
+    }, 300) // 300ms debounce
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
+  }, [searchQuery])
+
+  // Fetch courses from API
+  const fetchCourses = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const params = new URLSearchParams({
+        q: debouncedSearchQuery,
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        ...(selectedCategory !== "all" && { category: selectedCategory }),
+        ...(selectedDifficulty !== "all" && { difficulty: selectedDifficulty }),
+        ...(onlyFree ? { maxPrice: "0" } : {}),
+        ...(!onlyFree && priceRange[0] > 0 && { minPrice: priceRange[0].toString() }),
+        ...(!onlyFree && priceRange[1] < 200 && { maxPrice: priceRange[1].toString() }),
+        ...(minRating > 0 && { minRating: minRating.toString() }),
+      })
+
+      const response = await fetch(`/api/courses/search?${params}`)
+      const data = await response.json()
+
+      if (response.ok) {
+        setCourses(data.courses)
+        setPagination(data.pagination)
+      }
+    } catch (error) {
+      console.error("Failed to fetch courses:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [
+    debouncedSearchQuery,
+    selectedCategory,
+    selectedDifficulty,
+    priceRange,
+    onlyFree,
+    minRating,
+    pagination.page,
+    pagination.limit,
+  ])
+
+  // Fetch courses when filters change
+  useEffect(() => {
+    fetchCourses()
+  }, [
+    debouncedSearchQuery,
+    selectedCategory,
+    selectedDifficulty,
+    priceRange,
+    onlyFree,
+    minRating,
+  ])
+
+  // Apply client-side filters that aren't handled by API
   const filteredAndSortedCourses = useMemo(() => {
-    let filtered = mockCourses.filter(course => {
-      const matchesSearch =
-        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.instructor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-
-      const matchesCategory = selectedCategory === "all" || course.category === selectedCategory
-      const matchesDifficulty = selectedDifficulty === "all" || course.difficulty === selectedDifficulty
-      const matchesPrice = onlyFree ? course.price === 0 : course.price >= priceRange[0] && course.price <= priceRange[1]
+    let filtered = courses.filter(course => {
       const matchesDuration = course.duration >= durationRange[0] * 60 && course.duration <= durationRange[1] * 60
       const matchesEngine = selectedEngines.length === 0 || selectedEngines.includes(course.engine)
-      const matchesRating = course.rating >= minRating
-
-      return matchesSearch && matchesCategory && matchesDifficulty && matchesPrice &&
-             matchesDuration && matchesEngine && matchesRating
+      return matchesDuration && matchesEngine
     })
 
     // Sort courses
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "rating":
-          return b.rating - a.rating
+          return (b.rating || 0) - (a.rating || 0)
         case "newest":
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         case "price-low":
@@ -309,13 +431,12 @@ export default function CoursesPage() {
           return a.duration - b.duration
         case "popular":
         default:
-          return b.reviewCount - a.reviewCount
+          return (b.reviewCount || 0) - (a.reviewCount || 0)
       }
     })
 
     return filtered
-  }, [searchQuery, selectedCategory, selectedDifficulty, priceRange, durationRange,
-      selectedEngines, onlyFree, minRating, sortBy])
+  }, [courses, durationRange, selectedEngines, sortBy])
 
   const clearAllFilters = () => {
     setSearchQuery("")
@@ -327,6 +448,7 @@ export default function CoursesPage() {
     setOnlyFree(false)
     setMinRating(0)
     setSortBy("popular")
+    setPagination({ ...pagination, page: 1 })
   }
 
   const hasActiveFilters = selectedCategory !== "all" || selectedDifficulty !== "all" ||
@@ -350,7 +472,7 @@ export default function CoursesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {categories.slice(1).map((category) => {
               const IconComponent = category.icon
-              const courseCount = mockCourses.filter(c => c.category === category.id).length
+              const courseCount = courses.filter(c => c.category === category.id).length
 
               return (
                 <Card
@@ -379,6 +501,17 @@ export default function CoursesPage() {
           </div>
         </div>
 
+        {/* Featured and Trending Courses */}
+        {!searchQuery && !hasActiveFilters && (
+          <div className="mb-12">
+            <FeaturedTrendingSection
+              featuredLimit={6}
+              trendingLimit={6}
+              showTabs={true}
+            />
+          </div>
+        )}
+
         {/* Search and Filters */}
         <div className="space-y-4 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
@@ -391,6 +524,9 @@ export default function CoursesPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 h-12"
               />
+              {isLoading && searchQuery && (
+                <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
+              )}
             </div>
 
             {/* Quick Filters */}
@@ -618,9 +754,16 @@ export default function CoursesPage() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <p className="text-lg font-medium">
-              {filteredAndSortedCourses.length} course{filteredAndSortedCourses.length !== 1 ? 's' : ''} found
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Searching...
+                </span>
+              ) : (
+                <>{pagination.total} course{pagination.total !== 1 ? 's' : ''} found</>
+              )}
             </p>
-            {searchQuery && (
+            {searchQuery && !isLoading && (
               <p className="text-sm text-muted-foreground">
                 Results for "{searchQuery}"
               </p>
@@ -629,7 +772,11 @@ export default function CoursesPage() {
         </div>
 
         {/* Course Grid/List */}
-        {filteredAndSortedCourses.length === 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          </div>
+        ) : filteredAndSortedCourses.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

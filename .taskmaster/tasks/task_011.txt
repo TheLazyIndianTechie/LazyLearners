@@ -1,0 +1,43 @@
+# Task ID: 11
+# Title: Implement video upload interface for instructors
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Create drag-and-drop video upload interface with chunked upload support and progress tracking for instructor course creation
+# Details:
+Build React component using FileReader API for chunked uploads to /api/video/upload endpoint. Implement progress tracking with useState for upload percentage, drag-and-drop zone using onDrop handlers, file validation for video formats (mp4, webm, mov), and upload queue management. Integrate with existing instructor course creation flow and add video metadata extraction (duration, size, format). Use FormData for multipart uploads and handle upload resumption on failure.
+
+# Test Strategy:
+Unit tests for file validation logic, integration tests for upload API endpoint, E2E tests for complete upload workflow, and performance tests with large video files
+
+# Subtasks:
+## 1. Create drag-and-drop upload component with react-dropzone [done]
+### Dependencies: None
+### Description: Build React component with drag-and-drop zone using react-dropzone library for intuitive file selection
+### Details:
+Create VideoUploadZone component using react-dropzone with visual feedback for drag states, accept only video formats (mp4, webm, mov), implement file size validation (max 2GB), add styled drop zone with clear upload instructions and visual indicators for drag hover states
+
+## 2. Implement chunked upload with FileReader API and progress tracking [done]
+### Dependencies: 11.1
+### Description: Build chunked upload mechanism using FileReader API with real-time progress tracking
+### Details:
+Implement chunked upload logic using FileReader to split large video files into 5MB chunks, create progress tracking with useState for upload percentage, add FormData for multipart uploads, implement upload resumption on failure using chunk checksums, provide real-time upload speed and ETA calculations
+
+## 3. Add file validation and video metadata extraction [done]
+### Dependencies: 11.2
+### Description: Implement comprehensive file validation and extract video metadata for processing
+### Details:
+Validate video file formats, size limits, and duration constraints, extract video metadata (duration, resolution, bitrate, codec) using video element or library, implement file type checking using MIME types and file headers, add validation for maximum duration (e.g., 4 hours) and minimum quality requirements
+
+## 4. Build upload queue management and error handling [done]
+### Dependencies: 11.3
+### Description: Create upload queue system for managing multiple video uploads with comprehensive error handling
+### Details:
+Implement upload queue with ability to upload multiple videos simultaneously, add retry logic for failed uploads with exponential backoff, create upload status management (queued, uploading, processing, completed, failed), implement pause/resume functionality, add detailed error messages and recovery suggestions
+
+## 5. Integrate with instructor course creation flow [done]
+### Dependencies: 11.4
+### Description: Connect video upload component to existing instructor course management interface
+### Details:
+Integrate VideoUploadZone component into lesson creation forms, connect uploaded videos to lesson content, implement video thumbnail generation and preview, add video management (replace, delete) in lesson editor, ensure proper data flow between upload component and course creation state, add video processing status indicators
+

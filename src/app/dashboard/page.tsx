@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDashboard } from "@/hooks/use-dashboard"
+import { useAnalytics } from "@/hooks/use-analytics"
 import {
   BookOpen,
   Clock,
@@ -54,6 +55,7 @@ export default function DashboardPage() {
   const { isSignedIn, user } = useUser()
   const router = useRouter()
   const { data: dashboardData, loading: dashboardLoading, error: dashboardError, refetch } = useDashboard()
+  const { data: analyticsData, loading: analyticsLoading } = useAnalytics()
   const [activeTab, setActiveTab] = useState("overview")
 
   useEffect(() => {
@@ -104,23 +106,12 @@ export default function DashboardPage() {
   const stats = dashboardData?.stats || { totalCourses: 0, completedCourses: 0, averageProgress: 0, totalTimeSpent: 0 }
   const overallProgress = stats.averageProgress
 
-  // Mock data for charts (in real implementation, this would come from the API)
-  const weeklyProgress = [
-    { day: 'Mon', minutes: 45, lessons: 2 },
-    { day: 'Tue', minutes: 60, lessons: 3 },
-    { day: 'Wed', minutes: 30, lessons: 1 },
-    { day: 'Thu', minutes: 75, lessons: 4 },
-    { day: 'Fri', minutes: 90, lessons: 3 },
-    { day: 'Sat', minutes: 120, lessons: 5 },
-    { day: 'Sun', minutes: 40, lessons: 2 }
-  ]
-
-  const courseDistribution = [
-    { name: 'Unity Development', value: 40, color: '#3b82f6' },
-    { name: 'Unreal Engine', value: 25, color: '#ef4444' },
-    { name: 'Game Design', value: 20, color: '#10b981' },
-    { name: 'C# Programming', value: 15, color: '#f59e0b' }
-  ]
+  // Use real analytics data or fall back to empty arrays
+  const weeklyProgress = analyticsData?.weeklyProgress || []
+  const courseDistribution = analyticsData?.courseDistribution.map((item, index) => ({
+    ...item,
+    color: COLORS[index % COLORS.length]
+  })) || []
 
   const recentLessons = [
     {
@@ -426,6 +417,56 @@ export default function DashboardPage() {
 
           {/* Progress Tab */}
           <TabsContent value="progress" className="space-y-6">
+            {/* Analytics Stats Row */}
+            {analyticsData && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">This Week</p>
+                        <p className="text-2xl font-bold">{analyticsData.stats.totalMinutesThisWeek} min</p>
+                      </div>
+                      <Clock className="h-8 w-8 text-blue-500 opacity-50" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Lessons Completed</p>
+                        <p className="text-2xl font-bold">{analyticsData.stats.totalLessonsThisWeek}</p>
+                      </div>
+                      <BookOpen className="h-8 w-8 text-green-500 opacity-50" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Completion Rate</p>
+                        <p className="text-2xl font-bold">{analyticsData.stats.completionRate}%</p>
+                      </div>
+                      <Target className="h-8 w-8 text-purple-500 opacity-50" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Daily Average</p>
+                        <p className="text-2xl font-bold">{analyticsData.stats.averageDailyMinutes} min</p>
+                      </div>
+                      <TrendingUp className="h-8 w-8 text-orange-500 opacity-50" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Weekly Learning Activity */}
               <Card>
@@ -437,18 +478,51 @@ export default function DashboardPage() {
                   <CardDescription>Your learning minutes this week</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <BarChart data={weeklyProgress}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="day" />
-                      <YAxis />
-                      <Tooltip
-                        labelFormatter={(label) => `${label}`}
-                        formatter={(value, name) => [value, name === 'minutes' ? 'Minutes' : 'Lessons']}
-                      />
-                      <Bar dataKey="minutes" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  {analyticsLoading ? (
+                    <div className="h-[200px] flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  ) : weeklyProgress.length === 0 ? (
+                    <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                      <p>No activity data yet. Start learning to see your progress!</p>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height={200}>
+                      <BarChart data={weeklyProgress}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis
+                          dataKey="day"
+                          tick={{ fontSize: 12 }}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 12 }}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <Tooltip
+                          cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            padding: '12px'
+                          }}
+                          labelFormatter={(label) => `${label}`}
+                          formatter={(value: number, name: string) => [
+                            value,
+                            name === 'minutes' ? 'Minutes' : 'Lessons'
+                          ]}
+                        />
+                        <Bar
+                          dataKey="minutes"
+                          fill="#3b82f6"
+                          radius={[4, 4, 0, 0]}
+                          animationDuration={500}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
                 </CardContent>
               </Card>
 
@@ -462,25 +536,48 @@ export default function DashboardPage() {
                   <CardDescription>Your learning focus areas</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <RechartsPieChart>
-                      <Pie
-                        data={courseDistribution}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={40}
-                        outerRadius={80}
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        {courseDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value) => [`${value}%`, 'Progress']} />
-                      <Legend />
-                    </RechartsPieChart>
-                  </ResponsiveContainer>
+                  {analyticsLoading ? (
+                    <div className="h-[200px] flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  ) : courseDistribution.length === 0 ? (
+                    <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                      <p>Enroll in courses to see distribution</p>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height={200}>
+                      <RechartsPieChart>
+                        <Pie
+                          data={courseDistribution}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={40}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                          animationDuration={500}
+                        >
+                          {courseDistribution.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            padding: '12px'
+                          }}
+                          formatter={(value: number) => [`${value}%`, 'Progress']}
+                        />
+                        <Legend
+                          verticalAlign="bottom"
+                          height={36}
+                          iconType="circle"
+                        />
+                      </RechartsPieChart>
+                    </ResponsiveContainer>
+                  )}
                 </CardContent>
               </Card>
             </div>

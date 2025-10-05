@@ -1,0 +1,55 @@
+# Task ID: 21
+# Title: Comprehensive test suite expansion
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Achieve 80% code coverage with unit, integration, and E2E tests for all critical user journeys
+# Details:
+Expand existing test files in src/__tests__ to cover all utility functions, API routes, and components. Write integration tests for payment flows, course enrollment, video streaming, and instructor workflows. Create E2E tests using existing Playwright setup for complete user journeys. Implement visual regression testing with Percy or similar, add performance testing for video streaming and API endpoints, and create load testing scenarios for concurrent users.
+
+# Test Strategy:
+Code coverage reporting with Jest, CI/CD integration for automated testing, performance benchmarking, test data management, and test environment isolation
+
+# Subtasks:
+## 1. Expand unit test coverage for utilities and API routes [pending]
+### Dependencies: None
+### Description: Add comprehensive unit tests for all utility functions, API route handlers, and core business logic to achieve baseline coverage
+### Details:
+Write unit tests for all functions in src/lib/, src/hooks/, and src/app/api/ directories. Focus on payment processing utilities, video streaming logic, authentication helpers, validation schemas, and database operations. Set up Jest coverage reporting and aim for 80% coverage on utility functions.
+
+## 2. Create integration tests for payment and enrollment flows [pending]
+### Dependencies: 21.1
+### Description: Build comprehensive integration tests covering payment processing, course enrollment, and license key activation workflows
+### Details:
+Test complete payment flows using Dodo Payments MCP integration, course enrollment with license key generation, webhook processing for payment events, database state changes, and error handling scenarios. Include both successful and failure cases.
+
+## 3. Expand E2E tests for critical user journeys [pending]
+### Dependencies: 21.1
+### Description: Use existing Playwright setup to create comprehensive end-to-end tests for all major user workflows
+### Details:
+Build E2E tests for user registration/authentication, course discovery and enrollment, video streaming and lesson completion, instructor course creation, payment processing, and progress tracking. Test across different user roles (Student, Instructor, Admin).
+
+## 4. Implement visual regression testing [pending]
+### Dependencies: 21.3
+### Description: Set up visual regression testing to catch UI changes and ensure consistent user interface across releases
+### Details:
+Integrate Percy or similar visual testing tool with existing Playwright setup. Create baseline screenshots for all major pages and components. Configure visual diff thresholds and set up automated visual testing in CI/CD pipeline.
+
+## 5. Add performance testing for video streaming [pending]
+### Dependencies: 21.2
+### Description: Create performance tests for video streaming endpoints and adaptive quality selection functionality
+### Details:
+Build performance tests for /api/video/stream endpoint, test video quality adaptation under different network conditions, measure session heartbeat performance, test concurrent video streaming sessions, and validate video analytics tracking performance.
+
+## 6. Create load testing scenarios for concurrent users [pending]
+### Dependencies: 21.5
+### Description: Develop load testing scenarios to validate platform performance under high concurrent user loads
+### Details:
+Use tools like Artillery or k6 to create load testing scenarios for API endpoints, database operations, authentication flows, and video streaming. Test scenarios include peak enrollment periods, concurrent video streaming, and high-traffic course launches.
+
+## 7. Set up CI/CD integration for automated testing [pending]
+### Dependencies: 21.4, 21.6
+### Description: Integrate all test suites into CI/CD pipeline with coverage reporting and automated quality gates
+### Details:
+Configure GitHub Actions or similar CI/CD to run full test suite on pull requests, set up coverage reporting with threshold enforcement (80%), integrate visual regression testing, add performance monitoring alerts, and create test result dashboards.
+

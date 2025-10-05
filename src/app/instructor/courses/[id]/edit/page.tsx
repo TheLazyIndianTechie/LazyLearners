@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { SiteLayout } from "@/components/layout/site-layout"
@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, X, Plus, Save, Eye, Trash2, GripVertical, Upload } from "lucide-react"
+import { ArrowLeft, X, Plus, Save, Eye, Trash2, GripVertical, Upload, Copy, Check, AlertCircle, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
 import {
@@ -140,6 +140,10 @@ function SortableModule({
   deleteLesson: (moduleId: string, lessonId: string) => void
   onLessonsReorder: (moduleId: string, lessons: Lesson[]) => void
   onEditVideo?: (moduleId: string, lessonId: string) => void
+  onDuplicateModule?: (moduleId: string) => void
+  onSaveModuleAsTemplate?: (moduleId: string) => void
+  onDuplicateLesson?: (moduleId: string, lessonId: string) => void
+  onSaveLessonAsTemplate?: (moduleId: string, lessonId: string) => void
 }) {
   const {
     attributes,
@@ -202,6 +206,24 @@ function SortableModule({
             <Button
               size="sm"
               variant="ghost"
+              onClick={() => onDuplicateModule?.(module.id)}
+              title="Duplicate Module"
+              disabled={saving}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onSaveModuleAsTemplate?.(module.id)}
+              title="Save as Template"
+              disabled={saving}
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
               onClick={() => deleteModule(module.id)}
               title="Delete Module"
               disabled={saving}
@@ -233,6 +255,8 @@ function SortableModule({
                     saving={saving}
                     deleteLesson={deleteLesson}
                     onEditVideo={onEditVideo}
+                    onDuplicateLesson={onDuplicateLesson}
+                    onSaveLessonAsTemplate={onSaveLessonAsTemplate}
                   />
                 ))}
               </div>
@@ -299,6 +323,8 @@ function SortableLesson({
   saving: boolean
   deleteLesson: (moduleId: string, lessonId: string) => void
   onEditVideo?: (moduleId: string, lessonId: string) => void
+  onDuplicateLesson?: (moduleId: string, lessonId: string) => void
+  onSaveLessonAsTemplate?: (moduleId: string, lessonId: string) => void
 }) {
   const {
     attributes,
@@ -349,6 +375,24 @@ function SortableLesson({
         <Button
           size="sm"
           variant="ghost"
+          onClick={() => onDuplicateLesson?.(moduleId, lesson.id)}
+          title="Duplicate Lesson"
+          disabled={saving}
+        >
+          <Copy className="h-3 w-3" />
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => onSaveLessonAsTemplate?.(moduleId, lesson.id)}
+          title="Save as Template"
+          disabled={saving}
+        >
+          <Save className="h-3 w-3" />
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
           onClick={() => deleteLesson(moduleId, lesson.id)}
           disabled={saving}
           title="Delete Lesson"
@@ -380,6 +424,15 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
   const [newLessonType, setNewLessonType] = useState<"VIDEO" | "TEXT" | "QUIZ">("VIDEO")
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null)
   const [editingLesson, setEditingLesson] = useState<{ moduleId: string; lessonId: string } | null>(null)
+  const [showPublishDialog, setShowPublishDialog] = useState(false)
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [templateType, setTemplateType] = useState<'module' | 'lesson' | null>(null)
+  const [templateSource, setTemplateSource] = useState<{ moduleId?: string; lessonId?: string } | null>(null)
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const saveQueueRef = useRef<Partial<Course> | null>(null)
 
   // Initialize DnD sensors for modules
   const sensors = useSensors(
@@ -396,6 +449,42 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
     }
     fetchCourse()
   }, [user, params.id])
+
+  // Keyboard shortcut for manual save (Cmd/Ctrl + S)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault()
+        if (hasUnsavedChanges && saveQueueRef.current) {
+          performAutoSave()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [hasUnsavedChanges])
+
+  // Auto-save effect
+  useEffect(() => {
+    if (hasUnsavedChanges && saveQueueRef.current) {
+      // Clear existing timer
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current)
+      }
+
+      // Set new timer for auto-save (3 seconds debounce)
+      autoSaveTimerRef.current = setTimeout(() => {
+        performAutoSave()
+      }, 3000)
+    }
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current)
+      }
+    }
+  }, [hasUnsavedChanges, saveQueueRef.current])
 
   const fetchCourse = async () => {
     try {
@@ -417,11 +506,15 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
     }
   }
 
-  const updateCourse = async (updates: Partial<Course>) => {
-    if (!course) return
+  const performAutoSave = async () => {
+    if (!course || !saveQueueRef.current) return
 
     try {
-      setSaving(true)
+      setAutoSaveStatus('saving')
+      const updates = saveQueueRef.current
+      saveQueueRef.current = null
+      setHasUnsavedChanges(false)
+
       const response = await fetch(`/api/courses/${course.id}`, {
         method: "PUT",
         headers: {
@@ -432,17 +525,66 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || "Failed to update course")
+        throw new Error(error.error || "Failed to auto-save course")
       }
 
       const data = await response.json()
       setCourse(data.course)
-      toast.success("Course updated successfully!")
+      setAutoSaveStatus('saved')
+      setLastSavedAt(new Date())
+
+      // Reset to idle after 2 seconds
+      setTimeout(() => setAutoSaveStatus('idle'), 2000)
     } catch (error: any) {
-      console.error("Failed to update course:", error)
-      toast.error(error.message || "Failed to update course")
-    } finally {
-      setSaving(false)
+      console.error("Auto-save failed:", error)
+      setAutoSaveStatus('error')
+      // Keep the failed updates in queue for retry
+      setTimeout(() => setAutoSaveStatus('idle'), 3000)
+    }
+  }
+
+  const queueAutoSave = useCallback((updates: Partial<Course>) => {
+    // Merge with existing queued updates
+    saveQueueRef.current = {
+      ...saveQueueRef.current,
+      ...updates,
+    }
+    setHasUnsavedChanges(true)
+  }, [])
+
+  const updateCourse = async (updates: Partial<Course>, immediate = false) => {
+    if (!course) return
+
+    // For immediate saves (like publishing), don't use auto-save
+    if (immediate) {
+      try {
+        setSaving(true)
+        const response = await fetch(`/api/courses/${course.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updates),
+        })
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.error || "Failed to update course")
+        }
+
+        const data = await response.json()
+        setCourse(data.course)
+        toast.success("Course updated successfully!")
+      } catch (error: any) {
+        console.error("Failed to update course:", error)
+        toast.error(error.message || "Failed to update course")
+      } finally {
+        setSaving(false)
+      }
+    } else {
+      // Queue for auto-save
+      setCourse(prev => prev ? { ...prev, ...updates } : null)
+      queueAutoSave(updates)
     }
   }
 
@@ -491,9 +633,302 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
     }
   }
 
+  const getPublishValidationErrors = () => {
+    if (!course) return []
+    
+    const errors: string[] = []
+    
+    // Basic info validation
+    if (!course.title || course.title.trim().length === 0) {
+      errors.push("Course must have a title")
+    }
+    if (!course.description || course.description.trim().length === 0) {
+      errors.push("Course must have a description")
+    }
+    if (!course.thumbnail || course.thumbnail.trim().length === 0) {
+      errors.push("Course must have a thumbnail image")
+    }
+    
+    // Content validation
+    if (course.modules.length === 0) {
+      errors.push("Course must have at least one module")
+    } else {
+      const modulesWithoutLessons = course.modules.filter(m => m.lessons.length === 0)
+      if (modulesWithoutLessons.length > 0) {
+        errors.push(`${modulesWithoutLessons.length} module(s) have no lessons`)
+      }
+      
+      const videoLessonsWithoutVideos = course.modules
+        .flatMap(m => m.lessons)
+        .filter(l => l.type === 'VIDEO' && !l.videoUrl)
+      
+      if (videoLessonsWithoutVideos.length > 0) {
+        errors.push(`${videoLessonsWithoutVideos.length} video lesson(s) are missing video content`)
+      }
+    }
+    
+    // Pricing validation
+    if (course.price === undefined || course.price < 0) {
+      errors.push("Course must have a valid price (set to 0 for free)")
+    }
+    
+    // Metadata validation
+    if (course.objectives.length === 0) {
+      errors.push("Course should have at least one learning objective")
+    }
+    
+    return errors
+  }
+  
+  const getPublishValidationWarnings = () => {
+    if (!course) return []
+    
+    const warnings: string[] = []
+    
+    if (course.requirements.length === 0) {
+      warnings.push("No course requirements specified")
+    }
+    if (course.tags.length === 0) {
+      warnings.push("No tags added for better discoverability")
+    }
+    if (course.modules.length < 3) {
+      warnings.push("Course has fewer than 3 modules (recommended minimum)")
+    }
+    
+    const totalLessons = course.modules.reduce((sum, m) => sum + m.lessons.length, 0)
+    if (totalLessons < 5) {
+      warnings.push("Course has fewer than 5 lessons (recommended minimum)")
+    }
+    
+    return warnings
+  }
+
   const togglePublishStatus = async () => {
+    if (!course) return
+    
+    // If trying to publish, validate first
+    if (!course.published) {
+      const errors = getPublishValidationErrors()
+      if (errors.length > 0) {
+        setShowPublishDialog(true)
+        return
+      }
+      
+      // Show confirmation dialog if there are warnings
+      const warnings = getPublishValidationWarnings()
+      if (warnings.length > 0) {
+        setShowPublishDialog(true)
+        return
+      }
+    }
+    
+    await updateCourse({ published: !course.published })
+  }
+  
+  const handlePublishConfirm = async () => {
     if (course) {
-      await updateCourse({ published: !course.published })
+      setShowPublishDialog(false)
+      await updateCourse({ published: true }, true) // Immediate save for publishing
+    }
+  }
+
+  const duplicateModule = async (moduleId: string) => {
+    if (!course) return
+
+    const moduleToDuplicate = course.modules.find(m => m.id === moduleId)
+    if (!moduleToDuplicate) return
+
+    try {
+      setSaving(true)
+      
+      // Create new module with "Copy of" prefix
+      const response = await fetch(`/api/courses/${course.id}/modules`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: `Copy of ${moduleToDuplicate.title}`,
+          description: moduleToDuplicate.description,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Failed to duplicate module")
+      }
+
+      const { module: newModule } = await response.json()
+
+      // Duplicate all lessons in the module
+      const lessonPromises = moduleToDuplicate.lessons.map(async (lesson) => {
+        const lessonResponse = await fetch(
+          `/api/courses/${course.id}/modules/${newModule.id}/lessons`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: lesson.title,
+              description: lesson.description,
+              content: lesson.content,
+              type: lesson.type,
+              videoUrl: lesson.videoUrl,
+              duration: lesson.duration,
+            }),
+          }
+        )
+        if (!lessonResponse.ok) throw new Error("Failed to duplicate lesson")
+        return lessonResponse.json()
+      })
+
+      const duplicatedLessons = await Promise.all(lessonPromises)
+
+      // Update local state with new module and lessons
+      setCourse(prev => prev ? {
+        ...prev,
+        modules: [
+          ...prev.modules,
+          {
+            ...newModule,
+            lessons: duplicatedLessons.map(result => result.lesson)
+          }
+        ]
+      } : null)
+
+      toast.success(`Module "${moduleToDuplicate.title}" duplicated successfully!`)
+    } catch (error: any) {
+      console.error("Failed to duplicate module:", error)
+      toast.error(error.message || "Failed to duplicate module")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const duplicateLesson = async (moduleId: string, lessonId: string) => {
+    if (!course) return
+
+    const module = course.modules.find(m => m.id === moduleId)
+    const lessonToDuplicate = module?.lessons.find(l => l.id === lessonId)
+    if (!lessonToDuplicate) return
+
+    try {
+      setSaving(true)
+
+      const response = await fetch(
+        `/api/courses/${course.id}/modules/${moduleId}/lessons`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: `Copy of ${lessonToDuplicate.title}`,
+            description: lessonToDuplicate.description,
+            content: lessonToDuplicate.content,
+            type: lessonToDuplicate.type,
+            videoUrl: lessonToDuplicate.videoUrl,
+            duration: lessonToDuplicate.duration,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Failed to duplicate lesson")
+      }
+
+      const { lesson: newLesson } = await response.json()
+
+      // Update local state
+      setCourse(prev => prev ? {
+        ...prev,
+        modules: prev.modules.map(m =>
+          m.id === moduleId
+            ? { ...m, lessons: [...m.lessons, newLesson] }
+            : m
+        )
+      } : null)
+
+      toast.success(`Lesson "${lessonToDuplicate.title}" duplicated successfully!`)
+    } catch (error: any) {
+      console.error("Failed to duplicate lesson:", error)
+      toast.error(error.message || "Failed to duplicate lesson")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const saveAsTemplate = (type: 'module' | 'lesson', moduleId: string, lessonId?: string) => {
+    setTemplateType(type)
+    setTemplateSource({ moduleId, lessonId })
+    setShowTemplateDialog(true)
+  }
+
+  const handleSaveTemplate = async (templateName: string, category: string) => {
+    if (!course || !templateType || !templateSource) return
+
+    try {
+      setSaving(true)
+
+      if (templateType === 'module') {
+        const module = course.modules.find(m => m.id === templateSource.moduleId)
+        if (!module) throw new Error("Module not found")
+
+        const response = await fetch('/api/templates', {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: 'module',
+            name: templateName,
+            category,
+            data: {
+              title: module.title,
+              description: module.description,
+              lessons: module.lessons.map(l => ({
+                title: l.title,
+                description: l.description,
+                content: l.content,
+                type: l.type,
+                duration: l.duration,
+              }))
+            }
+          }),
+        })
+
+        if (!response.ok) throw new Error("Failed to save template")
+        toast.success("Module saved as template!")
+      } else if (templateType === 'lesson') {
+        const module = course.modules.find(m => m.id === templateSource.moduleId)
+        const lesson = module?.lessons.find(l => l.id === templateSource.lessonId)
+        if (!lesson) throw new Error("Lesson not found")
+
+        const response = await fetch('/api/templates', {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: 'lesson',
+            name: templateName,
+            category,
+            data: {
+              title: lesson.title,
+              description: lesson.description,
+              content: lesson.content,
+              type: lesson.type,
+              duration: lesson.duration,
+            }
+          }),
+        })
+
+        if (!response.ok) throw new Error("Failed to save template")
+        toast.success("Lesson saved as template!")
+      }
+
+      setShowTemplateDialog(false)
+      setTemplateType(null)
+      setTemplateSource(null)
+    } catch (error: any) {
+      console.error("Failed to save template:", error)
+      toast.error(error.message || "Failed to save template")
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -798,20 +1233,64 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <Button variant="outline" asChild>
-              <Link href={`/courses/${course.id}`}>
-                <Eye className="h-4 w-4 mr-2" />
-                Preview
-              </Link>
-            </Button>
-            <Button
-              onClick={togglePublishStatus}
-              variant={course.published ? "outline" : "default"}
-              disabled={saving}
-            >
-              {course.published ? "Unpublish" : "Publish"}
-            </Button>
+          <div className="flex items-center gap-4">
+            {/* Auto-save status indicator */}
+            <div className="flex items-center gap-2 text-sm">
+              {autoSaveStatus === 'saving' && (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                  <span className="text-muted-foreground">Saving...</span>
+                </>
+              )}
+              {autoSaveStatus === 'saved' && (
+                <>
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span className="text-muted-foreground">
+                    Saved {lastSavedAt && `at ${lastSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                  </span>
+                </>
+              )}
+              {autoSaveStatus === 'error' && (
+                <>
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                  <span className="text-red-500">Save failed</span>
+                </>
+              )}
+              {hasUnsavedChanges && autoSaveStatus === 'idle' && (
+                <>
+                  <div className="h-2 w-2 rounded-full bg-orange-500" />
+                  <span className="text-muted-foreground">Unsaved changes</span>
+                </>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              {hasUnsavedChanges && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={performAutoSave}
+                  disabled={autoSaveStatus === 'saving'}
+                  title="Save now (Cmd/Ctrl + S)"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Now
+                </Button>
+              )}
+              <Button variant="outline" asChild>
+                <Link href={`/courses/${course.id}`}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Preview
+                </Link>
+              </Button>
+              <Button
+                onClick={togglePublishStatus}
+                variant={course.published ? "outline" : "default"}
+                disabled={saving}
+              >
+                {course.published ? "Unpublish" : "Publish"}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -1117,6 +1596,10 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
                             deleteLesson={deleteLesson}
                             onLessonsReorder={handleLessonsReorder}
                             onEditVideo={handleEditVideo}
+                            onDuplicateModule={duplicateModule}
+                            onSaveModuleAsTemplate={(moduleId) => saveAsTemplate('module', moduleId)}
+                            onDuplicateLesson={duplicateLesson}
+                            onSaveLessonAsTemplate={(moduleId, lessonId) => saveAsTemplate('lesson', moduleId, lessonId)}
                           />
                         ))}
                       </SortableContext>
@@ -1154,6 +1637,7 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
+            {/* Publication Settings */}
             <Card>
               <CardHeader>
                 <CardTitle>Publication Settings</CardTitle>
@@ -1180,22 +1664,396 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
               </CardContent>
             </Card>
 
+            {/* Pricing Configuration */}
             <Card>
               <CardHeader>
-                <CardTitle>Danger Zone</CardTitle>
+                <CardTitle>Pricing Configuration</CardTitle>
+                <CardDescription>
+                  Set up pricing, discounts, and payment options
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="settings-price">Base Price (USD)</Label>
+                    <Input
+                      id="settings-price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={course.price}
+                      onChange={(e) => setCourse(prev => prev ? { ...prev, price: parseFloat(e.target.value) || 0 } : null)}
+                      onBlur={(e) => updateCourse({ price: parseFloat(e.target.value) || 0 })}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Set to 0 for free courses</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="currency">Currency</Label>
+                    <Select value="USD" disabled>
+                      <SelectTrigger id="currency">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">More currencies coming soon</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Access Control */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Access Control</CardTitle>
+                <CardDescription>
+                  Manage who can access your course and how
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="visibility">Course Visibility</Label>
+                  <Select value="public" onValueChange={(value) => toast.info("Visibility settings will be available soon")}>
+                    <SelectTrigger id="visibility">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">Public - Listed in course catalog</SelectItem>
+                      <SelectItem value="unlisted">Unlisted - Accessible via direct link only</SelectItem>
+                      <SelectItem value="private">Private - Invite only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Public courses appear in search and browse
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="enrollment-limit">Enrollment Limit (Optional)</Label>
+                  <Input
+                    id="enrollment-limit"
+                    type="number"
+                    min="0"
+                    placeholder="Unlimited"
+                    disabled
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Leave empty for unlimited enrollments
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <div>
+                    <h4 className="font-medium">Prerequisite Courses</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Require students to complete other courses first
+                    </p>
+                  </div>
+                  <Badge variant="secondary">Coming Soon</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Content Release Schedule */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Content Release Schedule</CardTitle>
+                <CardDescription>
+                  Set up drip content to release lessons over time
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">Drip Content</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Release lessons gradually after enrollment
+                    </p>
+                  </div>
+                  <Badge variant="secondary">Coming Soon</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Drip content scheduling will allow you to release lessons daily, weekly, or on custom schedules.
+                  This feature is currently in development.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Enrollment Period */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Enrollment Period</CardTitle>
+                <CardDescription>
+                  Set when students can enroll in your course
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="enrollment-start">Enrollment Opens</Label>
+                    <Input
+                      id="enrollment-start"
+                      type="datetime-local"
+                      disabled
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Leave empty to allow immediate enrollment
+                    </p>
+                  </div>
+                  <div>
+                    <Label htmlFor="enrollment-end">Enrollment Closes</Label>
+                    <Input
+                      id="enrollment-end"
+                      type="datetime-local"
+                      disabled
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Leave empty for no enrollment deadline
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Enrollment period management is coming soon
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Danger Zone */}
+            <Card className="border-destructive/50">
+              <CardHeader>
+                <CardTitle className="text-destructive">Danger Zone</CardTitle>
                 <CardDescription>
                   Irreversible actions for this course
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="destructive">
+                <Button variant="destructive" disabled>
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete Course
                 </Button>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Course deletion will be available soon
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Template Save Dialog */}
+        <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Save as Template</DialogTitle>
+              <DialogDescription>
+                Save this {templateType} as a reusable template for future courses
+              </DialogDescription>
+            </DialogHeader>
+            
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const formData = new FormData(e.currentTarget)
+                const name = formData.get('templateName') as string
+                const category = formData.get('category') as string
+                if (name && category) {
+                  handleSaveTemplate(name, category)
+                }
+              }}
+              className="space-y-4 py-4"
+            >
+              <div>
+                <Label htmlFor="templateName">Template Name</Label>
+                <Input
+                  id="templateName"
+                  name="templateName"
+                  placeholder="e.g., Introduction Module, Video Lesson Template"
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select name="category" required>
+                  <SelectTrigger id="category">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="introduction">Introduction</SelectItem>
+                    <SelectItem value="project-based">Project-Based</SelectItem>
+                    <SelectItem value="theory">Theory/Concepts</SelectItem>
+                    <SelectItem value="quiz">Quiz/Assessment</SelectItem>
+                    <SelectItem value="hands-on">Hands-On Practice</SelectItem>
+                    <SelectItem value="advanced">Advanced Topics</SelectItem>
+                    <SelectItem value="recap">Recap/Summary</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Helps organize templates in the library
+                </p>
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowTemplateDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={saving}>
+                  {saving ? "Saving..." : "Save Template"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Publishing Validation Dialog */}
+        <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {getPublishValidationErrors().length > 0
+                  ? "Cannot Publish Course"
+                  : "Ready to Publish?"}
+              </DialogTitle>
+              <DialogDescription>
+                {getPublishValidationErrors().length > 0
+                  ? "Please fix the following issues before publishing:"
+                  : "Review the checklist below before publishing your course."}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              {/* Errors Section */}
+              {getPublishValidationErrors().length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-medium text-destructive flex items-center gap-2">
+                    <X className="h-4 w-4" />
+                    Required Items
+                  </h4>
+                  <ul className="space-y-1 ml-6 text-sm">
+                    {getPublishValidationErrors().map((error, idx) => (
+                      <li key={idx} className="text-destructive list-disc">
+                        {error}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {/* Warnings Section */}
+              {getPublishValidationWarnings().length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-medium text-orange-600 flex items-center gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                      <path d="M12 9v4" />
+                      <path d="M12 17h.01" />
+                    </svg>
+                    Recommendations
+                  </h4>
+                  <ul className="space-y-1 ml-6 text-sm">
+                    {getPublishValidationWarnings().map((warning, idx) => (
+                      <li key={idx} className="text-orange-600 list-disc">
+                        {warning}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-xs text-muted-foreground ml-6">
+                    These are optional but recommended for a better course
+                  </p>
+                </div>
+              )}
+              
+              {/* Success checklist when everything is good */}
+              {getPublishValidationErrors().length === 0 && getPublishValidationWarnings().length === 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-medium text-green-600 flex items-center gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    All Requirements Met
+                  </h4>
+                  <ul className="space-y-1 ml-6 text-sm">
+                    <li className="text-green-600 list-disc">Course has title and description</li>
+                    <li className="text-green-600 list-disc">Thumbnail image set</li>
+                    <li className="text-green-600 list-disc">At least one module with lessons</li>
+                    <li className="text-green-600 list-disc">All video lessons have videos uploaded</li>
+                    <li className="text-green-600 list-disc">Pricing configured</li>
+                    <li className="text-green-600 list-disc">Learning objectives defined</li>
+                  </ul>
+                </div>
+              )}
+              
+              {/* Course stats */}
+              <div className="border-t pt-4">
+                <h4 className="font-medium mb-2">Course Summary</h4>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Modules:</span>
+                    <span className="ml-2 font-medium">{course.modules.length}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Total Lessons:</span>
+                    <span className="ml-2 font-medium">
+                      {course.modules.reduce((sum, m) => sum + m.lessons.length, 0)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Video Lessons:</span>
+                    <span className="ml-2 font-medium">
+                      {course.modules.flatMap(m => m.lessons).filter(l => l.type === 'VIDEO').length}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Price:</span>
+                    <span className="ml-2 font-medium">
+                      {course.price === 0 ? 'Free' : `$${course.price.toFixed(2)}`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowPublishDialog(false)}
+              >
+                Cancel
+              </Button>
+              {getPublishValidationErrors().length === 0 && (
+                <Button
+                  onClick={handlePublishConfirm}
+                  disabled={saving}
+                >
+                  {saving ? "Publishing..." : "Publish Course"}
+                </Button>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Video Upload Dialog */}
         <Dialog open={!!editingLesson} onOpenChange={() => setEditingLesson(null)}>

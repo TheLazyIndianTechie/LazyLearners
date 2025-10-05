@@ -1,0 +1,11 @@
+# Task ID: 15
+# Title: API route standardization and documentation
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Standardize error responses, add request logging, and create OpenAPI documentation for all 70+ API endpoints
+# Details:
+Create standardized error response schema with code, message, details fields. Implement middleware for request/response logging using next/server RequestInit. Add rate limiting using @upstash/ratelimit with Redis or in-memory store. Generate OpenAPI/Swagger documentation using @apidevtools/swagger-jsdoc and serve via /api/docs endpoint. Implement request ID tracking using crypto.randomUUID() and add response time headers.
+
+# Test Strategy:
+API contract testing with generated OpenAPI spec, rate limiting verification tests, error response format validation, and performance impact assessment of logging

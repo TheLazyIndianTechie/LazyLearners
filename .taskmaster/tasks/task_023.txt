@@ -1,0 +1,43 @@
+# Task ID: 23
+# Title: Database seeding with comprehensive sample data
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Create extensive seed data including 20+ courses, instructors, students, and enrollment data for testing
+# Details:
+Extend existing prisma/seed.ts and seed-course.ts files to create realistic sample data: 20+ courses across different categories, 5+ instructor profiles with complete details, 50+ student accounts with varied enrollment history, sample progress and completion data, payment and license records, forum posts and discussions, quiz attempts and results. Implement seed data for different environments (development, staging) and create data reset/refresh scripts.
+
+# Test Strategy:
+Seed data integrity validation, database constraint verification, performance testing with seeded data, data consistency checks, and environment-specific seeding verification
+
+# Subtasks:
+## 1. Extend course seed data to 20+ comprehensive courses [pending]
+### Dependencies: None
+### Description: Expand existing seed-course.ts to create 20+ realistic courses across Unity, Unreal Engine, Godot, and other game development categories with complete course structures
+### Details:
+Modify existing seed-course.ts file to generate diverse courses including: beginner to advanced Unity courses (2D/3D game development, UI systems, physics), Unreal Engine courses (blueprints, C++, materials, lighting), Godot courses (GDScript, 2D/3D development), specialized topics (VR development, mobile games, indie game marketing). Each course should have realistic titles, descriptions, pricing, difficulty levels, estimated duration, and proper category assignment.
+
+## 2. Create comprehensive instructor and student profiles [pending]
+### Dependencies: None
+### Description: Generate 5+ detailed instructor profiles and 50+ student accounts with realistic personal information and varied backgrounds
+### Details:
+Create instructor seed data with complete profiles including bio, expertise areas, social links, profile images, teaching experience, and specializations. Generate 50+ student accounts with varied demographics, learning preferences, skill levels, and enrollment histories. Include realistic names, email addresses, profile pictures, join dates, and activity patterns to simulate a diverse user base.
+
+## 3. Generate enrollment history and progress tracking data [pending]
+### Dependencies: 23.1, 23.2
+### Description: Create realistic enrollment patterns, course progress, lesson completions, and learning analytics for all seeded users
+### Details:
+Generate enrollment records linking students to courses with realistic enrollment dates and patterns. Create progress tracking data showing varied completion rates, lesson view history, quiz attempts and scores, time spent on lessons, and course completion certificates. Include dropped courses, active learning paths, and seasonal enrollment patterns to simulate real user behavior.
+
+## 4. Create payment records and license key data [pending]
+### Dependencies: 23.3
+### Description: Generate sample payment transactions, license keys, and financial records for testing payment flows and course access
+### Details:
+Create payment records with various payment methods (credit card, PayPal, etc.), payment statuses (completed, pending, failed, refunded), and transaction amounts. Generate corresponding license keys for successful payments, including activation dates, expiry dates, and usage limits. Include sample subscription data, discount codes, and promotional pricing to test all payment scenarios.
+
+## 5. Implement environment-specific seeding and data management scripts [pending]
+### Dependencies: 23.1, 23.2, 23.3, 23.4
+### Description: Create scripts for different environments (development, staging) and data reset/refresh functionality
+### Details:
+Develop environment-specific seed configurations in prisma/seed.ts with different data volumes for development (smaller dataset) and staging (full dataset). Create npm scripts for data reset, refresh, and selective seeding. Implement database cleanup utilities, data export/import functionality, and seed data validation checks. Add error handling and rollback mechanisms for failed seeding operations.
+

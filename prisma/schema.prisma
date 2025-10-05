@@ -66,6 +66,9 @@ model User {
   payments          Payment[]
   licenseKeys       LicenseKey[]
   skills            UserSkill[]
+  wishlist          Wishlist[]
+  videoProgress     VideoProgress[]
+  videoBookmarks    VideoBookmark[]
 
   @@index([role]) // For filtering users by role (instructors, students, etc.)
   @@index([createdAt]) // For sorting users by registration date
@@ -81,6 +84,20 @@ model UserSkill {
   userId String
 
   @@unique([userId, skill])
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId String
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
 }
 
 model VerificationToken {
@@ -104,6 +121,8 @@ model Course {
   thumbnail   String?
   price       Float       @default(0)
   published   Boolean     @default(false)
+  isFeatured  Boolean     @default(false)
+  viewCount   Int         @default(0)
   category    Category
   engine      GameEngine?
   difficulty  Difficulty
@@ -122,6 +141,7 @@ model Course {
   requirements CourseRequirement[]
   objectives   CourseObjective[]
   tags         CourseTag[]
+  wishlists    Wishlist[]
 
   @@index([category]) // For filtering courses by category
   @@index([published]) // For filtering published vs draft courses
@@ -197,11 +217,18 @@ model Lesson {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  module    Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  moduleId  String
-  quiz      Quiz?
-  progress  Progress[]
-  resources LessonResource[]
+  // Video-specific metadata
+  videoDuration    Int? // Video duration in seconds
+  videoMetadata    String? // JSON: {qualities: string[], bitrate: number, resolution: string, frameRate: number}
+  videoThumbnails  String? // JSON array of thumbnail URLs
+
+  module         Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId       String
+  quiz           Quiz?
+  progress       Progress[]
+  resources      LessonResource[]
+  videoProgress  VideoProgress[]
+  videoBookmarks VideoBookmark[]
 
   @@index([moduleId]) // For finding all lessons in a module
   @@index([moduleId, order]) // For ordered lesson retrieval
@@ -275,11 +302,12 @@ model Enrollment {
 }
 
 model Progress {
-  id                   String   @id @default(cuid())
-  completionPercentage Float    @default(0)
-  timeSpent            Int      @default(0) // in minutes
-  lastAccessed         DateTime @default(now())
-  completed            Boolean  @default(false)
+  id                   String    @id @default(cuid())
+  completionPercentage Float     @default(0)
+  timeSpent            Int       @default(0) // in minutes
+  lastAccessed         DateTime  @default(now())
+  completed            Boolean   @default(false)
+  completedAt          DateTime? // Timestamp when lesson/course was completed
 
   user     User    @relation(fields: [userId], references: [id])
   userId   String
@@ -296,6 +324,50 @@ model Progress {
   @@index([userId, courseId]) // For finding user's progress in a course
   @@index([userId, completed]) // For finding user's completed lessons
   @@index([lastAccessed]) // For sorting by recently accessed
+}
+
+model VideoProgress {
+  id                   String   @id @default(cuid())
+  watchTime            Int      @default(0) // Total watch time in seconds
+  completionPercentage Float    @default(0) // Percentage of video watched (0-100)
+  lastPosition         Int      @default(0) // Last playback position in seconds
+  resumePosition       Int      @default(0) // Position to resume from in seconds
+  qualityPreference    String? // User's preferred video quality (e.g., "720p")
+  playbackSpeed        Float    @default(1.0) // Playback speed (0.25 to 2.0)
+  sessionsCount        Int      @default(0) // Number of viewing sessions
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId String
+
+  @@unique([userId, lessonId])
+  @@index([userId]) // For finding all video progress for a user
+  @@index([lessonId]) // For finding all progress for a lesson
+  @@index([userId, lessonId]) // For finding user's progress on a specific lesson
+  @@index([completionPercentage]) // For filtering by completion
+  @@index([updatedAt]) // For sorting by recently watched
+}
+
+model VideoBookmark {
+  id        String   @id @default(cuid())
+  position  Int // Timestamp position in video (seconds)
+  note      String? // User's note at this timestamp
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId String
+
+  @@index([userId]) // For finding all bookmarks for a user
+  @@index([lessonId]) // For finding all bookmarks for a lesson
+  @@index([userId, lessonId]) // For finding user's bookmarks on a specific lesson
+  @@index([createdAt]) // For sorting bookmarks by date
+  @@index([position]) // For sorting bookmarks by position in video
 }
 
 model Review {
@@ -568,4 +640,22 @@ enum LicenseKeyStatus {
   EXPIRED
   DISABLED
   REVOKED
+}
+
+model Template {
+  id        String   @id @default(cuid())
+  type      String // 'module' or 'lesson'
+  name      String
+  category  String // e.g., 'introduction', 'project-based', 'quiz', etc.
+  data      String // JSON data containing the template structure
+  isPublic  Boolean  @default(false)
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type]) // For filtering templates by type
+  @@index([category]) // For filtering templates by category
+  @@index([createdBy]) // For finding user's templates
+  @@index([isPublic]) // For finding public templates
+  @@index([type, category]) // For finding templates by type and category
 }

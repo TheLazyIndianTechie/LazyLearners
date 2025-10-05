@@ -1,0 +1,11 @@
+# Task ID: 25
+# Title: Course player immersive experience
+# Status: pending
+# Dependencies: 12
+# Priority: high
+# Description: Create immersive course player with lesson sidebar, notes, Q&A, and autoplay functionality
+# Details:
+Build immersive course player layout extending existing lesson pages with lesson sidebar showing progress indicators, course notes/bookmarks functionality using localStorage and database sync, Q&A section per lesson with threaded discussions, resource downloads section, next lesson autoplay with countdown timer, keyboard shortcuts guide modal, and lesson completion tracking with automatic progress updates.
+
+# Test Strategy:
+User experience testing for player interface, progress tracking accuracy tests, note-taking functionality tests, discussion feature tests, and cross-browser player compatibility
