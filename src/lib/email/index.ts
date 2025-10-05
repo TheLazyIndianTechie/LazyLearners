@@ -13,7 +13,7 @@ export {
   checkEmailHealth,
   verifyEmailDomain,
   createEmailProvider,
-} from './service';
+} from "./service";
 
 // Configuration
 export {
@@ -23,7 +23,7 @@ export {
   getActiveProvider,
   isDryRunMode,
   type EmailConfig,
-} from './config';
+} from "./config";
 
 // Types
 export {
@@ -47,7 +47,41 @@ export {
   type EmailTemplateKey,
   type EmailTemplate,
   EmailCategory,
-} from './types';
+} from "./types";
 
 // Providers
-export { ResendProvider } from './providers/resend';
+export { ResendProvider } from "./providers/resend";
+
+// Templates
+export {
+  // Template components
+  WelcomeEmail,
+  EnrollmentEmail,
+  PaymentReceiptEmail,
+  LicenseKeyEmail,
+  ProgressMilestoneEmail,
+  CertificateEmail,
+  // Registry and rendering
+  emailTemplateRegistry,
+  renderEmailTemplate,
+  renderEmailHtml,
+  renderEmailText,
+  getTemplateMetadata,
+  getAllTemplates,
+  templateExists,
+  getTemplatesByCategory,
+  validateTemplateData,
+  type TemplateMetadata,
+  type RenderResult,
+  // Theme
+  emailTheme,
+  emailStyles,
+  type EmailTheme,
+  type EmailStyles,
+  // Components
+  BaseLayout,
+  Button,
+  IconButton,
+  type ButtonVariant,
+  type ButtonSize,
+} from "./templates";

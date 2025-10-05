@@ -1671,7 +1671,7 @@
             "description": "Build a reusable React Email template system and implement all required transactional templates.",
             "dependencies": [],
             "details": "Create React Email based template system with a shared BaseLayout, theme, and partials (header, footer, button). Implement templates: Welcome, Enrollment Confirmation, Payment Receipt (itemized, taxes), License Key Delivery, Progress Milestone, Certificate Delivery. Support plain-text variants, localization, preheaders, and dark mode. Implement a local preview server and HTML/CSS inlining. Define TypeScript types for each template's data payload and a template registry mapping template keys to components and default subjects.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Snapshot test rendered HTML and text for each template with sample payloads. Visual regression via Storybook or React Email preview. Validate responsiveness at common widths. Accessibility checks (semantic tags, contrast). Ensure all dynamic placeholders render and gracefully handle missing optional fields."
           },
           {
@@ -2106,7 +2106,7 @@
       ],
       "created": "2025-10-05T05:10:02.779Z",
       "description": "Tasks for master context",
-      "updated": "2025-10-05T06:51:57.330Z"
+      "updated": "2025-10-05T07:45:48.321Z"
     }
   }
 }
