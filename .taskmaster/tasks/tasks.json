@@ -255,7 +255,7 @@
           "1",
           "2"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -282,7 +282,7 @@
             "title": "Integrate enrollment and license validation into video access control",
             "description": "Extend VideoStreamingService.verifyVideoAccess to check user enrollment status and license key validity before allowing lesson video access",
             "details": "Modify src/lib/video/streaming.ts - Update verifyVideoAccess method to: 1) Query Prisma for user enrollment via Enrollment model. 2) Validate active LicenseKey for the course. 3) Check lesson ownership via Course → Module → Lesson relationship. 4) Return appropriate VideoAccess with restrictions based on enrollment type (free preview vs full access). 5) Log security events for unauthorized access attempts. Add helper methods: checkEnrollment(userId, courseId), validateLicense(userId, courseId), getLessonCourse(lessonId).",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 3,
             "parentId": "undefined"
@@ -2106,7 +2106,7 @@
       ],
       "created": "2025-10-05T05:10:02.779Z",
       "description": "Tasks for master context",
-      "updated": "2025-10-05T06:05:09.971Z"
+      "updated": "2025-10-05T06:09:12.664Z"
     }
   }
 }
