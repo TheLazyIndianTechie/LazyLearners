@@ -1662,7 +1662,7 @@
             "description": "Integrate a provider-agnostic email adapter supporting SendGrid or Resend with secure environment configuration and domain authentication.",
             "dependencies": [],
             "details": "Set up provider-agnostic email adapter with support for SendGrid or Resend. Implement interface sendEmail({ to, from, subject, html, text, headers, categories, customArgs }) and provider-specific implementations. Configure environment variables (RESEND_API_KEY or SENDGRID_API_KEY, MAIL_FROM, MAIL_REPLY_TO), secrets in CI/CD, and runtime config toggling provider. Complete domain authentication (SPF, DKIM, DMARC), link branding, and bounce domain. Add health check endpoint and dry-run mode. Document DNS records and verification steps.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Verify DNS: SPF/DKIM/DMARC pass (using mail-tester or Gmail headers). Send test emails via sandbox and live mode. Unit-test adapter with mocked HTTP clients. Integration test that provider selection fallback works if primary fails. Validate from/reply-to and return-path. Run basic spam score checks."
           },
           {
@@ -2106,7 +2106,7 @@
       ],
       "created": "2025-10-05T05:10:02.779Z",
       "description": "Tasks for master context",
-      "updated": "2025-10-05T06:45:27.489Z"
+      "updated": "2025-10-05T06:51:57.330Z"
     }
   }
 }
