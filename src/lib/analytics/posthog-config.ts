@@ -225,39 +225,48 @@ export const POSTHOG_INSIGHTS: Record<string, PosthogInsight> = {
     }
   },
 
-  // Course Engagement by Category
-  course_engagement_by_category: {
-    id: "course_engagement_by_category",
-    name: "Course Engagement by Category",
-    description: "Compare engagement metrics across different course categories",
-    query: {
-      kind: "TrendsQuery",
-      properties: {
-        type: "AND",
-        values: []
-      },
-      breakdown: {
-        breakdown: "category",
-        breakdown_type: "event"
-      },
-      breakdown_type: "event",
-      display: "ActionsLineGraph",
-      insight: "TRENDS",
-      interval: "week",
-      series: [
-        {
-          kind: "EventsNode",
-          event: "lesson_completed",
-          name: "lesson_completed",
-          math: "total"
-        }
-      ],
-      trendsFilter: {
-        compare: false,
-        display: "ActionsLineGraph"
-      }
-    }
-  },
+   // Course Engagement by Category
+   course_engagement_by_category: {
+     id: "course_engagement_by_category",
+     name: "Course Engagement by Category",
+     description: "Compare engagement metrics across different course categories",
+     query: {
+       kind: "TrendsQuery",
+       properties: {
+         type: "AND",
+         values: []
+       },
+       breakdown: {
+         breakdown: "category",
+         breakdown_type: "event"
+       },
+       breakdown_type: "event",
+       display: "ActionsLineGraph",
+       insight: "TRENDS",
+       interval: "week",
+       series: [
+         {
+           kind: "EventsNode",
+           event: "lesson_completed",
+           name: "lesson_completed",
+           math: "total"
+         }
+       ],
+       trendsFilter: {
+         compare: false,
+         display: "ActionsLineGraph"
+       }
+     },
+     filters: {
+       properties: [
+         {
+           key: "instructor_id",
+           operator: "exact",
+           value: "{instructor_id}"
+         }
+       ]
+     }
+   },
 
   // Quiz Performance
   quiz_completion_rate: {
@@ -328,11 +337,220 @@ export const POSTHOG_INSIGHTS: Record<string, PosthogInsight> = {
     }
   },
 
-  // Session Analytics
-  session_duration: {
-    id: "session_duration",
-    name: "Average Session Duration",
-    description: "Track average session duration over time",
+   // Session Analytics
+   session_duration: {
+     id: "session_duration",
+     name: "Average Session Duration",
+     description: "Track average session duration over time",
+     query: {
+       kind: "TrendsQuery",
+       properties: {
+         type: "AND",
+         values: []
+       },
+       breakdown: null,
+       breakdown_type: null,
+       display: "ActionsLineGraph",
+       insight: "TRENDS",
+       interval: "day",
+       series: [
+         {
+           kind: "EventsNode",
+           event: "session_ended",
+           name: "session_ended",
+           math: "avg",
+           math_property: "duration_seconds"
+         }
+       ],
+       trendsFilter: {
+         compare: false,
+         display: "ActionsLineGraph"
+       }
+     },
+     filters: {
+       properties: [
+         {
+           key: "instructor_id",
+           operator: "exact",
+           value: "{instructor_id}"
+         }
+       ]
+     }
+   },
+
+   // Engagement Retention
+   user_retention: {
+     id: "user_retention",
+     name: "User Retention Analysis",
+     description: "Track user retention and engagement over time",
+     query: {
+       kind: "RetentionQuery",
+       properties: {
+         type: "AND",
+         values: []
+       },
+       target_entity: {
+         type: "events",
+         id: "course_enrolled",
+         name: "course_enrolled"
+       },
+       returning_entity: {
+         type: "events",
+         id: "lesson_completed",
+         name: "lesson_completed"
+       },
+       retention_type: "retention_first_time",
+       total_intervals: 12,
+       period: "Week"
+     },
+     filters: {
+       properties: [
+         {
+           key: "instructor_id",
+           operator: "exact",
+           value: "{instructor_id}"
+         }
+       ]
+     }
+   },
+
+   // Content Interaction Heatmap
+   content_interaction_heatmap: {
+     id: "content_interaction_heatmap",
+     name: "Content Interaction Heatmap",
+     description: "Visualize when learners are most active",
+     query: {
+       kind: "TrendsQuery",
+       properties: {
+         type: "AND",
+         values: []
+       },
+       breakdown: {
+         breakdown: "hour",
+         breakdown_type: "event"
+       },
+       breakdown_type: "event",
+       display: "ActionsLineGraph",
+       insight: "TRENDS",
+       interval: "day",
+       series: [
+         {
+           kind: "EventsNode",
+           event: "lesson_started",
+           name: "lesson_started",
+           math: "total"
+         }
+       ],
+       trendsFilter: {
+         compare: false,
+         display: "ActionsLineGraph"
+       }
+     },
+     filters: {
+       properties: [
+         {
+           key: "instructor_id",
+           operator: "exact",
+           value: "{instructor_id}"
+         }
+       ]
+     }
+   }
+      ],
+      trendsFilter: {
+        compare: false,
+        display: "ActionsLineGraph"
+      }
+    }
+  },
+
+  // Video Analytics Insights
+  video_retention_analysis: {
+    id: "video_retention_analysis",
+    name: "Video Retention Analysis",
+    description: "Track how many viewers continue watching at different points in the video",
+    query: {
+      kind: "FunnelsQuery",
+      properties: {
+        type: "AND",
+        values: []
+      },
+      series: [
+        {
+          kind: "EventsNode",
+          event: "video_started",
+          name: "video_started"
+        },
+        {
+          kind: "EventsNode",
+          event: "video_progress_25",
+          name: "video_progress_25"
+        },
+        {
+          kind: "EventsNode",
+          event: "video_progress_50",
+          name: "video_progress_50"
+        },
+        {
+          kind: "EventsNode",
+          event: "video_progress_75",
+          name: "video_progress_75"
+        },
+        {
+          kind: "EventsNode",
+          event: "video_completed",
+          name: "video_completed"
+        }
+      ],
+      funnelVizType: "steps",
+      exclusions: [],
+      filterTestAccounts: false,
+      funnelWindowInterval: 7,
+      funnelWindowIntervalUnit: "day",
+      breakdownAttributionType: "first_touch",
+      breakdownAttributionValue: 0,
+      funnelWindowIntervalToDefault: true,
+      exclusionsToDefault: true
+    }
+  },
+
+  video_watch_heatmap: {
+    id: "video_watch_heatmap",
+    name: "Video Watch Time Heatmap",
+    description: "Visualize when your audience is most active throughout the week",
+    query: {
+      kind: "TrendsQuery",
+      properties: {
+        type: "AND",
+        values: []
+      },
+      breakdown: {
+        breakdown: "$time",
+        breakdown_type: "event"
+      },
+      breakdown_type: "event",
+      display: "ActionsLineGraph",
+      insight: "TRENDS",
+      interval: "hour",
+      series: [
+        {
+          kind: "EventsNode",
+          event: "video_started",
+          name: "video_started",
+          math: "total"
+        }
+      ],
+      trendsFilter: {
+        compare: false,
+        display: "ActionsLineGraph"
+      }
+    }
+  },
+
+  video_engagement_metrics: {
+    id: "video_engagement_metrics",
+    name: "Video Engagement Metrics",
+    description: "Detailed breakdown of user interactions and engagement patterns",
     query: {
       kind: "TrendsQuery",
       properties: {
@@ -347,15 +565,198 @@ export const POSTHOG_INSIGHTS: Record<string, PosthogInsight> = {
       series: [
         {
           kind: "EventsNode",
-          event: "session_ended",
-          name: "session_ended",
-          math: "avg",
-          math_property: "duration_seconds"
+          event: "video_started",
+          name: "video_started",
+          math: "total"
+        },
+        {
+          kind: "EventsNode",
+          event: "video_completed",
+          name: "video_completed",
+          math: "total"
+        },
+        {
+          kind: "EventsNode",
+          event: "video_paused",
+          name: "video_paused",
+          math: "total"
+        },
+        {
+          kind: "EventsNode",
+          event: "video_seeked",
+          name: "video_seeked",
+          math: "total"
         }
       ],
       trendsFilter: {
         compare: false,
         display: "ActionsLineGraph"
+      }
+    }
+  },
+
+  video_completion_rate: {
+    id: "video_completion_rate",
+    name: "Video Completion Rate",
+    description: "Track video completion rates over time",
+    query: {
+      kind: "TrendsQuery",
+      properties: {
+        type: "AND",
+        values: []
+      },
+      breakdown: null,
+      breakdown_type: null,
+      display: "ActionsLineGraph",
+      insight: "TRENDS",
+      interval: "week",
+      series: [
+        {
+          kind: "EventsNode",
+          event: "video_completed",
+          name: "video_completed",
+          math: "total"
+        },
+        {
+          kind: "EventsNode",
+          event: "video_started",
+          name: "video_started",
+          math: "total"
+        }
+      ],
+      trendsFilter: {
+        compare: false,
+        display: "ActionsLineGraph"
+      }
+    }
+  },
+
+  video_average_watch_time: {
+    id: "video_average_watch_time",
+    name: "Average Video Watch Time",
+    description: "Track average time spent watching videos",
+    query: {
+      kind: "TrendsQuery",
+      properties: {
+        type: "AND",
+        values: []
+      },
+      breakdown: null,
+      breakdown_type: null,
+      display: "ActionsLineGraph",
+      insight: "TRENDS",
+      interval: "week",
+      series: [
+        {
+          kind: "EventsNode",
+          event: "video_completed",
+          name: "video_completed",
+          math: "avg",
+          math_property: "watch_time_seconds"
+        }
+      ],
+      trendsFilter: {
+        compare: false,
+        display: "ActionsLineGraph"
+      }
+    }
+  },
+
+  video_drop_off_points: {
+    id: "video_drop_off_points",
+    name: "Video Drop-off Points",
+    description: "Identify where viewers tend to stop watching",
+    query: {
+      kind: "TrendsQuery",
+      properties: {
+        type: "AND",
+        values: []
+      },
+      breakdown: {
+        breakdown: "progress_percentage",
+        breakdown_type: "event"
+      },
+      breakdown_type: "event",
+      display: "ActionsBarChart",
+      insight: "TRENDS",
+      interval: "month",
+      series: [
+        {
+          kind: "EventsNode",
+          event: "video_progress",
+          name: "video_progress",
+          math: "total"
+        }
+      ],
+      trendsFilter: {
+        compare: false,
+        display: "ActionsBarChart"
+      }
+    }
+  },
+
+  video_quality_distribution: {
+    id: "video_quality_distribution",
+    name: "Video Quality Distribution",
+    description: "Track which video qualities are most used",
+    query: {
+      kind: "TrendsQuery",
+      properties: {
+        type: "AND",
+        values: []
+      },
+      breakdown: {
+        breakdown: "video_quality",
+        breakdown_type: "event"
+      },
+      breakdown_type: "event",
+      display: "ActionsBarChart",
+      insight: "TRENDS",
+      interval: "month",
+      series: [
+        {
+          kind: "EventsNode",
+          event: "video_quality_changed",
+          name: "video_quality_changed",
+          math: "total"
+        }
+      ],
+      trendsFilter: {
+        compare: false,
+        display: "ActionsBarChart"
+      }
+    }
+  },
+
+  video_device_distribution: {
+    id: "video_device_distribution",
+    name: "Video Device Distribution",
+    description: "Track which devices are used for video playback",
+    query: {
+      kind: "TrendsQuery",
+      properties: {
+        type: "AND",
+        values: []
+      },
+      breakdown: {
+        breakdown: "$browser",
+        breakdown_type: "event"
+      },
+      breakdown_type: "event",
+      display: "ActionsBarChart",
+      insight: "TRENDS",
+      interval: "month",
+      series: [
+        {
+          kind: "EventsNode",
+          event: "video_started",
+          name: "video_started",
+          math: "total"
+        }
+      ],
+      trendsFilter: {
+        compare: false,
+        display: "ActionsBarChart"
       }
     }
   }
@@ -688,6 +1089,43 @@ export const POSTHOG_DASHBOARDS: Record<string, PosthogDashboard> = {
           value: "{course_id}" // Template variable
         }
       ]
+    }
+  },
+
+  // Video Analytics Dashboard
+  video_analytics: {
+    id: "video_analytics",
+    name: "Video Analytics Dashboard",
+    description: "Comprehensive video analytics with retention, engagement, and performance metrics",
+    insightIds: [
+      "video_retention_analysis",
+      "video_watch_heatmap",
+      "video_engagement_metrics",
+      "video_completion_rate",
+      "video_average_watch_time",
+      "video_drop_off_points",
+      "video_quality_distribution",
+      "video_device_distribution"
+    ]
+  },
+
+  // Video Analytics Dashboard Template (scoped to course/video)
+  video_analytics_template: {
+    id: "video_analytics_template",
+    name: "Video Analytics (Template)",
+    description: "Video analytics dashboard for specific courses or videos",
+    insightIds: [
+      "video_retention_analysis",
+      "video_watch_heatmap",
+      "video_engagement_metrics",
+      "video_completion_rate",
+      "video_average_watch_time",
+      "video_drop_off_points",
+      "video_quality_distribution",
+      "video_device_distribution"
+    ],
+    filters: {
+      properties: []
     }
   }
 };

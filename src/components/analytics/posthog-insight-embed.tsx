@@ -1,6 +1,8 @@
 "use client"
 
+import { useMemo } from "react"
 import { PosthogEmbed } from "./posthog-embed"
+import { POSTHOG_INSIGHTS } from "@/lib/analytics/posthog-config"
 
 interface PosthogInsightEmbedProps {
   insightId: string
@@ -9,6 +11,7 @@ interface PosthogInsightEmbedProps {
   className?: string
   height?: number
   showExport?: boolean
+  additionalFilters?: Record<string, unknown>
 }
 
 export function PosthogInsightEmbed({
@@ -18,7 +21,15 @@ export function PosthogInsightEmbed({
   className,
   height = 400,
   showExport = true,
+  additionalFilters: propAdditionalFilters,
 }: PosthogInsightEmbedProps) {
+  // Get insight-level filters and merge with prop filters
+  const additionalFilters = useMemo(() => {
+    const insight = POSTHOG_INSIGHTS[insightId]
+    const insightFilters = insight?.filters || {}
+    return { ...insightFilters, ...propAdditionalFilters }
+  }, [insightId, propAdditionalFilters])
+
   return (
     <PosthogEmbed
       insightId={insightId}
@@ -27,6 +38,7 @@ export function PosthogInsightEmbed({
       className={className}
       height={height}
       showExport={showExport}
+      additionalFilters={additionalFilters}
     />
   )
 }

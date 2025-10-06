@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState } from "react"
 import { useAnalytics } from "@/contexts/analytics-context"
 import { usePosthogEmbed } from "@/hooks/use-analytics-data"
 import { useEmbedCache } from "@/hooks/use-embed-cache"
+import { useGlobalFilterSync } from "@/hooks/use-global-filter-sync"
+import { filterSyncService } from "@/lib/analytics/filter-sync"
+import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -19,6 +22,7 @@ interface PosthogEmbedProps {
   className?: string
   height?: number
   showExport?: boolean
+  additionalFilters?: Record<string, unknown>
 }
 
 export function PosthogEmbed({
@@ -29,34 +33,37 @@ export function PosthogEmbed({
   className,
   height = 600,
   showExport = true,
+  additionalFilters = {},
 }: PosthogEmbedProps) {
-  const { selectedCourseIds, dateRange, includeArchived } = useAnalytics()
+  const { user } = useUser()
   const { getCachedEmbed, setCachedEmbed } = useEmbedCache()
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [cachedData, setCachedData] = useState<any>(null)
+  const [currentFilters, setCurrentFilters] = useState<Record<string, unknown>>({})
 
-  // Build filters based on current analytics state
+  // Use global filter sync
+  const { getPlatformFilters } = useGlobalFilterSync({
+    onFiltersChanged: (platform, filters) => {
+      if (platform === 'posthog') {
+        setCurrentFilters(filters)
+      }
+    },
+  })
+
+  // Get filters from global filter system and merge with additional filters
   const filters = useMemo(() => {
-    const filterObj: Record<string, unknown> = {}
+    const globalFilters = getPlatformFilters('posthog')
 
-    // Add date range filters
-    if (dateRange.start && dateRange.end) {
-      filterObj.date_from = dateRange.start.toISOString().split('T')[0]
-      filterObj.date_to = dateRange.end.toISOString().split('T')[0]
+    // Add instructor filter for scoped analytics
+    if (user?.id) {
+      globalFilters.instructor_id = user.id
     }
 
-    // Add course filters
-    if (selectedCourseIds.length > 0) {
-      filterObj.course_ids = selectedCourseIds
-    }
+    // Merge with additional filters
+    Object.assign(globalFilters, additionalFilters)
 
-    // Add archived filter
-    if (includeArchived !== undefined) {
-      filterObj.include_archived = includeArchived
-    }
-
-    return filterObj
-  }, [selectedCourseIds, dateRange, includeArchived])
+    return globalFilters
+  }, [getPlatformFilters, user?.id, additionalFilters])
 
   const cacheKey = useMemo(() => ({
     type: 'posthog' as const,

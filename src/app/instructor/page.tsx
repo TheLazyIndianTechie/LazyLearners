@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { SiteLayout } from "@/components/layout/site-layout"
@@ -12,6 +12,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, BookOpen, Users, DollarSign, Star, TrendingUp, Edit, Trash2, Eye } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
+import { AnalyticsProvider, useAnalytics } from "@/contexts/analytics-context"
+import { RevenueDashboard } from "@/components/analytics/revenue-dashboard"
+import { CourseSelector } from "@/components/analytics/course-selector"
+import { AnalyticsDateRangePicker } from "@/components/analytics/date-range-picker"
+import { useAnalyticsData } from "@/hooks/use-analytics-data"
+import type { RevenueAnalyticsResponse } from "@/components/analytics/revenue-analytics"
 
 interface Course {
   id: string
@@ -35,6 +41,85 @@ interface DashboardStats {
   totalStudents: number
   totalRevenue: number
   avgRating: number
+}
+
+function AnalyticsContent() {
+  const { selectedCourseIds, dateRange } = useAnalytics()
+
+  const query = useMemo(() => ({
+    courseIds: selectedCourseIds.length > 0 ? selectedCourseIds : undefined,
+    startDate: dateRange.start.toISOString(),
+    endDate: dateRange.end.toISOString(),
+  }), [selectedCourseIds, dateRange])
+
+  const { data: revenueData, isLoading: revenueLoading } = useAnalyticsData<RevenueAnalyticsResponse>(
+    "/api/analytics/revenue",
+    query
+  )
+
+  return (
+    <div className="space-y-6">
+      {/* Analytics Navigation */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Analytics Dashboards</CardTitle>
+          <CardDescription>
+            Choose from different analytics views to understand your course performance
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Button variant="outline" className="h-auto p-4 flex flex-col items-start gap-2" asChild>
+              <Link href="/instructor/analytics">
+                <TrendingUp className="h-6 w-6" />
+                <div className="text-left">
+                  <div className="font-medium">Course Performance</div>
+                  <div className="text-sm text-muted-foreground">Enrollments, completions, and revenue trends</div>
+                </div>
+              </Link>
+            </Button>
+            <Button variant="outline" className="h-auto p-4 flex flex-col items-start gap-2" asChild>
+              <Link href="/instructor/analytics/engagement">
+                <Users className="h-6 w-6" />
+                <div className="text-left">
+                  <div className="font-medium">Engagement Analytics</div>
+                  <div className="text-sm text-muted-foreground">Learner behavior and engagement metrics</div>
+                </div>
+              </Link>
+            </Button>
+            <Button variant="outline" className="h-auto p-4 flex flex-col items-start gap-2" asChild>
+              <Link href="/instructor/analytics/embedded">
+                <Eye className="h-6 w-6" />
+                <div className="text-left">
+                  <div className="font-medium">Embedded Analytics</div>
+                  <div className="text-sm text-muted-foreground">PostHog and Metabase integrations</div>
+                </div>
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Analytics Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Analytics Filters</CardTitle>
+          <CardDescription>
+            Select courses and date ranges to filter your analytics
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center">
+            <CourseSelector className="w-full md:w-auto" />
+            <AnalyticsDateRangePicker className="w-full md:w-auto" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Revenue Analytics Dashboard */}
+      <RevenueDashboard />
+    </div>
+  )
 }
 
 export default function InstructorDashboard() {
@@ -334,21 +419,11 @@ export default function InstructorDashboard() {
             )}
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Analytics</CardTitle>
-                <CardDescription>
-                  Track your teaching performance and course metrics
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  Analytics dashboard coming soon...
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+           <TabsContent value="analytics" className="space-y-4">
+             <AnalyticsProvider>
+               <AnalyticsContent />
+             </AnalyticsProvider>
+           </TabsContent>
         </Tabs>
       </div>
       </SiteLayout>
