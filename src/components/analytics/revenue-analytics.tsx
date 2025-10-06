@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart, RefreshCw } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { RevenueExportButton } from "@/components/analytics/export-button";
 
 interface RevenueAnalyticsProps {
   className?: string;
@@ -25,7 +26,7 @@ interface RevenueMetrics {
   failedTransactions: number;
 }
 
-interface RevenueAnalyticsResponse {
+export interface RevenueAnalyticsResponse {
   metrics: RevenueMetrics;
   timeseries: Array<{
     date: string;
@@ -114,6 +115,17 @@ export function RevenueAnalytics({ className }: RevenueAnalyticsProps) {
 
   return (
     <div className={cn("space-y-6", className)}>
+      {/* Header with Export Button */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold">Revenue Analytics</h2>
+          <p className="text-sm text-muted-foreground">
+            Track revenue metrics, transactions, and financial performance
+          </p>
+        </div>
+        <RevenueExportButton />
+      </div>
+
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>

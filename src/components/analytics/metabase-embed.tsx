@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react"
 import { useAnalytics } from "@/contexts/analytics-context"
 import { useEmbedCache } from "@/hooks/use-embed-cache"
+import { useGlobalFilterSync } from "@/hooks/use-global-filter-sync"
+import { filterSyncService } from "@/lib/analytics/filter-sync"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -35,35 +37,26 @@ export function MetabaseEmbed({
   height = 600,
   showExport = true,
 }: MetabaseEmbedProps) {
-  const { selectedCourseIds, dateRange, includeArchived } = useAnalytics()
   const { getCachedEmbed, setCachedEmbed } = useEmbedCache()
   const [embedData, setEmbedData] = useState<MetabaseEmbedResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [currentFilters, setCurrentFilters] = useState<Record<string, unknown>>({})
 
-  // Build filters based on current analytics state
+  // Use global filter sync
+  const { getPlatformFilters } = useGlobalFilterSync({
+    onFiltersChanged: (platform, filters) => {
+      if (platform === 'metabase') {
+        setCurrentFilters(filters)
+      }
+    },
+  })
+
+  // Get filters from global filter system
   const filters = useMemo(() => {
-    const filterObj: Record<string, unknown> = {}
-
-    // Add date range filters
-    if (dateRange.start && dateRange.end) {
-      filterObj.date_from = dateRange.start.toISOString().split('T')[0]
-      filterObj.date_to = dateRange.end.toISOString().split('T')[0]
-    }
-
-    // Add course filters
-    if (selectedCourseIds.length > 0) {
-      filterObj.course_ids = selectedCourseIds
-    }
-
-    // Add archived filter
-    if (includeArchived !== undefined) {
-      filterObj.include_archived = includeArchived
-    }
-
-    return filterObj
-  }, [selectedCourseIds, dateRange, includeArchived])
+    return getPlatformFilters('metabase')
+  }, [getPlatformFilters])
 
   const cacheKey = useMemo(() => ({
     type: 'metabase' as const,
@@ -218,13 +211,22 @@ export function MetabaseEmbed({
       </CardHeader>
       <CardContent className="p-0">
         {error && (
-          <Alert variant="destructive" className="m-4 rounded-none border-0 border-b">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Failed to load analytics: {error}
-            </AlertDescription>
-          </Alert>
-        )}
+           <Alert variant="destructive" className="m-4 rounded-none border-0 border-b">
+             <AlertCircle className="h-4 w-4" />
+             <AlertDescription>
+               {error.includes("not configured") ? (
+                 <div>
+                   <p className="font-medium">Metabase Integration Not Configured</p>
+                   <p className="text-sm mt-1">
+                     Advanced analytics dashboards require Metabase setup. Contact your administrator to enable this feature.
+                   </p>
+                 </div>
+               ) : (
+                 `Failed to load analytics: ${error}`
+               )}
+             </AlertDescription>
+           </Alert>
+         )}
         {isLoading && !embedData && (
           <div className="flex items-center justify-center" style={{ height }}>
             <div className="space-y-3">
