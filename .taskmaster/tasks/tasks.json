@@ -1807,11 +1807,11 @@
         "id": 27,
         "title": "Instructor analytics dashboard",
         "description": "Create comprehensive analytics dashboard for instructors with course performance, revenue, and engagement metrics",
-        "details": "Build instructor analytics dashboard extending existing instructor pages with course performance metrics (enrollments, completion rates), revenue analytics with charts using Recharts or similar, student engagement metrics (video watch time, quiz scores), video analytics (watch time, dropout points), export functionality for reports, date range filtering, real-time statistics, and comparative analysis across multiple courses.",
-        "testStrategy": "Analytics data accuracy verification, chart rendering tests, export functionality validation, performance testing with large datasets, and user interface usability testing",
+        "details": "Leverage PostHog and self-hosted Metabase to deliver instructor analytics by embedding revenue and course performance dashboards, streaming PostHog engagement/video insights, and unifying everything inside the shared analytics shell with global filters, exports, and real-time controls.",
+        "testStrategy": "PostHog event accuracy verification, Metabase embed rendering tests, filter synchronization checks, export workflow validation, and instructor dashboard usability testing",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -1819,53 +1819,53 @@
             "description": "Implement dashboard shell and course performance KPIs and charts (enrollments, completions, completion rate, active learners) with real-time stats and multi-course comparison.",
             "dependencies": [],
             "details": "Create shared layout/components on existing instructor pages (KPI cards, Recharts line/area charts, sortable tables); add course multi-select comparator and dashboard-level state; implement real-time updates via WebSocket/SSE (fallback polling) for new enrollments/completions; build backend aggregation endpoints with caching and access controls; include loading/error states and skeletons; prepare hooks/contexts for global filters (to be wired in 27.5); verify data accuracy against source tables and support large datasets with pagination/virtualization.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
             "id": 2,
-            "title": "Add revenue analytics with Recharts",
-            "description": "Build revenue analytics module showing gross/net revenue, refunds, ARPU, and per-course/channel breakdown with time-series and categorical charts.",
+            "title": "Embed revenue analytics with Metabase",
+            "description": "Surface instructor revenue metrics by embedding Metabase dashboards and tables scoped to their courses.",
             "dependencies": [
-              "27.1"
+              1
             ],
-            "details": "Implement revenue aggregation endpoints (transactions, fees, refunds, taxes) with currency and timezone handling; compute metrics (gross, net, refunds rate, ARPU, AOV) and daily/weekly series; add Recharts stacked area/line for revenue over time and bar charts by course/channel; include top-earning courses table and recent transactions feed; support multi-course comparison via shared shell; add optional real-time ticker for new sales events; enforce permissions and data masking for sensitive fields.",
+            "details": "Connect a self-hosted Metabase instance to the reporting database, model saved questions for gross/net revenue, refunds, ARPU/AOV, and build signed embeds for instructor-facing dashboards. Implement an embed token service, map dashboard parameters to course/date filters from the analytics shell, surface top earners and recent transactions, and document permissions plus PII masking expectations.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 3,
-            "title": "Implement student engagement metrics",
-            "description": "Provide engagement dashboards: aggregate video watch time, quiz scores, DAU/WAU/MAU, time-on-task, progression funnel, and engagement score per course and cohort.",
+            "title": "Instrument engagement analytics with PostHog",
+            "description": "Capture learner engagement telemetry with PostHog and expose the resulting insights inside the instructor dashboard.",
             "dependencies": [
-              "27.1"
+              1
             ],
-            "details": "Aggregate telemetry from video player and assessments; expose endpoints for retention curves, average quiz scores, attempts distribution, session duration, and cohort retention; visualize with Recharts histograms, bar/funnel approximations, and line charts; list low-engagement cohorts/modules and top improving courses; support multi-course comparison and cohort filters; ensure privacy (no PII by default) and performance via precomputed aggregates and caching.",
+            "details": "Instrument PostHog events for enrollments, lesson/video checkpoints, quiz outcomes, and session activity; define PostHog dashboards/cohorts for DAU/WAU/MAU and progression funnels; embed those insights in the analytics shell with instructor/course scoping, and ensure privacy controls plus documentation for event taxonomy.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 4,
-            "title": "Create video analytics with watch time and dropout analysis",
-            "description": "Deliver per-video analytics: watch time, average watch percentage, retention curves, heatmap/drop-off points, and playback issue events overview.",
+            "title": "Integrate PostHog video analytics insights",
+            "description": "Provide video watch, retention, and dropout analysis using PostHog video telemetry and embedded insights.",
             "dependencies": [
-              "27.1"
+              1
             ],
-            "details": "Precompute per-video retention bins (e.g., 0–100% in 5% steps) and watch-time aggregates; provide endpoints for per-video and per-course video summaries; visualize retention with Recharts line/area and bar charts for average watch %; surface top dropout timestamps and affected sessions; include table of videos with high dropout and completion correlation; support multi-course comparison; handle long videos via sampling/windowing; integrate with engagement metrics for drill-through.",
+            "details": "Send granular video playback events to PostHog, configure retention/drop-off dashboards and heatmaps, embed those views for instructors, and document how to interpret playback issue reports. Ensure embeds honor course filters, handle long-form content gracefully, and respect data retention policies.",
             "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 5,
-            "title": "Add export functionality and global date range filtering",
-            "description": "Implement global date range picker and apply across modules; add export of reports (CSV, PDF, JSON) with async processing for large datasets and comparative selections.",
+            "title": "Unify global filters and exports for embedded analytics",
+            "description": "Wire shared date/course filters and export actions across the PostHog and Metabase embeds in the instructor dashboard.",
             "dependencies": [
-              "27.1",
-              "27.2",
-              "27.3",
-              "27.4"
+              1,
+              2,
+              3,
+              4
             ],
-            "details": "Build reusable date picker with presets (7d, 30d, YTD, custom) and context wiring so all queries include range and course selections; validate ranges and timezones server-side; implement export services: CSV for tables, JSON for raw metrics, and PDF dashboard snapshots via headless renderer; use async job queue for heavy exports with notifications and secure download links; include column selection, anonymization toggle, and aggregation granularity options; ensure exports reflect current comparisons and freeze real-time data at export time; add audit logs, rate limiting, and e2e tests for filter propagation and export accuracy.",
+            "details": "Connect the shared date range picker and course selector to Metabase embed parameters and PostHog insight filters, cache signed embed tokens, and surface export controls that call Metabase CSV/PDF exports or trigger PostHog data downloads. Provide asynchronous job handling for large exports, add audit logs, enforce rate limiting, and test that filters stay in sync across every embedded view.",
             "status": "pending",
             "testStrategy": ""
           }
@@ -1949,7 +1949,7 @@
         "dependencies": [
           "21"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1957,7 +1957,7 @@
             "description": "Create CI workflow to run tests automatically on pull requests and pushes",
             "dependencies": [],
             "details": "Deliverables:\n- .github/workflows/ci.yml with jobs for unit/integration tests\n- Triggers: pull_request to main and feature branches; push to main\n- Use actions/checkout@v4, actions/setup-node@v4 (Node 18/20 matrix), dependency caching\n- Commands: install deps, build if needed, run tests with coverage, upload artifacts (junit/coverage) if available\n- Optional: service container for DB if integration tests require it\n- Concurrency group to cancel in-progress runs for same ref\nAcceptance criteria:\n- Tests run automatically on PRs and main pushes\n- Failing tests mark PRs as failing",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1968,7 +1968,7 @@
               "29.1"
             ],
             "details": "Deliverables:\n- Extend ci.yml or add .github/workflows/checks.yml with jobs: test, lint (eslint), typecheck (tsc --noEmit), format check (prettier --check) as applicable\n- Problem matchers to annotate code issues in PRs\n- Set required status checks in branch protection rules for main\n- Fail build on any check failure\nAcceptance criteria:\n- PRs blocked until tests, lint, and typecheck pass\n- Check results visible in PR UI",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1979,7 +1979,7 @@
               "29.2"
             ],
             "details": "Deliverables:\n- .github/workflows/deploy-staging.yml with jobs: build-artifact, deploy-staging\n- Trigger: push to main and workflow_dispatch; needs: checks from CI\n- Use environment: staging with required reviewers if needed; use concurrency group env-staging\n- Build once and upload artifact; deploy job downloads artifact and deploys via provider CLI/API (placeholder steps for Vercel/Netlify/AWS/K8s)\n- Store deployment metadata (version/commit) as outputs or artifact\n- Manual input to re-deploy a specific commit to staging\nAcceptance criteria:\n- Successful push to main deploys to staging automatically after checks pass\n- Ability to trace staging deployment to a commit/version",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1990,7 +1990,7 @@
               "29.3"
             ],
             "details": "Deliverables:\n- Add migration step to deploy-staging and future prod workflows: prisma generate, prisma migrate deploy\n- Use DATABASE_URL from GitHub Encrypted Secrets; protect logs from leaking secrets\n- Pre-migration backup step or snapshot command (provider-specific placeholder)\n- Migration status reporting and failure handling to abort deploy on error\n- Guidelines: prefer backward-compatible (expand/contract) migrations; seed only in staging\nAcceptance criteria:\n- Migrations run automatically during staging deploys and fail-fast on errors\n- Clear logs for applied migrations and status",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2001,7 +2001,7 @@
               "29.3"
             ],
             "details": "Deliverables:\n- Notification step(s) in CI and deploy workflows for success/failure\n- Integrate Slack/Discord via incoming webhooks or official actions; secrets: SLACK_WEBHOOK_URL, DISCORD_WEBHOOK_URL\n- Message payload includes repo, environment, commit SHA, author, run URL, status, and duration\n- Rate-limit and deduplicate notifications on retried jobs\nAcceptance criteria:\n- Team receives notifications on CI failures and staging deploy outcomes\n- Messages contain actionable links and context",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2013,7 +2013,7 @@
               "29.4"
             ],
             "details": "Deliverables:\n- .github/workflows/rollback.yml with workflow_dispatch inputs: environment (staging/prod), target version/commit\n- Steps to list recent deployments and redeploy previous stable artifact/image/version via provider CLI/API\n- Auto-invoke rollback on deployment failure hooks where safe; ensure idempotency and audit logs\n- Database guidance: application rollback is automated; DB rollback is manual unless reversible migrations exist; document playbook\nAcceptance criteria:\n- One-click/manual rollback to last known-good version\n- Failed deploys can trigger automatic rollback of application layer",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2025,7 +2025,7 @@
               "29.6"
             ],
             "details": "Deliverables:\n- App-level /healthz and /readyz endpoints; readiness includes DB connectivity\n- Post-deploy health-check job: poll health endpoint with backoff until success or timeout; capture logs on failure\n- On health-check failure, auto-trigger rollback workflow and notify Slack/Discord\n- Promotion workflow: promote-to-prod job reuses staging artifact after staging health checks pass; environment: production with required reviewers\n- Configurable SLOs (latency threshold, HTTP 200) and regression guard (basic smoke tests)\nAcceptance criteria:\n- Deploys only considered successful when health checks pass\n- Production promotion requires passing staging checks and approval",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -2106,7 +2106,7 @@
       ],
       "created": "2025-10-05T05:10:02.779Z",
       "description": "Tasks for master context",
-      "updated": "2025-10-05T09:47:16.106Z"
+      "updated": "2025-10-05T10:38:46.427Z"
     }
   }
 }

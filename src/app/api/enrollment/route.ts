@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 
 import { enrollUserInCourse, getUserEnrollments } from "@/lib/payment";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma };
 import { queueTemplateEmail } from "@/lib/email";
+import { AnalyticsTracker } from "@/lib/analytics/events";
 
 export async function GET(request: NextRequest) {
   try {
@@ -135,6 +136,18 @@ export async function POST(request: NextRequest) {
       // Log error but don't fail the enrollment
       console.error("Error preparing enrollment email:", error);
     }
+
+    // Track enrollment event
+    await AnalyticsTracker.trackCourseEnrolled({
+      userId,
+      courseId,
+      courseTitle: enrollmentDetails?.course.title || "Unknown Course",
+      instructorId: enrollmentDetails?.course.instructorId || "unknown",
+      category: enrollmentDetails?.course.category || undefined,
+      difficulty: enrollmentDetails?.course.difficulty || undefined,
+      price: course.price,
+      timestamp: enrollment.enrolledAt.toISOString(),
+    });
 
     return NextResponse.json({
       success: true,

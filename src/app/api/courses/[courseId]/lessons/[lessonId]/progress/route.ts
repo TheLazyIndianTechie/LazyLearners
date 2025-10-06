@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { createRequestLogger } from "@/lib/logger"
 import { z } from "zod"
+import { AnalyticsTracker } from "@/lib/analytics/events"
 
 interface RouteContext {
   params: { courseId: string; lessonId: string }
@@ -179,8 +180,14 @@ export async function PUT(
       where: { id: lessonId },
       include: {
         module: {
-          select: { courseId: true }
-        }
+          include: {
+            course: {
+              include: {
+                instructor: true,
+              },
+            },
+          },
+        },
       }
     })
 
@@ -206,6 +213,16 @@ export async function PUT(
 
     const updates = validationResult.data
 
+    // Get existing progress for comparison
+    const existingProgress = await prisma.videoProgress.findUnique({
+      where: {
+        userId_lessonId: {
+          userId,
+          lessonId
+        }
+      }
+    })
+
     // Update or create video progress
     const videoProgress = await prisma.videoProgress.upsert({
       where: {
@@ -230,6 +247,46 @@ export async function PUT(
         sessionsCount: 0
       }
     })
+
+    // Track video checkpoint analytics
+    if (updates.completionPercentage !== undefined || updates.watchTime !== undefined) {
+      const wasCompleted = existingProgress ? existingProgress.completionPercentage >= 90 : false;
+      const isNowCompleted = videoProgress.completionPercentage >= 90;
+
+      await AnalyticsTracker.trackVideoCheckpoint({
+        userId,
+        courseId,
+        courseTitle: lesson.module.course.title,
+        lessonId,
+        lessonTitle: lesson.title,
+        moduleId: lesson.moduleId,
+        videoDuration: lesson.videoDuration || 0,
+        currentPosition: videoProgress.lastPosition,
+        completionPercentage: videoProgress.completionPercentage,
+        quality: videoProgress.qualityPreference || undefined,
+        playbackSpeed: videoProgress.playbackSpeed,
+        instructorId: lesson.module.course.instructorId,
+      });
+
+      // Track video completed if it just reached completion
+      if (!wasCompleted && isNowCompleted) {
+        await AnalyticsTracker.trackVideoCompleted({
+          userId,
+          courseId,
+          courseTitle: lesson.module.course.title,
+          lessonId,
+          lessonTitle: lesson.title,
+          moduleId: lesson.moduleId,
+          videoDuration: lesson.videoDuration || 0,
+          currentPosition: videoProgress.lastPosition,
+          completionPercentage: videoProgress.completionPercentage,
+          quality: videoProgress.qualityPreference || undefined,
+          playbackSpeed: videoProgress.playbackSpeed,
+          instructorId: lesson.module.course.instructorId,
+          timeSpent: videoProgress.watchTime,
+        });
+      }
+    }
 
     // If lesson is marked as completed (>90% watched), update overall progress
     if (videoProgress.completionPercentage >= 90) {

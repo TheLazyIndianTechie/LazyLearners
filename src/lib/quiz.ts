@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { Quiz, QuizAttempt, QuizAnswer, QuizResult } from "@/lib/types/quiz"
+import { AnalyticsTracker } from "./analytics/events"
 
 export async function getQuizByLessonId(lessonId: string): Promise<Quiz | null> {
   try {
@@ -108,6 +109,48 @@ export async function submitQuizAttempt(
         completedAt: new Date()
       }
     })
+
+    // Get lesson and course details for analytics
+    const quizWithDetails = await prisma.quiz.findUnique({
+      where: { id: quizId },
+      include: {
+        lesson: {
+          include: {
+            module: {
+              include: {
+                course: {
+                  include: {
+                    instructor: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (quizWithDetails) {
+      const lesson = quizWithDetails.lesson;
+      const course = lesson.module.course;
+
+      // Track quiz completion analytics
+      await AnalyticsTracker.trackQuizCompleted({
+        userId,
+        courseId: course.id,
+        courseTitle: course.title,
+        lessonId: lesson.id,
+        lessonTitle: lesson.title,
+        moduleId: lesson.moduleId,
+        quizId,
+        score,
+        maxScore: 100,
+        passingScore: quiz.passingScore,
+        questionsCount: totalQuestions,
+        timeSpent,
+        instructorId: course.instructorId,
+      });
+    }
 
     // Update lesson progress if passed
     if (passed) {

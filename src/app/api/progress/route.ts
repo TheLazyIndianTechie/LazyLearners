@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z, ZodError } from "zod";
 import { queueTemplateEmail } from "@/lib/email";
+import { AnalyticsTracker } from "@/lib/analytics/events";
 
 // Validation schema for progress updates
 const progressUpdateSchema = z.object({
@@ -64,6 +65,29 @@ export async function POST(request: NextRequest) {
       ? Math.max(existingProgress.completionPercentage, completionPercentage)
       : completionPercentage;
 
+    // Get lesson and course details for analytics
+    const lessonDetails = await prisma.lesson.findUnique({
+      where: { id: lessonId },
+      include: {
+        module: {
+          include: {
+            course: {
+              include: {
+                instructor: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!lessonDetails) {
+      return NextResponse.json(
+        { error: "Lesson not found" },
+        { status: 404 },
+      );
+    }
+
     // Create or update progress record
     const progressData = await prisma.progress.upsert({
       where: {
@@ -88,6 +112,53 @@ export async function POST(request: NextRequest) {
         timeSpent: timeSpent || 0,
         lastAccessed: new Date(),
       },
+    });
+
+    // Track analytics events
+    const wasCompleted = existingProgress?.completed || false;
+    const isNowCompleted = progressData.completed;
+
+    // Track lesson started (first time accessing)
+    if (!existingProgress) {
+      await AnalyticsTracker.trackLessonStarted({
+        userId,
+        courseId,
+        courseTitle: lessonDetails.module.course.title,
+        lessonId,
+        lessonTitle: lessonDetails.title,
+        moduleId: lessonDetails.moduleId,
+        lessonType: lessonDetails.type,
+        duration: lessonDetails.duration,
+        instructorId: lessonDetails.module.course.instructorId,
+      });
+    }
+
+    // Track lesson completed
+    if (!wasCompleted && isNowCompleted) {
+      await AnalyticsTracker.trackLessonCompleted({
+        userId,
+        courseId,
+        courseTitle: lessonDetails.module.course.title,
+        lessonId,
+        lessonTitle: lessonDetails.title,
+        moduleId: lessonDetails.moduleId,
+        lessonType: lessonDetails.type,
+        duration: lessonDetails.duration,
+        instructorId: lessonDetails.module.course.instructorId,
+        timeSpent: progressData.timeSpent,
+      });
+    }
+
+    // Track progress update
+    await AnalyticsTracker.trackProgressUpdated({
+      userId,
+      courseId,
+      courseTitle: lessonDetails.module.course.title,
+      lessonId,
+      moduleId: lessonDetails.moduleId,
+      completionPercentage: progressData.completionPercentage,
+      timeSpent: progressData.timeSpent,
+      instructorId: lessonDetails.module.course.instructorId,
     });
 
     // Check for course milestone and send email (async, non-blocking)

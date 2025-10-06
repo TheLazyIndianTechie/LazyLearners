@@ -87,6 +87,8 @@
     "isomorphic-dompurify": "^2.28.0",
     "lucide-react": "^0.544.0",
     "postcss": "^8.5.6",
+    "posthog-js": "^1.127.0",
+    "posthog-node": "^3.4.0",
     "react-dropzone": "^14.3.8",
     "react-email": "^4.2.12",
     "recharts": "^3.2.1",
@@ -95,7 +97,8 @@
     "svix": "^1.76.1",
     "swagger-ui-react": "^5.18.2",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "task-master": "^2.3.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",

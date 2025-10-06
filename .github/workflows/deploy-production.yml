@@ -1,0 +1,680 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_from:
+        description: 'Deploy from staging or main branch'
+        required: true
+        type: choice
+        options:
+          - staging-promotion
+          - main-branch
+        default: staging-promotion
+      commit_sha:
+        description: 'Commit SHA to deploy (leave empty for latest, only for main-branch)'
+        required: false
+        type: string
+      skip_tests:
+        description: 'Skip test validation (NOT RECOMMENDED)'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  # Pre-flight checks
+  validate:
+    name: Validate Deployment Request
+    runs-on: ubuntu-latest
+    outputs:
+      deploy-sha: ${{ steps.determine.outputs.deploy-sha }}
+      deploy-version: ${{ steps.determine.outputs.deploy-version }}
+      staging-validated: ${{ steps.staging.outputs.validated }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.deploy_from == 'main-branch' && (inputs.commit_sha || github.sha) || 'main' }}
+
+      - name: Determine deployment SHA
+        id: determine
+        run: |
+          if [ "${{ inputs.deploy_from }}" = "staging-promotion" ]; then
+            # Get the latest staging deployment SHA
+            DEPLOY_SHA=$(git rev-parse main)
+            echo "Promoting staging deployment: $DEPLOY_SHA"
+          else
+            # Deploy from specific commit or latest main
+            DEPLOY_SHA="${{ inputs.commit_sha || github.sha }}"
+            echo "Deploying from main: $DEPLOY_SHA"
+          fi
+
+          # Verify SHA exists
+          if ! git cat-file -e $DEPLOY_SHA^{commit} 2>/dev/null; then
+            echo "❌ Error: Commit $DEPLOY_SHA does not exist"
+            exit 1
+          fi
+
+          VERSION="$DEPLOY_SHA-$(date +%s)"
+          echo "deploy-sha=$DEPLOY_SHA" >> $GITHUB_OUTPUT
+          echo "deploy-version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Validate staging deployment (if promotion)
+        id: staging
+        if: inputs.deploy_from == 'staging-promotion'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Get recent staging deployments
+            const deployments = await github.rest.repos.listDeployments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              environment: 'staging',
+              per_page: 5
+            });
+
+            if (deployments.data.length === 0) {
+              core.setFailed('❌ No staging deployments found');
+              return;
+            }
+
+            // Check if latest staging deployment was successful
+            const latestDeployment = deployments.data[0];
+            const statuses = await github.rest.repos.listDeploymentStatuses({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: latestDeployment.id
+            });
+
+            const latestStatus = statuses.data[0];
+            if (latestStatus.state !== 'success') {
+              core.setFailed(`❌ Latest staging deployment status: ${latestStatus.state}`);
+              return;
+            }
+
+            core.setOutput('validated', 'true');
+            console.log('✅ Staging deployment validated');
+
+      - name: Check for pending migrations
+        run: |
+          echo "Checking for pending database migrations..."
+          git diff HEAD~1..HEAD --name-only | grep -q "prisma/migrations" && echo "⚠️ Warning: New migrations detected" || echo "✅ No new migrations"
+
+  # Run full test suite (unless skipped)
+  run-tests:
+    name: Run Test Suite
+    runs-on: ubuntu-latest
+    needs: validate
+    if: ${{ !inputs.skip_tests }}
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.deploy-sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Apply database migrations
+        run: npx prisma db push --skip-generate
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+
+      - name: Run critical tests
+        run: npm run test:critical
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          NODE_ENV: test
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          NODE_ENV: test
+
+  # Build for production
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [validate, run-tests]
+    if: ${{ always() && (needs.run-tests.result == 'success' || needs.run-tests.result == 'skipped') }}
+    outputs:
+      deployment-id: ${{ steps.deployment.outputs.deployment-id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.deploy-sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.PRODUCTION_APP_URL }}
+          SKIP_ENV_VALIDATION: true
+
+      - name: Create version file
+        run: |
+          echo "${{ needs.validate.outputs.deploy-version }}" > version.txt
+          echo "SHA: ${{ needs.validate.outputs.deploy-sha }}" >> version.txt
+          echo "Built: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> version.txt
+          echo "Deployed by: ${{ github.actor }}" >> version.txt
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build-${{ needs.validate.outputs.deploy-version }}
+          path: |
+            .next/
+            public/
+            package.json
+            package-lock.json
+            prisma/
+            version.txt
+          retention-days: 30
+
+      - name: Create deployment record
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: '${{ needs.validate.outputs.deploy-sha }}',
+              environment: 'production',
+              required_contexts: [],
+              auto_merge: false,
+              description: 'Production deployment via ${{ inputs.deploy_from }}',
+              production_environment: true
+            });
+            core.setOutput('deployment-id', deployment.data.id);
+            return deployment.data.id;
+
+  # Database migrations (with backup)
+  migrate:
+    name: Database Migration
+    runs-on: ubuntu-latest
+    needs: [validate, build]
+    environment:
+      name: production
+      url: ${{ secrets.PRODUCTION_APP_URL }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.deploy-sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check migration status
+        run: npx prisma migrate status
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+      - name: Create pre-migration backup marker
+        run: |
+          echo "⚠️ IMPORTANT: Ensure database backup is completed before proceeding"
+          echo "Backup should be taken by your database provider's automated backup system"
+          echo "Deployment SHA: ${{ needs.validate.outputs.deploy-sha }}"
+
+      - name: Run database migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Verify database connection
+        run: |
+          node -e "
+          const { PrismaClient } = require('@prisma/client');
+          const prisma = new PrismaClient();
+          prisma.\$connect()
+            .then(() => { console.log('✅ Database connection successful'); process.exit(0); })
+            .catch((e) => { console.error('❌ Database connection failed:', e); process.exit(1); });
+          "
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+  # Deploy to production
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [validate, build, migrate]
+    environment:
+      name: production
+      url: ${{ secrets.PRODUCTION_APP_URL }}
+    outputs:
+      deployment-url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.deploy-sha }}
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build-${{ needs.validate.outputs.deploy-version }}
+
+      - name: Deploy to Vercel Production
+        id: deploy
+        run: |
+          npm install -g vercel
+          DEPLOYMENT_URL=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }} \
+            --env ENVIRONMENT=production \
+            --env NODE_ENV=production \
+            --env DATABASE_URL="${{ secrets.PRODUCTION_DATABASE_URL }}" \
+            --env NEXT_PUBLIC_APP_URL="${{ secrets.PRODUCTION_APP_URL }}" \
+            --env CLERK_SECRET_KEY="${{ secrets.PRODUCTION_CLERK_SECRET_KEY }}" \
+            --env NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="${{ secrets.PRODUCTION_CLERK_PUBLISHABLE_KEY }}" \
+            --env RESEND_API_KEY="${{ secrets.RESEND_API_KEY }}" \
+            --env DODO_API_KEY="${{ secrets.DODO_API_KEY }}" \
+            --env ENABLE_CACHING=true \
+            --env ENABLE_PAYMENTS=true \
+            --env ENABLE_EMAIL=true \
+            --build-env DATABASE_URL="${{ secrets.PRODUCTION_DATABASE_URL }}" \
+            --prod \
+            --yes)
+          echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "✅ Deployed to: $DEPLOYMENT_URL"
+
+      - name: Set production alias
+        run: |
+          vercel alias set ${{ steps.deploy.outputs.deployment-url }} ${{ secrets.PRODUCTION_DOMAIN }} \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_ORG_ID }}
+
+  # Comprehensive health checks
+  health-check:
+    name: Production Health Checks
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Wait for deployment propagation
+        run: sleep 45
+
+      - name: Health check with retries
+        id: health
+        run: |
+          MAX_ATTEMPTS=15
+          ATTEMPT=0
+          DELAY=15
+
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            echo "🔍 Health check attempt $((ATTEMPT + 1))/$MAX_ATTEMPTS"
+
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_APP_URL }}/api/health || echo "000")
+
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Health check passed!"
+
+              # Get detailed health info
+              HEALTH_RESPONSE=$(curl -s ${{ secrets.PRODUCTION_APP_URL }}/api/health)
+              echo "Health details: $HEALTH_RESPONSE"
+
+              exit 0
+            fi
+
+            echo "❌ Health check failed with status: $STATUS"
+            ATTEMPT=$((ATTEMPT + 1))
+
+            if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+              echo "⏳ Waiting ${DELAY}s before retry..."
+              sleep $DELAY
+            fi
+          done
+
+          echo "❌ Health check failed after $MAX_ATTEMPTS attempts"
+          exit 1
+
+      - name: Database connectivity check
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_APP_URL }}/api/health || echo "000")
+
+          if [ "$STATUS" = "200" ]; then
+            # Verify database is accessible
+            RESPONSE=$(curl -s ${{ secrets.PRODUCTION_APP_URL }}/api/health)
+            DB_STATUS=$(echo $RESPONSE | jq -r '.checks.database.status')
+
+            if [ "$DB_STATUS" = "pass" ]; then
+              echo "✅ Database connectivity verified"
+              exit 0
+            else
+              echo "❌ Database connectivity check failed: $DB_STATUS"
+              exit 1
+            fi
+          else
+            echo "❌ Health endpoint returned: $STATUS"
+            exit 1
+          fi
+
+      - name: Run comprehensive smoke tests
+        run: |
+          echo "🧪 Running production smoke tests..."
+
+          # Test homepage
+          echo "Testing homepage..."
+          curl -f -s -o /dev/null ${{ secrets.PRODUCTION_APP_URL }} || exit 1
+
+          # Test API health
+          echo "Testing API health..."
+          curl -f -s -o /dev/null ${{ secrets.PRODUCTION_APP_URL }}/api/health || exit 1
+
+          # Test courses listing (should not error even if empty)
+          echo "Testing courses API..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_APP_URL }}/api/courses)
+          if [ "$STATUS" != "200" ] && [ "$STATUS" != "401" ]; then
+            echo "❌ Courses API returned unexpected status: $STATUS"
+            exit 1
+          fi
+
+          # Test authentication endpoints
+          echo "Testing auth endpoints..."
+          curl -f -s -o /dev/null ${{ secrets.PRODUCTION_APP_URL }}/sign-in || exit 1
+
+          echo "✅ All smoke tests passed!"
+
+      - name: Performance baseline check
+        run: |
+          echo "⚡ Checking performance baseline..."
+
+          START=$(date +%s%3N)
+          curl -s -o /dev/null ${{ secrets.PRODUCTION_APP_URL }}
+          END=$(date +%s%3N)
+
+          DURATION=$((END - START))
+          echo "Homepage load time: ${DURATION}ms"
+
+          if [ $DURATION -gt 5000 ]; then
+            echo "⚠️ Warning: Homepage load time exceeds 5s"
+          else
+            echo "✅ Performance baseline acceptable"
+          fi
+
+  # Update deployment status
+  update-deployment:
+    name: Update Deployment Status
+    runs-on: ubuntu-latest
+    needs: [validate, build, deploy, health-check]
+    if: always()
+    steps:
+      - name: Update deployment status - Success
+        if: needs.health-check.result == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ needs.build.outputs.deployment-id }},
+              state: 'success',
+              environment_url: '${{ secrets.PRODUCTION_APP_URL }}',
+              description: '✅ Production deployment successful',
+              auto_inactive: true
+            });
+
+      - name: Update deployment status - Failure
+        if: needs.health-check.result != 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ needs.build.outputs.deployment-id }},
+              state: 'failure',
+              description: '❌ Production deployment failed - rollback may be required'
+            });
+
+  # Trigger rollback on failure
+  rollback-on-failure:
+    name: Automatic Rollback
+    runs-on: ubuntu-latest
+    needs: [validate, health-check]
+    if: failure() && needs.health-check.result == 'failure'
+    steps:
+      - name: Trigger rollback workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('🔄 Triggering automatic rollback due to health check failure...');
+
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'rollback.yml',
+              ref: 'main',
+              inputs: {
+                environment: 'production',
+                target_version: '',
+                reason: 'Automatic rollback - deployment health checks failed'
+              }
+            });
+
+            console.log('✅ Rollback workflow triggered');
+
+  # Send notifications
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs: [validate, build, deploy, health-check]
+    if: always()
+    steps:
+      - name: Notify Slack - Success
+        if: needs.health-check.result == 'success'
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚀 Production Deployment Successful",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚀 Production Deployment Successful",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {"type": "mrkdwn", "text": "*Repository:*\n${{ github.repository }}"},
+                    {"type": "mrkdwn", "text": "*Environment:*\nProduction"},
+                    {"type": "mrkdwn", "text": "*Version:*\n${{ needs.validate.outputs.deploy-version }}"},
+                    {"type": "mrkdwn", "text": "*Deployed by:*\n${{ github.actor }}"},
+                    {"type": "mrkdwn", "text": "*Commit:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ needs.validate.outputs.deploy-sha }}|${{ needs.validate.outputs.deploy-sha }}>"},
+                    {"type": "mrkdwn", "text": "*Deploy Type:*\n${{ inputs.deploy_from }}"}
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*URL:* ${{ secrets.PRODUCTION_APP_URL }}\n*Workflow:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Notify Slack - Failure
+        if: needs.health-check.result != 'success'
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚨 Production Deployment Failed",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚨 Production Deployment Failed",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {"type": "mrkdwn", "text": "*Repository:*\n${{ github.repository }}"},
+                    {"type": "mrkdwn", "text": "*Environment:*\nProduction"},
+                    {"type": "mrkdwn", "text": "*Commit:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ needs.validate.outputs.deploy-sha }}|${{ needs.validate.outputs.deploy-sha }}>"},
+                    {"type": "mrkdwn", "text": "*Deployed by:*\n${{ github.actor }}"}
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "<!channel> *URGENT:* Production deployment failed. Automatic rollback may have been triggered.\n\n*Workflow:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Notify Discord - Success
+        if: needs.health-check.result == 'success'
+        run: |
+          curl -X POST ${{ secrets.DISCORD_WEBHOOK_URL }} \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"embeds\": [{
+                \"title\": \"🚀 Production Deployment Successful\",
+                \"description\": \"**Repository:** ${{ github.repository }}\\n**Version:** ${{ needs.validate.outputs.deploy-version }}\\n**Deployed by:** ${{ github.actor }}\\n**Deploy Type:** ${{ inputs.deploy_from }}\",
+                \"url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\",
+                \"color\": 3066993,
+                \"fields\": [
+                  {\"name\": \"Environment\", \"value\": \"Production 🚀\", \"inline\": true},
+                  {\"name\": \"Commit\", \"value\": \"${{ needs.validate.outputs.deploy-sha }}\", \"inline\": true},
+                  {\"name\": \"URL\", \"value\": \"${{ secrets.PRODUCTION_APP_URL }}\", \"inline\": false}
+                ],
+                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\"
+              }]
+            }" || echo "Discord notification failed"
+
+      - name: Notify Discord - Failure
+        if: needs.health-check.result != 'success'
+        run: |
+          curl -X POST ${{ secrets.DISCORD_WEBHOOK_URL }} \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"content\": \"@everyone\",
+              \"embeds\": [{
+                \"title\": \"🚨 Production Deployment Failed\",
+                \"description\": \"**URGENT:** Production deployment failed and may require immediate attention.\\n\\n**Repository:** ${{ github.repository }}\\n**Deployed by:** ${{ github.actor }}\\n**Commit:** ${{ needs.validate.outputs.deploy-sha }}\",
+                \"url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\",
+                \"color\": 15158332,
+                \"fields\": [
+                  {\"name\": \"Environment\", \"value\": \"Production\", \"inline\": true},
+                  {\"name\": \"Status\", \"value\": \"Failed ❌\", \"inline\": true},
+                  {\"name\": \"Action Required\", \"value\": \"Check workflow logs and consider rollback\", \"inline\": false}
+                ],
+                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\"
+              }]
+            }" || echo "Discord notification failed"
+
+      - name: Create incident issue (on failure)
+        if: needs.health-check.result != 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 CRITICAL: Production Deployment Failed',
+              body: `## Production Deployment Failure
+
+              **Severity:** CRITICAL
+              **Environment:** Production
+              **Status:** Failed
+
+              ### Deployment Details
+              - **Commit SHA:** ${{ needs.validate.outputs.deploy-sha }}
+              - **Version:** ${{ needs.validate.outputs.deploy-version }}
+              - **Deploy Type:** ${{ inputs.deploy_from }}
+              - **Triggered by:** @${{ github.actor }}
+              - **Timestamp:** ${new Date().toISOString()}
+
+              ### Failure Details
+              Production deployment failed during health checks. Automatic rollback may have been triggered.
+
+              ### Workflow
+              ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+              ### Immediate Actions Required
+              - [ ] Review workflow logs for failure cause
+              - [ ] Check application health at ${{ secrets.PRODUCTION_APP_URL }}/api/health
+              - [ ] Verify database connectivity
+              - [ ] Check monitoring dashboards for anomalies
+              - [ ] Confirm if rollback was successful or manual intervention needed
+              - [ ] Update incident status
+
+              ### Escalation
+              - Alert on-call engineer if not already notified
+              - Post incident updates in #incidents channel
+
+              cc: @${{ github.repository_owner }}
+
+              ---
+              *This issue was automatically created by the deployment workflow.*`,
+              labels: ['incident', 'production', 'deployment', 'critical'],
+              assignees: ['${{ github.actor }}']
+            });

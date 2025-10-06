@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { queueTemplateEmail } from "@/lib/email";
+import { captureServerEvent } from "@/lib/analytics/posthog";
 
 export async function POST(request: NextRequest) {
   try {
     const { paymentId, courseId, userId, amount, currency, customer } =
       await request.json();
+
+    const customerEmail =
+      typeof customer === "object" && customer !== null && "email" in customer
+        ? (customer as { email?: string }).email
+        : undefined;
 
     console.log("Processing payment success:", {
       paymentId,
@@ -157,6 +163,22 @@ export async function POST(request: NextRequest) {
       // Log error but don't fail the payment processing
       console.error("Error preparing payment emails:", error);
     }
+
+    await captureServerEvent("payment_succeeded", {
+      distinctId: `user_${userId}`,
+      properties: {
+        paymentId,
+        courseId,
+        amount,
+        currency,
+        licenseKey: result.licenseKey.key,
+        provider: "dodo_payments",
+        customerEmail,
+      },
+      groups: {
+        course: courseId,
+      },
+    });
 
     return NextResponse.json({
       success: true,
