@@ -11,6 +11,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import {
+  trackVideoStart,
+  trackVideoPlay,
+  trackVideoPause,
+  trackVideoSeek,
+  trackVideoQualityChange,
+  trackVideoBuffer,
+  trackVideoComplete,
+  trackVideoError,
+  trackVideoHeartbeat,
+  trackVideoEngagement,
+  trackVideoDropOff
+} from '@/lib/analytics/posthog-video'
 
 interface VideoPlayerProps {
   sessionId: string
@@ -18,6 +31,9 @@ interface VideoPlayerProps {
   title?: string
   duration?: number
   thumbnails?: string[]
+  videoId: string
+  courseId?: string
+  lessonId?: string
   watermark?: {
     text: string
     position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
@@ -55,6 +71,9 @@ function VideoPlayer({
   title,
   duration: initialDuration = 0,
   thumbnails = [],
+  videoId,
+  courseId,
+  lessonId,
   watermark,
   onProgress,
   onQualityChange,
@@ -94,6 +113,31 @@ function VideoPlayer({
   const qualities = ['240p', '360p', '480p', '720p', '1080p']
   const playbackSpeeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
 
+  // Analytics helper function
+  const getAnalyticsProperties = useCallback((position?: number) => ({
+    sessionId,
+    videoId,
+    courseId,
+    lessonId,
+    position: position ?? state.currentTime,
+    duration: state.duration,
+    quality: state.quality,
+    playbackRate: state.playbackRate,
+    volume: state.isMuted ? 0 : state.volume,
+    isFullscreen: state.isFullscreen,
+    bufferHealth: getBufferHealth(),
+    deviceInfo: {
+      platform: navigator.platform,
+      browser: navigator.userAgent.split(' ')[0],
+      screenResolution: `${window.screen.width}x${window.screen.height}`
+    },
+    networkInfo: {
+      effectiveType: (navigator as any).connection?.effectiveType,
+      downlink: (navigator as any).connection?.downlink,
+      rtt: (navigator as any).connection?.rtt
+    }
+  }), [sessionId, videoId, courseId, lessonId, state])
+
   // Detect mobile viewport
   useEffect(() => {
     const checkMobile = () => {
@@ -116,6 +160,9 @@ function VideoPlayer({
         duration: video.duration,
         isLoading: false
       }))
+
+      // Track video session start
+      trackVideoStart(getAnalyticsProperties(0))
     }
 
     const handleTimeUpdate = () => {
@@ -130,6 +177,8 @@ function VideoPlayer({
         if (now - lastAnalyticsRef.current > ANALYTICS_THROTTLE) {
           onProgress?.(video.currentTime, video.duration)
           trackAnalyticsEvent('heartbeat', video.currentTime)
+          // Track PostHog heartbeat
+          trackVideoHeartbeat(getAnalyticsProperties(video.currentTime))
           lastAnalyticsRef.current = now
         }
       }
@@ -137,26 +186,41 @@ function VideoPlayer({
 
     const handleProgress = () => {
       if (video.buffered.length > 0) {
+        const newBufferedTime = video.buffered.end(video.buffered.length - 1)
+        const oldBufferedTime = state.bufferedTime
+
         setState(prev => ({
           ...prev,
-          bufferedTime: video.buffered.end(video.buffered.length - 1)
+          bufferedTime: newBufferedTime
         }))
+
+        // Track buffering improvements
+        if (newBufferedTime > oldBufferedTime + 5) { // Buffer increased significantly
+          trackVideoBuffer({
+            ...getAnalyticsProperties(video.currentTime),
+            bufferEvent: 'end',
+            bufferDuration: newBufferedTime - oldBufferedTime
+          })
+        }
       }
     }
 
     const handlePlay = () => {
       setState(prev => ({ ...prev, isPlaying: true }))
       trackAnalyticsEvent('play', video.currentTime)
+      trackVideoPlay(getAnalyticsProperties(video.currentTime))
     }
 
     const handlePause = () => {
       setState(prev => ({ ...prev, isPlaying: false }))
       trackAnalyticsEvent('pause', video.currentTime)
+      trackVideoPause(getAnalyticsProperties(video.currentTime))
     }
 
     const handleEnded = () => {
       setState(prev => ({ ...prev, isPlaying: false }))
       trackAnalyticsEvent('ended', video.currentTime)
+      trackVideoComplete(getAnalyticsProperties(video.currentTime))
     }
 
     const handleError = () => {
@@ -164,6 +228,12 @@ function VideoPlayer({
       setState(prev => ({ ...prev, error: error.message, isLoading: false }))
       onError?.(error)
       trackAnalyticsEvent('error', video.currentTime, { error: error.message })
+      trackVideoError({
+        ...getAnalyticsProperties(video.currentTime),
+        error: error.message,
+        errorCode: video.error?.code?.toString(),
+        errorDetails: video.error
+      })
     }
 
     const handleVolumeChange = () => {
@@ -174,6 +244,20 @@ function VideoPlayer({
       }))
     }
 
+    const handleWaiting = () => {
+      trackVideoBuffer({
+        ...getAnalyticsProperties(video.currentTime),
+        bufferEvent: 'start'
+      })
+    }
+
+    const handleCanPlay = () => {
+      trackVideoBuffer({
+        ...getAnalyticsProperties(video.currentTime),
+        bufferEvent: 'end'
+      })
+    }
+
     video.addEventListener('loadedmetadata', handleLoadedMetadata)
     video.addEventListener('timeupdate', handleTimeUpdate)
     video.addEventListener('progress', handleProgress)
@@ -182,6 +266,8 @@ function VideoPlayer({
     video.addEventListener('ended', handleEnded)
     video.addEventListener('error', handleError)
     video.addEventListener('volumechange', handleVolumeChange)
+    video.addEventListener('waiting', handleWaiting)
+    video.addEventListener('canplay', handleCanPlay)
 
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata)
@@ -192,6 +278,8 @@ function VideoPlayer({
       video.removeEventListener('ended', handleEnded)
       video.removeEventListener('error', handleError)
       video.removeEventListener('volumechange', handleVolumeChange)
+      video.removeEventListener('waiting', handleWaiting)
+      video.removeEventListener('canplay', handleCanPlay)
     }
   }, [isDragging, onProgress, onError])
 
@@ -364,6 +452,35 @@ function VideoPlayer({
     return () => clearInterval(saveInterval)
   }, [sessionId])
 
+  // Track drop-off when user leaves the page
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (state.currentTime > 0 && state.currentTime < state.duration) {
+        trackVideoDropOff({
+          ...getAnalyticsProperties(state.currentTime),
+          dropOffReason: 'navigation'
+        })
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && state.currentTime > 0 && state.currentTime < state.duration) {
+        trackVideoDropOff({
+          ...getAnalyticsProperties(state.currentTime),
+          dropOffReason: 'tab_hidden'
+        })
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [state.currentTime, state.duration, getAnalyticsProperties])
+
   // Analytics and heartbeat functions
   const trackAnalyticsEvent = useCallback(async (eventType: string, position: number, metadata?: any) => {
     try {
@@ -439,13 +556,23 @@ function VideoPlayer({
     if (!video) return
 
     const newTime = value[0]
+    const oldTime = state.currentTime
     video.currentTime = newTime
     setState(prev => ({ ...prev, currentTime: newTime }))
 
     if (!isDragging) {
       trackAnalyticsEvent('seek', newTime, {
-        seekDirection: newTime > state.currentTime ? 'forward' : 'backward',
-        seekDistance: Math.abs(newTime - state.currentTime)
+        seekDirection: newTime > oldTime ? 'forward' : 'backward',
+        seekDistance: Math.abs(newTime - oldTime)
+      })
+
+      trackVideoSeek({
+        ...getAnalyticsProperties(newTime),
+        seekFrom: oldTime,
+        seekTo: newTime,
+        seekDirection: newTime > oldTime ? 'forward' : 'backward',
+        seekDistance: Math.abs(newTime - oldTime),
+        seekMethod: 'progress_bar'
       })
     }
   }
@@ -479,10 +606,18 @@ function VideoPlayer({
         await container.requestFullscreen()
         setState(prev => ({ ...prev, isFullscreen: true }))
         trackAnalyticsEvent('fullscreen_enter', state.currentTime)
+        trackVideoEngagement({
+          ...getAnalyticsProperties(state.currentTime),
+          engagementType: 'fullscreen_enter'
+        })
       } else {
         await document.exitFullscreen()
         setState(prev => ({ ...prev, isFullscreen: false }))
         trackAnalyticsEvent('fullscreen_exit', state.currentTime)
+        trackVideoEngagement({
+          ...getAnalyticsProperties(state.currentTime),
+          engagementType: 'fullscreen_exit'
+        })
       }
     } catch (error) {
       console.warn('Fullscreen error:', error)
@@ -490,11 +625,19 @@ function VideoPlayer({
   }
 
   const changeQuality = (newQuality: string) => {
+    const oldQuality = state.quality
     setState(prev => ({ ...prev, quality: newQuality }))
     onQualityChange?.(newQuality)
     trackAnalyticsEvent('quality_change', state.currentTime, {
-      from: state.quality,
+      from: oldQuality,
       to: newQuality,
+      reason: 'manual'
+    })
+
+    trackVideoQualityChange({
+      ...getAnalyticsProperties(state.currentTime),
+      fromQuality: oldQuality,
+      toQuality: newQuality,
       reason: 'manual'
     })
   }
@@ -503,11 +646,18 @@ function VideoPlayer({
     const video = videoRef.current
     if (!video) return
 
+    const oldRate = state.playbackRate
     video.playbackRate = rate
     setState(prev => ({ ...prev, playbackRate: rate }))
     trackAnalyticsEvent('speed_change', state.currentTime, {
-      from: state.playbackRate,
+      from: oldRate,
       to: rate
+    })
+
+    trackVideoEngagement({
+      ...getAnalyticsProperties(state.currentTime),
+      engagementType: 'speed_change',
+      engagementValue: { from: oldRate, to: rate }
     })
   }
 
@@ -515,12 +665,22 @@ function VideoPlayer({
     const video = videoRef.current
     if (!video) return
 
+    const oldTime = state.currentTime
     const newTime = Math.max(0, Math.min(state.duration, state.currentTime + seconds))
     video.currentTime = newTime
     trackAnalyticsEvent('seek', newTime, {
       seekDirection: seconds > 0 ? 'forward' : 'backward',
       seekDistance: Math.abs(seconds),
       method: 'skip_button'
+    })
+
+    trackVideoSeek({
+      ...getAnalyticsProperties(newTime),
+      seekFrom: oldTime,
+      seekTo: newTime,
+      seekDirection: seconds > 0 ? 'forward' : 'backward',
+      seekDistance: Math.abs(seconds),
+      seekMethod: 'skip_button'
     })
   }
 
@@ -534,11 +694,19 @@ function VideoPlayer({
           await video.requestPictureInPicture()
           setState(prev => ({ ...prev, isPiP: true }))
           trackAnalyticsEvent('pip_enter', state.currentTime)
+          trackVideoEngagement({
+            ...getAnalyticsProperties(state.currentTime),
+            engagementType: 'pip_enter'
+          })
         }
       } else {
         await document.exitPictureInPicture()
         setState(prev => ({ ...prev, isPiP: false }))
         trackAnalyticsEvent('pip_exit', state.currentTime)
+        trackVideoEngagement({
+          ...getAnalyticsProperties(state.currentTime),
+          engagementType: 'pip_exit'
+          })
       }
     } catch (error) {
       console.warn('Picture-in-Picture error:', error)
@@ -559,6 +727,12 @@ function VideoPlayer({
     setState(prev => ({ ...prev, showCaptions: newShowCaptions }))
     trackAnalyticsEvent('captions_toggle', state.currentTime, {
       enabled: newShowCaptions
+    })
+
+    trackVideoEngagement({
+      ...getAnalyticsProperties(state.currentTime),
+      engagementType: 'caption_toggle',
+      engagementValue: newShowCaptions
     })
   }
 
