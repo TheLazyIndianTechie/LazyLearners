@@ -105,6 +105,9 @@ function VideoPlayer({
     thumbnailPreview: null
   })
 
+  // Track previous playing state for resume detection
+  const [wasPaused, setWasPaused] = useState(false)
+
   const [showControls, setShowControls] = useState(true)
   const [isDragging, setIsDragging] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -207,12 +210,24 @@ function VideoPlayer({
 
     const handlePlay = () => {
       setState(prev => ({ ...prev, isPlaying: true }))
-      trackAnalyticsEvent('play', video.currentTime)
-      trackVideoPlay(getAnalyticsProperties(video.currentTime))
+
+      // Track resume event if this play follows a pause
+      if (wasPaused) {
+        trackAnalyticsEvent('resume', video.currentTime)
+        trackVideoEngagement({
+          ...getAnalyticsProperties(video.currentTime),
+          engagementType: 'resume'
+        })
+        setWasPaused(false)
+      } else {
+        trackAnalyticsEvent('play', video.currentTime)
+        trackVideoPlay(getAnalyticsProperties(video.currentTime))
+      }
     }
 
     const handlePause = () => {
       setState(prev => ({ ...prev, isPlaying: false }))
+      setWasPaused(true)
       trackAnalyticsEvent('pause', video.currentTime)
       trackVideoPause(getAnalyticsProperties(video.currentTime))
     }

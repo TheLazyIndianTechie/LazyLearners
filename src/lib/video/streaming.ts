@@ -726,37 +726,63 @@ export class VideoStreamingService {
   }
 
   private async aggregateVideoAnalytics(videoId: string, timeRange: number): Promise<any> {
-    // In production, this would aggregate data from watch history
-    // For now, returning simulated analytics
-    return {
-      totalViews: 150,
-      uniqueViewers: 120,
-      totalWatchTime: 45000, // seconds
-      averageWatchTime: 375, // seconds
-      completionRate: 0.78, // 78%
-      qualityDistribution: {
-        '240p': 10,
-        '360p': 25,
-        '480p': 35,
-        '720p': 25,
-        '1080p': 5
-      },
-      deviceDistribution: {
-        desktop: 60,
-        mobile: 30,
-        tablet: 10
-      },
-      dropOffPoints: [
-        { position: 120, dropOffRate: 0.15 },
-        { position: 300, dropOffRate: 0.08 },
-        { position: 600, dropOffRate: 0.12 }
-      ],
-      engagement: [
-        { position: 0, viewerCount: 150 },
-        { position: 60, viewerCount: 140 },
-        { position: 120, viewerCount: 127 },
-        { position: 180, viewerCount: 125 }
-      ]
+    try {
+      // Try to get real analytics from PostHog
+      const { getPostHogVideoAnalyticsClient } = await import('@/lib/analytics/posthog-client')
+      const client = getPostHogVideoAnalyticsClient()
+      const analytics = await client.getVideoAnalytics({ videoId, timeRange })
+
+      return {
+        totalViews: analytics.totalViews,
+        uniqueViewers: analytics.uniqueViewers,
+        totalWatchTime: analytics.totalWatchTime,
+        averageWatchTime: analytics.averageWatchTime,
+        completionRate: analytics.completionRate,
+        qualityDistribution: analytics.qualityDistribution,
+        deviceDistribution: analytics.deviceDistribution,
+        dropOffPoints: analytics.retentionData.map(point => ({
+          position: point.position,
+          dropOffRate: point.dropOffRate
+        })),
+        engagement: analytics.retentionData.map(point => ({
+          position: point.position,
+          viewerCount: point.viewersRemaining
+        }))
+      }
+    } catch (error) {
+      this.logger.warn('Failed to get analytics from PostHog, falling back to mock data', error as Error)
+
+      // Fallback to simulated analytics
+      return {
+        totalViews: 150,
+        uniqueViewers: 120,
+        totalWatchTime: 45000, // seconds
+        averageWatchTime: 375, // seconds
+        completionRate: 0.78, // 78%
+        qualityDistribution: {
+          '240p': 10,
+          '360p': 25,
+          '480p': 35,
+          '720p': 25,
+          '1080p': 5
+        },
+        deviceDistribution: {
+          desktop: 60,
+          mobile: 30,
+          tablet: 10
+        },
+        dropOffPoints: [
+          { position: 120, dropOffRate: 0.15 },
+          { position: 300, dropOffRate: 0.08 },
+          { position: 600, dropOffRate: 0.12 }
+        ],
+        engagement: [
+          { position: 0, viewerCount: 150 },
+          { position: 60, viewerCount: 140 },
+          { position: 120, viewerCount: 127 },
+          { position: 180, viewerCount: 125 }
+        ]
+      }
     }
   }
 }
