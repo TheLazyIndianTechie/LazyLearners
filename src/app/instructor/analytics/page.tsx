@@ -23,6 +23,8 @@ import type {
 import { PosthogInsightEmbed } from "@/components/analytics/posthog-embed";
 import { POSTHOG_INSIGHTS } from "@/lib/analytics/posthog-config";
 import { VideoAnalyticsDashboard } from "@/components/analytics/video-analytics-dashboard";
+import { RevenueDashboard } from "@/components/analytics/revenue-dashboard";
+import { PerformanceExportButton } from "@/components/analytics/export-button";
 import { useUser } from "@clerk/nextjs";
 import { useSessionTracking } from "@/hooks/use-session-tracking";
 import {
@@ -265,6 +267,8 @@ export default function InstructorAnalyticsPage() {
       title="Course Performance Analytics"
       description="Track enrollments, completions, revenue, and active learner trends across your courses."
       filters={filters}
+      showGlobalFilters={true}
+      globalFiltersCompact={false}
       breadcrumbs={[
         { label: "Instructor", href: "/instructor" },
         { label: "Analytics" },
@@ -313,6 +317,7 @@ export default function InstructorAnalyticsPage() {
           <AnalyticsSection
             title="Learner Activity Over Time"
             description="Monitor enrollments, completions, and active learners by day."
+            actions={<PerformanceExportButton />}
           >
             <PerformanceTimeseries data={timeseries} />
           </AnalyticsSection>
@@ -320,11 +325,19 @@ export default function InstructorAnalyticsPage() {
           <AnalyticsSection
             title="Course Performance Breakdown"
             description="Compare course-level KPIs to identify top performers."
+            actions={<PerformanceExportButton />}
           >
             <PerformanceTable metrics={metrics} />
           </AnalyticsSection>
 
-          {/* PostHog Analytics Insights */}
+           <AnalyticsSection
+             title="Revenue Analytics"
+             description="Track your course revenue, refunds, and key financial metrics."
+           >
+             <RevenueDashboard />
+           </AnalyticsSection>
+
+           {/* PostHog Analytics Insights */}
           <AnalyticsSection
             title="User Engagement Analytics"
             description="Detailed learner behavior insights powered by PostHog."

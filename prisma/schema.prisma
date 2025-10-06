@@ -48,6 +48,7 @@ model User {
   bio           String?
   website       String?
   location      String?
+  privacySettings String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -72,6 +73,7 @@ model User {
   lessonNotes       LessonNote[]
   lessonQuestions   LessonQuestion[]
   lessonAnswers     LessonAnswer[]
+  exportJobs        ExportJob[]
 
   @@index([role]) // For filtering users by role (instructors, students, etc.)
   @@index([createdAt]) // For sorting users by registration date
@@ -716,4 +718,50 @@ model LessonAnswer {
   questionId String
 
   @@index([questionId, createdAt])
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ExportType {
+  POSTHOG
+  METABASE
+  REVENUE
+  VIDEO
+  PERFORMANCE
+}
+
+enum ExportFormat {
+  CSV
+  PDF
+  JSON
+  XLSX
+}
+
+model ExportJob {
+  id          String       @id @default(cuid())
+  userId      String
+  type        ExportType
+  resourceId  String?      // For PostHog/Metabase resource IDs
+  format      ExportFormat
+  filters     String?      // JSON string of applied filters
+  status      ExportStatus @default(PENDING)
+  progress    Float        @default(0) // 0-100
+  fileUrl     String?
+  fileSize    Int?
+  error       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  completedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId, status])
 }

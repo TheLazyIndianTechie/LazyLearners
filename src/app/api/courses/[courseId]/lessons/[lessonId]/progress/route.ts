@@ -253,7 +253,7 @@ export async function PUT(
       const wasCompleted = existingProgress ? existingProgress.completionPercentage >= 90 : false;
       const isNowCompleted = videoProgress.completionPercentage >= 90;
 
-      await AnalyticsTracker.trackVideoCheckpoint({
+      AnalyticsTracker.trackVideoCheckpoint({
         userId,
         courseId,
         courseTitle: lesson.module.course.title,
@@ -270,7 +270,7 @@ export async function PUT(
 
       // Track video completed if it just reached completion
       if (!wasCompleted && isNowCompleted) {
-        await AnalyticsTracker.trackVideoCompleted({
+        AnalyticsTracker.trackVideoCompleted({
           userId,
           courseId,
           courseTitle: lesson.module.course.title,

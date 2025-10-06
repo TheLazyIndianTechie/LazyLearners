@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
-import { useAnalyticsDateRange } from "@/contexts/analytics-context"
+import { useAnalyticsDateRange, useGlobalFilters } from "@/contexts/analytics-context"
 
 type PresetKey = "7d" | "30d" | "90d" | "ytd" | "custom"
 
@@ -97,6 +97,7 @@ export function AnalyticsDateRangePicker({
   description = "Select a time period to hydrate analytics throughout the dashboard.",
 }: AnalyticsDateRangePickerProps) {
   const { dateRange, setDateRange } = useAnalyticsDateRange()
+  const { globalFilters, setGlobalFilters } = useGlobalFilters()
 
   const [customStart, setCustomStart] = useState(asDateInputValue(dateRange.start))
   const [customEnd, setCustomEnd] = useState(asDateInputValue(dateRange.end))
@@ -109,6 +110,14 @@ export function AnalyticsDateRangePicker({
     return "custom"
   }, [dateRange.preset])
 
+  // Sync with global filters
+  useEffect(() => {
+    if (globalFilters.dateRange.start.getTime() !== dateRange.start.getTime() ||
+        globalFilters.dateRange.end.getTime() !== dateRange.end.getTime()) {
+      setDateRange(globalFilters.dateRange)
+    }
+  }, [globalFilters.dateRange, dateRange, setDateRange])
+
   useEffect(() => {
     setCustomStart(asDateInputValue(dateRange.start))
     setCustomEnd(asDateInputValue(dateRange.end))
@@ -119,7 +128,9 @@ export function AnalyticsDateRangePicker({
     setError(null)
     setCustomStart(asDateInputValue(start))
     setCustomEnd(asDateInputValue(end))
-    setDateRange({ start, end, preset: presetKey })
+    const newDateRange = { start, end, preset: presetKey }
+    setDateRange(newDateRange)
+    setGlobalFilters({ dateRange: newDateRange })
   }
 
   const applyCustomRange = () => {
@@ -137,7 +148,9 @@ export function AnalyticsDateRangePicker({
     }
 
     setError(null)
-    setDateRange({ start: parsedStart, end: parsedEnd, preset: "custom" })
+    const newDateRange = { start: parsedStart, end: parsedEnd, preset: "custom" }
+    setDateRange(newDateRange)
+    setGlobalFilters({ dateRange: newDateRange })
   }
 
   return (

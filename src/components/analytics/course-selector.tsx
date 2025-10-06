@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { useAnalyticsSelection } from "@/contexts/analytics-context"
+import { useAnalyticsSelection, useGlobalFilters } from "@/contexts/analytics-context"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -50,6 +50,7 @@ export function CourseSelector({
     selectionMode,
     setSelectionMode,
   } = useAnalyticsSelection()
+  const { globalFilters, setGlobalFilters } = useGlobalFilters()
 
   const [courses, setCourses] = useState<CourseSummary[]>([])
   const [loading, setLoading] = useState(true)
@@ -58,6 +59,13 @@ export function CourseSelector({
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const effectiveMode = mode ?? selectionMode
+
+  // Sync selected course IDs with global filters
+  useEffect(() => {
+    if (globalFilters.courseIds !== selectedCourseIds) {
+      setSelectedCourseIds(globalFilters.courseIds)
+    }
+  }, [globalFilters.courseIds, selectedCourseIds, setSelectedCourseIds])
 
   useEffect(() => {
     let isMounted = true
@@ -109,20 +117,25 @@ export function CourseSelector({
   )
 
   const handleToggle = (courseId: string) => {
+    let newCourseIds: string[]
+
     if (effectiveMode === "single") {
-      setSelectedCourseIds([courseId])
-      return
+      newCourseIds = [courseId]
+    } else {
+      if (selectedCourseIds.includes(courseId)) {
+        newCourseIds = selectedCourseIds.filter((id) => id !== courseId)
+      } else {
+        newCourseIds = [...selectedCourseIds, courseId]
+      }
     }
 
-    if (selectedCourseIds.includes(courseId)) {
-      setSelectedCourseIds(selectedCourseIds.filter((id) => id !== courseId))
-    } else {
-      setSelectedCourseIds([...selectedCourseIds, courseId])
-    }
+    setSelectedCourseIds(newCourseIds)
+    setGlobalFilters({ courseIds: newCourseIds })
   }
 
   const handleClearSelection = () => {
     setSelectedCourseIds([])
+    setGlobalFilters({ courseIds: [] })
   }
 
   const handleModeChange = (nextMode: CourseSelectionMode) => {
@@ -136,7 +149,9 @@ export function CourseSelector({
 
     if (nextMode === "single" && selectedCourseIds.length > 1) {
       const [first] = selectedCourseIds
-      setSelectedCourseIds(first ? [first] : [])
+      const newCourseIds = first ? [first] : []
+      setSelectedCourseIds(newCourseIds)
+      setGlobalFilters({ courseIds: newCourseIds })
     }
   }
 

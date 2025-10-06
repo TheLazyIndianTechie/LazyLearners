@@ -104,8 +104,8 @@ export class AnalyticsTracker {
   /**
    * Track course enrollment
    */
-  static async trackCourseEnrolled(props: CourseEventProperties): Promise<void> {
-    await captureServerEvent(AnalyticsEvent.COURSE_ENROLLED, {
+  static trackCourseEnrolled(props: CourseEventProperties): void {
+    captureServerEvent(AnalyticsEvent.COURSE_ENROLLED, {
       distinctId: getUserDistinctId(props.userId)!,
       properties: {
         course_id: props.courseId,
@@ -127,8 +127,8 @@ export class AnalyticsTracker {
   /**
    * Track course completion
    */
-  static async trackCourseCompleted(props: CourseEventProperties & { timeSpent: number }): Promise<void> {
-    await captureServerEvent(AnalyticsEvent.COURSE_COMPLETED, {
+  static trackCourseCompleted(props: CourseEventProperties & { timeSpent: number }): void {
+    captureServerEvent(AnalyticsEvent.COURSE_COMPLETED, {
       distinctId: getUserDistinctId(props.userId)!,
       properties: {
         course_id: props.courseId,
@@ -148,8 +148,8 @@ export class AnalyticsTracker {
   /**
    * Track lesson started
    */
-  static async trackLessonStarted(props: LessonEventProperties): Promise<void> {
-    await captureServerEvent(AnalyticsEvent.LESSON_STARTED, {
+  static trackLessonStarted(props: LessonEventProperties): void {
+    captureServerEvent(AnalyticsEvent.LESSON_STARTED, {
       distinctId: getUserDistinctId(props.userId)!,
       properties: {
         course_id: props.courseId,
@@ -174,8 +174,8 @@ export class AnalyticsTracker {
   /**
    * Track lesson completion
    */
-  static async trackLessonCompleted(props: LessonEventProperties & { timeSpent: number }): Promise<void> {
-    await captureServerEvent(AnalyticsEvent.LESSON_COMPLETED, {
+  static trackLessonCompleted(props: LessonEventProperties & { timeSpent: number }): void {
+    captureServerEvent(AnalyticsEvent.LESSON_COMPLETED, {
       distinctId: getUserDistinctId(props.userId)!,
       properties: {
         course_id: props.courseId,
@@ -201,8 +201,8 @@ export class AnalyticsTracker {
   /**
    * Track video progress checkpoints
    */
-  static async trackVideoCheckpoint(props: VideoEventProperties): Promise<void> {
-    await captureServerEvent(AnalyticsEvent.VIDEO_CHECKPOINT, {
+  static trackVideoCheckpoint(props: VideoEventProperties): void {
+    captureServerEvent(AnalyticsEvent.VIDEO_CHECKPOINT, {
       distinctId: getUserDistinctId(props.userId)!,
       properties: {
         course_id: props.courseId,
@@ -230,8 +230,8 @@ export class AnalyticsTracker {
   /**
    * Track video completed
    */
-  static async trackVideoCompleted(props: VideoEventProperties & { timeSpent: number }): Promise<void> {
-    await captureServerEvent(AnalyticsEvent.VIDEO_COMPLETED, {
+  static trackVideoCompleted(props: VideoEventProperties & { timeSpent: number }): void {
+    captureServerEvent(AnalyticsEvent.VIDEO_COMPLETED, {
       distinctId: getUserDistinctId(props.userId)!,
       properties: {
         course_id: props.courseId,
@@ -259,8 +259,8 @@ export class AnalyticsTracker {
   /**
    * Track quiz started
    */
-  static async trackQuizStarted(props: QuizEventProperties): Promise<void> {
-    await captureServerEvent(AnalyticsEvent.QUIZ_STARTED, {
+  static trackQuizStarted(props: QuizEventProperties): void {
+    captureServerEvent(AnalyticsEvent.QUIZ_STARTED, {
       distinctId: getUserDistinctId(props.userId)!,
       properties: {
         course_id: props.courseId,
@@ -287,10 +287,10 @@ export class AnalyticsTracker {
   /**
    * Track quiz completion
    */
-  static async trackQuizCompleted(props: QuizEventProperties): Promise<void> {
+  static trackQuizCompleted(props: QuizEventProperties): void {
     const passed = props.score >= props.passingScore;
 
-    await captureServerEvent(AnalyticsEvent.QUIZ_COMPLETED, {
+    captureServerEvent(AnalyticsEvent.QUIZ_COMPLETED, {
       distinctId: getUserDistinctId(props.userId)!,
       properties: {
         course_id: props.courseId,
@@ -320,7 +320,7 @@ export class AnalyticsTracker {
 
     // Also track pass/fail events
     if (passed) {
-      await captureServerEvent(AnalyticsEvent.QUIZ_PASSED, {
+      captureServerEvent(AnalyticsEvent.QUIZ_PASSED, {
         distinctId: getUserDistinctId(props.userId)!,
         properties: {
           course_id: props.courseId,
@@ -340,7 +340,7 @@ export class AnalyticsTracker {
         },
       });
     } else {
-      await captureServerEvent(AnalyticsEvent.QUIZ_FAILED, {
+      captureServerEvent(AnalyticsEvent.QUIZ_FAILED, {
         distinctId: getUserDistinctId(props.userId)!,
         properties: {
           course_id: props.courseId,
@@ -366,8 +366,8 @@ export class AnalyticsTracker {
   /**
    * Track session started
    */
-  static async trackSessionStarted(props: SessionEventProperties): Promise<void> {
-    await captureServerEvent(AnalyticsEvent.SESSION_STARTED, {
+  static trackSessionStarted(props: SessionEventProperties): void {
+    captureServerEvent(AnalyticsEvent.SESSION_STARTED, {
       distinctId: getUserDistinctId(props.userId)!,
       properties: {
         device_type: props.deviceType,
@@ -382,8 +382,8 @@ export class AnalyticsTracker {
   /**
    * Track session ended
    */
-  static async trackSessionEnded(props: SessionEventProperties): Promise<void> {
-    await captureServerEvent(AnalyticsEvent.SESSION_ENDED, {
+  static trackSessionEnded(props: SessionEventProperties): void {
+    captureServerEvent(AnalyticsEvent.SESSION_ENDED, {
       distinctId: getUserDistinctId(props.userId)!,
       properties: {
         duration_seconds: props.duration,
@@ -398,8 +398,8 @@ export class AnalyticsTracker {
   /**
    * Track progress updated
    */
-  static async trackProgressUpdated(props: ProgressEventProperties): Promise<void> {
-    await captureServerEvent(AnalyticsEvent.PROGRESS_UPDATED, {
+  static trackProgressUpdated(props: ProgressEventProperties): void {
+    captureServerEvent(AnalyticsEvent.PROGRESS_UPDATED, {
       distinctId: getUserDistinctId(props.userId)!,
       properties: {
         course_id: props.courseId,

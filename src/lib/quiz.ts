@@ -135,7 +135,7 @@ export async function submitQuizAttempt(
       const course = lesson.module.course;
 
       // Track quiz completion analytics
-      await AnalyticsTracker.trackQuizCompleted({
+      AnalyticsTracker.trackQuizCompleted({
         userId,
         courseId: course.id,
         courseTitle: course.title,

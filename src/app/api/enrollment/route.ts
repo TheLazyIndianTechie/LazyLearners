@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Track enrollment event
-    await AnalyticsTracker.trackCourseEnrolled({
+    AnalyticsTracker.trackCourseEnrolled({
       userId,
       courseId,
       courseTitle: enrollmentDetails?.course.title || "Unknown Course",

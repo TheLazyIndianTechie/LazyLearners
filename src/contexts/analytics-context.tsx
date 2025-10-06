@@ -1,6 +1,7 @@
 "use client"
 
-import { createContext, useContext, useMemo, useState, useCallback } from "react"
+import { createContext, useContext, useMemo, useState, useCallback, useEffect } from "react"
+import { useURLStateManager } from "@/lib/analytics/url-state"
 
 type CourseSelectionMode = "single" | "multi"
 
@@ -22,6 +23,14 @@ export interface RealTimeConfig {
   lastUpdated?: Date
 }
 
+export interface GlobalFilterState {
+  courseIds: string[]
+  dateRange: DateRange
+  includeArchived: boolean
+  comparison: ComparisonConfig
+  customFilters: Record<string, unknown>
+}
+
 export interface AnalyticsState {
   selectedCourseIds: string[]
   selectionMode: CourseSelectionMode
@@ -29,6 +38,7 @@ export interface AnalyticsState {
   comparison: ComparisonConfig
   realTime: RealTimeConfig
   includeArchived: boolean
+  globalFilters: GlobalFilterState
   setSelectedCourseIds: (ids: string[]) => void
   setSelectionMode: (mode: CourseSelectionMode) => void
   setDateRange: (range: DateRange) => void
@@ -37,6 +47,7 @@ export interface AnalyticsState {
   setRealTimeInterval: (seconds: number) => void
   markRealTimeRefreshed: () => void
   setIncludeArchived: (include: boolean) => void
+  setGlobalFilters: (filters: Partial<GlobalFilterState>) => void
   reset: () => void
 }
 
@@ -59,6 +70,14 @@ const defaultRealTime: RealTimeConfig = {
   lastUpdated: undefined,
 }
 
+const defaultGlobalFilters: GlobalFilterState = {
+  courseIds: [],
+  dateRange: defaultDateRange,
+  includeArchived: false,
+  comparison: defaultComparison,
+  customFilters: {},
+}
+
 const defaultState: AnalyticsState = {
   selectedCourseIds: [],
   selectionMode: "multi",
@@ -66,6 +85,7 @@ const defaultState: AnalyticsState = {
   comparison: defaultComparison,
   realTime: defaultRealTime,
   includeArchived: false,
+  globalFilters: defaultGlobalFilters,
   setSelectedCourseIds: () => undefined,
   setSelectionMode: () => undefined,
   setDateRange: () => undefined,
@@ -74,6 +94,7 @@ const defaultState: AnalyticsState = {
   setRealTimeInterval: () => undefined,
   markRealTimeRefreshed: () => undefined,
   setIncludeArchived: () => undefined,
+  setGlobalFilters: () => undefined,
   reset: () => undefined,
 }
 
@@ -86,6 +107,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   const [comparison, setComparisonState] = useState<ComparisonConfig>(defaultComparison)
   const [realTime, setRealTime] = useState<RealTimeConfig>(defaultRealTime)
   const [includeArchived, setIncludeArchived] = useState(false)
+  const [globalFilters, setGlobalFiltersState] = useState<GlobalFilterState>(defaultGlobalFilters)
 
   const setComparison = useCallback((config: Partial<ComparisonConfig>) => {
     setComparisonState((prev) => {
@@ -137,6 +159,13 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
     }))
   }, [])
 
+  const setGlobalFilters = useCallback((filters: Partial<GlobalFilterState>) => {
+    setGlobalFiltersState((prev) => ({
+      ...prev,
+      ...filters,
+    }))
+  }, [])
+
   const reset = useCallback(() => {
     setSelectedCourseIds([])
     setSelectionMode("multi")
@@ -144,6 +173,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
     setComparisonState(defaultComparison)
     setRealTime(defaultRealTime)
     setIncludeArchived(false)
+    setGlobalFiltersState(defaultGlobalFilters)
   }, [])
 
   const value = useMemo<AnalyticsState>(
@@ -154,6 +184,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
       comparison,
       realTime,
       includeArchived,
+      globalFilters,
       setSelectedCourseIds,
       setSelectionMode,
       setDateRange,
@@ -162,6 +193,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
       setRealTimeInterval,
       markRealTimeRefreshed,
       setIncludeArchived,
+      setGlobalFilters,
       reset,
     }),
     [
@@ -171,10 +203,12 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
       comparison,
       realTime,
       includeArchived,
+      globalFilters,
       setComparison,
       toggleRealTime,
       setRealTimeInterval,
       markRealTimeRefreshed,
+      setGlobalFilters,
       reset,
     ],
   )
@@ -218,4 +252,9 @@ export function useAnalyticsRealTime() {
 export function useAnalyticsFilters() {
   const { includeArchived, setIncludeArchived, reset } = useAnalytics()
   return { includeArchived, setIncludeArchived, reset }
+}
+
+export function useGlobalFilters() {
+  const { globalFilters, setGlobalFilters } = useAnalytics()
+  return { globalFilters, setGlobalFilters }
 }

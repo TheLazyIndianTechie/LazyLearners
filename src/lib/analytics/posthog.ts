@@ -29,14 +29,14 @@ export function getPosthogClient(): PostHog | null {
   return client;
 }
 
-export async function captureServerEvent(
+export function captureServerEvent(
   event: string,
   payload: {
     distinctId: string;
     properties?: Record<string, unknown>;
     groups?: Record<string, string>;
   },
-): Promise<void> {
+): void {
   const posthog = getPosthogClient();
   if (!posthog) return;
 
@@ -52,10 +52,10 @@ export async function captureServerEvent(
   }
 }
 
-export async function identifyServerUser(
+export function identifyServerUser(
   distinctId: string,
   traits: Record<string, unknown>,
-): Promise<void> {
+): void {
   const posthog = getPosthogClient();
   if (!posthog) return;
 
@@ -69,7 +69,7 @@ export async function identifyServerUser(
   }
 }
 
-export async function flushAnalytics(): Promise<void> {
+export function flushAnalytics(): void {
   const posthog = getPosthogClient();
   if (!posthog) return;
 

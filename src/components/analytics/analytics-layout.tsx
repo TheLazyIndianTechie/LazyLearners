@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { CalendarClock, RefreshCw } from "lucide-react"
 import { useAnalyticsRealTime } from "@/contexts/analytics-context"
+import { GlobalFilterControls } from "./global-filter-controls"
 
 interface BreadcrumbItem {
   label: string
@@ -18,6 +19,8 @@ interface AnalyticsLayoutProps {
   description?: string
   actions?: React.ReactNode
   filters?: React.ReactNode
+  showGlobalFilters?: boolean
+  globalFiltersCompact?: boolean
   breadcrumbs?: BreadcrumbItem[]
   footer?: React.ReactNode
   children: React.ReactNode
@@ -35,6 +38,8 @@ export function AnalyticsLayout({
   description,
   actions,
   filters,
+  showGlobalFilters = false,
+  globalFiltersCompact = false,
   breadcrumbs,
   footer,
   children,
@@ -53,6 +58,12 @@ export function AnalyticsLayout({
 
       {(filters || breadcrumbs) && (
         <AnalyticsToolbar filters={filters} breadcrumbs={!breadcrumbs ? undefined : breadcrumbs} />
+      )}
+
+      {showGlobalFilters && (
+        <div className="space-y-4">
+          <GlobalFilterControls compact={globalFiltersCompact} />
+        </div>
       )}
 
       <div className={cn("flex flex-col gap-6", contentClassName)}>

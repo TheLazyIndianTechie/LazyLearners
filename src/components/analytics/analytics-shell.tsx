@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Download, RefreshCw, Settings } from "lucide-react"
 import { useAnalytics } from "@/contexts/analytics-context"
+import { ExportManager } from "@/components/analytics/export-manager"
 
 interface AnalyticsShellProps {
   title?: string
@@ -86,7 +87,7 @@ export function AnalyticsShell({
       <CourseSelector />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="posthog" disabled={!hasPosthogContent}>
             PostHog Insights
@@ -94,6 +95,7 @@ export function AnalyticsShell({
           <TabsTrigger value="metabase" disabled={!hasMetabaseContent}>
             Metabase Reports
           </TabsTrigger>
+          <TabsTrigger value="exports">Exports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -194,6 +196,10 @@ export function AnalyticsShell({
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="exports" className="space-y-6">
+          <ExportManager />
         </TabsContent>
       </Tabs>
     </AnalyticsLayout>
