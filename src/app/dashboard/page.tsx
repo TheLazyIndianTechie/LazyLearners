@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDashboard } from "@/hooks/use-dashboard"
 import { useAnalytics } from "@/hooks/use-analytics"
+import { useStreak } from "@/hooks/use-streak"
 import {
   BookOpen,
   Clock,
@@ -32,6 +33,7 @@ import {
   MessageSquare,
   Download
 } from "lucide-react"
+import { StreakVisualization } from "@/components/progress/streak-visualization"
 import {
   PieChart as RechartsPieChart,
   Pie,
@@ -56,6 +58,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const { data: dashboardData, loading: dashboardLoading, error: dashboardError, refetch } = useDashboard()
   const { data: analyticsData, loading: analyticsLoading } = useAnalytics()
+  const { data: streakData, loading: streakLoading } = useStreak()
   const [activeTab, setActiveTab] = useState("overview")
 
   useEffect(() => {
@@ -228,18 +231,22 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-purple-900">Learning Streak</p>
-                    <p className="text-3xl font-bold text-purple-950">7 days</p>
-                    <p className="text-xs text-purple-800 mt-1">Keep it going! 🔥</p>
-                  </div>
-                  <Zap className="h-8 w-8 text-purple-700" />
-                </div>
-              </CardContent>
-            </Card>
+             <Card className="border-2 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+               <CardContent className="p-6">
+                 <div className="flex items-center justify-between">
+                   <div>
+                     <p className="text-sm font-medium text-purple-900">Learning Streak</p>
+                     <p className="text-3xl font-bold text-purple-950">
+                       {streakLoading ? '...' : `${streakData?.currentStreak || 0} days`}
+                     </p>
+                     <p className="text-xs text-purple-800 mt-1">
+                       {streakData?.currentStreak && streakData.currentStreak > 0 ? 'Keep it going! 🔥' : 'Start your streak today!'}
+                     </p>
+                   </div>
+                   <Zap className="h-8 w-8 text-purple-700" />
+                 </div>
+               </CardContent>
+             </Card>
 
             <Card className="border-2 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
               <CardContent className="p-6">
@@ -605,6 +612,12 @@ export default function DashboardPage() {
                 ))}
               </CardContent>
             </Card>
+
+            {/* Learning Streak Visualization */}
+            <StreakVisualization
+              streakData={streakData}
+              loading={streakLoading}
+            />
           </TabsContent>
 
           {/* My Courses Tab */}
