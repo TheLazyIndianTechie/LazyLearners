@@ -1,0 +1,492 @@
+From 864b865c750692534af73d58318e789f85aae926 Mon Sep 17 00:00:00 2001
+From: TheLazyIndianTechie
+ <86476092+TheLazyIndianTechie@users.noreply.github.com>
+Date: Tue, 7 Oct 2025 10:42:29 +0530
+Subject: [PATCH] feat: Implement Learning Streak System with Calendar
+ Visualization
+
+- Add streak API endpoint (/api/progress/streak) with calendar heatmap data
+- Create useStreak hook for fetching streak data
+- Implement StreakVisualization component with GitHub-style calendar
+- Update dashboard to display real streak data instead of hardcoded values
+- Add milestone achievements for streak goals (7, 30, 100, 365 days)
+---
+ src/app/api/progress/streak/route.ts          | 189 ++++++++++++++++
+ .../progress/streak-visualization.tsx         | 207 ++++++++++++++++++
+ src/hooks/use-streak.ts                       |  51 +++++
+ 3 files changed, 447 insertions(+)
+ create mode 100644 src/app/api/progress/streak/route.ts
+ create mode 100644 src/components/progress/streak-visualization.tsx
+ create mode 100644 src/hooks/use-streak.ts
+
+diff --git a/src/app/api/progress/streak/route.ts b/src/app/api/progress/streak/route.ts
+new file mode 100644
+index 00000000..356ab4ab
+--- /dev/null
++++ b/src/app/api/progress/streak/route.ts
+@@ -0,0 +1,189 @@
++import { NextRequest, NextResponse } from "next/server"
++import { auth } from "@clerk/nextjs/server"
++import { prisma } from "@/lib/prisma"
++
++export async function GET(request: NextRequest) {
++  try {
++    const { userId } = await auth()
++
++    if (!userId) {
++      return NextResponse.json(
++        { error: "Unauthorized" },
++        { status: 401 }
++      )
++    }
++
++    // Get user from database
++    const user = await prisma.user.findUnique({
++      where: { id: userId },
++    })
++
++    if (!user) {
++      return NextResponse.json(
++        { error: "User not found" },
++        { status: 404 }
++      )
++    }
++
++    // Get all progress records for the user, ordered by last accessed date
++    const progressRecords = await prisma.progress.findMany({
++      where: { userId: user.id },
++      select: {
++        lastAccessed: true,
++        timeSpent: true,
++        completed: true,
++      },
++      orderBy: {
++        lastAccessed: 'desc',
++      },
++    })
++
++    // Calculate streak data
++    const streakData = calculateStreak(progressRecords)
++
++    // Get calendar heatmap data (last 365 days)
++    const calendarData = generateCalendarData(progressRecords)
++
++    return NextResponse.json({
++      currentStreak: streakData.currentStreak,
++      longestStreak: streakData.longestStreak,
++      lastLearningDate: streakData.lastLearningDate,
++      calendarData,
++      milestones: calculateMilestones(streakData.longestStreak),
++    })
++  } catch (error) {
++    console.error("Error fetching streak data:", error)
++    return NextResponse.json(
++      { error: "Failed to fetch streak data" },
++      { status: 500 }
++    )
++  }
++}
++
++function calculateStreak(progressRecords: any[]) {
++  if (progressRecords.length === 0) {
++    return {
++      currentStreak: 0,
++      longestStreak: 0,
++      lastLearningDate: null,
++    }
++  }
++
++  // Group progress by date
++  const dailyActivity = new Map<string, boolean>()
++
++  progressRecords.forEach((record) => {
++    const date = record.lastAccessed.toISOString().split('T')[0]
++    // Consider it active if they spent time or completed something
++    dailyActivity.set(date, record.timeSpent > 0 || record.completed)
++  })
++
++  // Sort dates in descending order (most recent first)
++  const sortedDates = Array.from(dailyActivity.keys()).sort((a, b) => b.localeCompare(a))
++
++  let currentStreak = 0
++  let longestStreak = 0
++  let tempStreak = 0
++  let lastDate: Date | null = null
++
++  // Calculate current streak (from today backwards)
++  const today = new Date().toISOString().split('T')[0]
++  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
++
++  // Check if user learned today or yesterday (grace period)
++  const learnedToday = dailyActivity.get(today)
++  const learnedYesterday = dailyActivity.get(yesterday)
++
++  if (learnedToday) {
++    currentStreak = 1
++    lastDate = new Date(today)
++  } else if (learnedYesterday) {
++    // Grace period - count yesterday as maintaining streak
++    currentStreak = 1
++    lastDate = new Date(yesterday)
++  }
++
++  // Continue counting backwards from the starting point
++  if (currentStreak > 0) {
++    let checkDate = new Date(lastDate!)
++    checkDate.setDate(checkDate.getDate() - 1)
++
++    while (true) {
++      const dateStr = checkDate.toISOString().split('T')[0]
++      if (dailyActivity.get(dateStr)) {
++        currentStreak++
++        checkDate.setDate(checkDate.getDate() - 1)
++      } else {
++        break
++      }
++    }
++  }
++
++  // Calculate longest streak
++  for (const date of sortedDates) {
++    if (dailyActivity.get(date)) {
++      tempStreak++
++      longestStreak = Math.max(longestStreak, tempStreak)
++    } else {
++      tempStreak = 0
++    }
++  }
++
++  return {
++    currentStreak,
++    longestStreak,
++    lastLearningDate: lastDate,
++  }
++}
++
++function generateCalendarData(progressRecords: any[]) {
++  const calendarData: { date: string; count: number; level: number }[] = []
++
++  // Get date 365 days ago
++  const startDate = new Date()
++  startDate.setDate(startDate.getDate() - 365)
++
++  // Group activity by date
++  const dailyActivity = new Map<string, number>()
++
++  progressRecords.forEach((record) => {
++    const date = record.lastAccessed.toISOString().split('T')[0]
++    const minutes = Math.round(record.timeSpent / 60) // Convert to minutes
++    dailyActivity.set(date, (dailyActivity.get(date) || 0) + minutes)
++  })
++
++  // Generate data for each day in the past year
++  for (let i = 0; i < 365; i++) {
++    const date = new Date(startDate)
++    date.setDate(startDate.getDate() + i)
++    const dateStr = date.toISOString().split('T')[0]
++
++    const minutes = dailyActivity.get(dateStr) || 0
++    let level = 0
++
++    // Determine activity level based on minutes spent
++    if (minutes > 120) level = 4 // Very active
++    else if (minutes > 60) level = 3 // Active
++    else if (minutes > 30) level = 2 // Moderate
++    else if (minutes > 0) level = 1 // Light activity
++
++    calendarData.push({
++      date: dateStr,
++      count: minutes,
++      level,
++    })
++  }
++
++  return calendarData
++}
++
++function calculateMilestones(longestStreak: number) {
++  const milestones = [
++    { days: 7, name: "Week Warrior", achieved: longestStreak >= 7 },
++    { days: 30, name: "Monthly Master", achieved: longestStreak >= 30 },
++    { days: 100, name: "Century Champion", achieved: longestStreak >= 100 },
++    { days: 365, name: "Yearly Legend", achieved: longestStreak >= 365 },
++  ]
++
++  return milestones
++}
+\ No newline at end of file
+diff --git a/src/components/progress/streak-visualization.tsx b/src/components/progress/streak-visualization.tsx
+new file mode 100644
+index 00000000..4fcd21b9
+--- /dev/null
++++ b/src/components/progress/streak-visualization.tsx
+@@ -0,0 +1,207 @@
++"use client"
++
++import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
++import { Badge } from "@/components/ui/badge"
++import { Calendar, Flame, Trophy } from "lucide-react"
++
++interface StreakVisualizationProps {
++  streakData: {
++    currentStreak: number
++    longestStreak: number
++    lastLearningDate: string | null
++    calendarData: Array<{
++      date: string
++      count: number
++      level: number
++    }>
++    milestones: Array<{
++      days: number
++      name: string
++      achieved: boolean
++    }>
++  } | null
++  loading: boolean
++}
++
++export function StreakVisualization({ streakData, loading }: StreakVisualizationProps) {
++  if (loading) {
++    return (
++      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
++        <Card>
++          <CardHeader>
++            <CardTitle className="flex items-center gap-2">
++              <Calendar className="h-5 w-5 text-blue-500" />
++              Learning Calendar
++            </CardTitle>
++          </CardHeader>
++          <CardContent>
++            <div className="animate-pulse space-y-4">
++              <div className="grid grid-cols-7 gap-1">
++                {Array.from({ length: 35 }).map((_, i) => (
++                  <div key={i} className="w-3 h-3 bg-gray-200 rounded-sm"></div>
++                ))}
++              </div>
++            </div>
++          </CardContent>
++        </Card>
++        <Card>
++          <CardHeader>
++            <CardTitle className="flex items-center gap-2">
++              <Trophy className="h-5 w-5 text-yellow-500" />
++              Streak Milestones
++            </CardTitle>
++          </CardHeader>
++          <CardContent>
++            <div className="animate-pulse space-y-3">
++              {Array.from({ length: 4 }).map((_, i) => (
++                <div key={i} className="flex items-center gap-3">
++                  <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
++                  <div className="flex-1">
++                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
++                    <div className="h-3 bg-gray-200 rounded w-1/2 mt-1"></div>
++                  </div>
++                </div>
++              ))}
++            </div>
++          </CardContent>
++        </Card>
++      </div>
++    )
++  }
++
++  if (!streakData) {
++    return (
++      <Card>
++        <CardContent className="py-12 text-center">
++          <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
++          <h3 className="text-lg font-semibold mb-2">No streak data available</h3>
++          <p className="text-muted-foreground">
++            Start learning to build your streak!
++          </p>
++        </CardContent>
++      </Card>
++    )
++  }
++
++  // Get the last 12 weeks of calendar data for visualization
++  const recentCalendarData = streakData.calendarData.slice(-84) // 12 weeks * 7 days
++
++  const getLevelColor = (level: number) => {
++    switch (level) {
++      case 0: return 'bg-gray-100'
++      case 1: return 'bg-green-200'
++      case 2: return 'bg-green-300'
++      case 3: return 'bg-green-400'
++      case 4: return 'bg-green-500'
++      default: return 'bg-gray-100'
++    }
++  }
++
++  return (
++    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
++      {/* Learning Calendar */}
++      <Card>
++        <CardHeader>
++          <CardTitle className="flex items-center gap-2">
++            <Calendar className="h-5 w-5 text-blue-500" />
++            Learning Calendar
++          </CardTitle>
++          <CardDescription>
++            Your learning activity over the past 12 weeks
++          </CardDescription>
++        </CardHeader>
++        <CardContent>
++          <div className="space-y-4">
++            {/* Calendar Grid */}
++            <div className="grid grid-cols-7 gap-1">
++              {/* Day labels */}
++              <div className="text-xs text-muted-foreground text-center">Mon</div>
++              <div className="text-xs text-muted-foreground text-center">Tue</div>
++              <div className="text-xs text-muted-foreground text-center">Wed</div>
++              <div className="text-xs text-muted-foreground text-center">Thu</div>
++              <div className="text-xs text-muted-foreground text-center">Fri</div>
++              <div className="text-xs text-muted-foreground text-center">Sat</div>
++              <div className="text-xs text-muted-foreground text-center">Sun</div>
++
++              {/* Calendar cells */}
++              {recentCalendarData.map((day, index) => (
++                <div
++                  key={day.date}
++                  className={`w-3 h-3 rounded-sm ${getLevelColor(day.level)}`}
++                  title={`${day.date}: ${day.count} minutes`}
++                />
++              ))}
++            </div>
++
++            {/* Legend */}
++            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
++              <span>Less</span>
++              <div className="flex gap-1">
++                <div className="w-3 h-3 rounded-sm bg-gray-100"></div>
++                <div className="w-3 h-3 rounded-sm bg-green-200"></div>
++                <div className="w-3 h-3 rounded-sm bg-green-300"></div>
++                <div className="w-3 h-3 rounded-sm bg-green-400"></div>
++                <div className="w-3 h-3 rounded-sm bg-green-500"></div>
++              </div>
++              <span>More</span>
++            </div>
++          </div>
++        </CardContent>
++      </Card>
++
++      {/* Streak Milestones */}
++      <Card>
++        <CardHeader>
++          <CardTitle className="flex items-center gap-2">
++            <Trophy className="h-5 w-5 text-yellow-500" />
++            Streak Milestones
++          </CardTitle>
++          <CardDescription>
++            Achievements unlocked at different streak levels
++          </CardDescription>
++        </CardHeader>
++        <CardContent>
++          <div className="space-y-3">
++            {streakData.milestones.map((milestone) => (
++              <div
++                key={milestone.days}
++                className={`flex items-center gap-3 p-3 rounded-lg border ${
++                  milestone.achieved
++                    ? 'bg-yellow-50 border-yellow-200'
++                    : 'bg-gray-50 border-gray-200'
++                }`}
++              >
++                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
++                  milestone.achieved
++                    ? 'bg-yellow-500 text-white'
++                    : 'bg-gray-300 text-gray-500'
++                }`}>
++                  {milestone.achieved ? (
++                    <Trophy className="h-4 w-4" />
++                  ) : (
++                    <Flame className="h-4 w-4" />
++                  )}
++                </div>
++                <div className="flex-1">
++                  <p className={`font-medium ${
++                    milestone.achieved ? 'text-yellow-900' : 'text-gray-700'
++                  }`}>
++                    {milestone.name}
++                  </p>
++                  <p className="text-sm text-muted-foreground">
++                    {milestone.days} day streak
++                  </p>
++                </div>
++                {milestone.achieved && (
++                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
++                    Achieved
++                  </Badge>
++                )}
++              </div>
++            ))}
++          </div>
++        </CardContent>
++      </Card>
++    </div>
++  )
++}
+\ No newline at end of file
+diff --git a/src/hooks/use-streak.ts b/src/hooks/use-streak.ts
+new file mode 100644
+index 00000000..e070c407
+--- /dev/null
++++ b/src/hooks/use-streak.ts
+@@ -0,0 +1,51 @@
++"use client"
++
++import { useState, useEffect } from 'react'
++
++interface StreakData {
++  currentStreak: number
++  longestStreak: number
++  lastLearningDate: string | null
++  calendarData: Array<{
++    date: string
++    count: number
++    level: number
++  }>
++  milestones: Array<{
++    days: number
++    name: string
++    achieved: boolean
++  }>
++}
++
++export function useStreak() {
++  const [data, setData] = useState<StreakData | null>(null)
++  const [loading, setLoading] = useState(true)
++  const [error, setError] = useState<string | null>(null)
++
++  const fetchStreakData = async () => {
++    try {
++      setLoading(true)
++      const response = await fetch('/api/progress/streak')
++      const result = await response.json()
++
++      if (response.ok) {
++        setData(result)
++        setError(null)
++      } else {
++        setError(result.error || 'Failed to fetch streak data')
++      }
++    } catch (err) {
++      setError('Failed to fetch streak data')
++      console.error('Streak fetch error:', err)
++    } finally {
++      setLoading(false)
++    }
++  }
++
++  useEffect(() => {
++    fetchStreakData()
++  }, [])
++
++  return { data, loading, error, refetch: fetchStreakData }
++}
+\ No newline at end of file
+-- 
+2.39.5 (Apple Git-154)
+
