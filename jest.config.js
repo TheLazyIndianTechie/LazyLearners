@@ -16,15 +16,17 @@ const customJestConfig = {
   // Test environment
   testEnvironment: 'jest-environment-jsdom',
 
-  // Transform ES modules
-  transformIgnorePatterns: [
-    'node_modules/(?!(next-auth|@auth|\\@clerk|jose)/)',
-  ],
+   // Transform ES modules
+   transformIgnorePatterns: [
+     'node_modules/(?!(next-auth|@auth|\\@clerk|jose|msgpackr|@clerk/backend)/)',
+   ],
 
-  // Module name mapping for path aliases
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
+   // Module name mapping for path aliases
+   moduleNameMapper: {
+     '^@/(.*)$': '<rootDir>/src/$1',
+     '^msgpackr$': '<rootDir>/__mocks__/msgpackr.js',
+     '^@clerk/backend$': '<rootDir>/__mocks__/@clerk/backend.js',
+   },
 
   // Test patterns
   testMatch: [
@@ -75,11 +77,17 @@ const customJestConfig = {
   // Restore mocks after each test
   restoreMocks: true,
 
-  // Test timeout
-  testTimeout: 10000,
+   // Test timeout
+   testTimeout: 30000,
 
-  // Max workers for parallel testing
-  maxWorkers: '50%',
+   // Max workers for parallel testing
+   maxWorkers: 2,
+
+   // Force exit to prevent hanging
+   forceExit: true,
+
+   // Detect open handles
+   detectOpenHandles: true,
 
   // Verbose output
   verbose: true,

@@ -4,7 +4,7 @@
 process.env.NODE_ENV = 'test'
 
 // Database URLs for testing
-process.env.DATABASE_URL = 'sqlite://test.db'
+process.env.DATABASE_URL = 'file:./test.db'
 process.env.REDIS_URL = 'redis://localhost:6379/test'
 
 // Authentication configuration

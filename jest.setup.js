@@ -48,10 +48,31 @@ jest.mock('next/navigation', () => ({
 
 // Mock Next.js server actions
 jest.mock('next/server', () => ({
-  NextRequest: jest.fn(),
+  NextRequest: jest.fn().mockImplementation((input, init) => ({
+    url: input,
+    method: init?.method || 'GET',
+    headers: new Headers(init?.headers),
+    json: jest.fn().mockResolvedValue({}),
+    formData: jest.fn().mockResolvedValue(new FormData()),
+    text: jest.fn().mockResolvedValue(''),
+    clone: jest.fn(),
+    ...init,
+  })),
   NextResponse: {
-    json: jest.fn(),
-    redirect: jest.fn(),
+    json: jest.fn().mockImplementation((data, init) => ({
+      status: init?.status || 200,
+      statusText: '',
+      headers: new Headers(init?.headers),
+      json: jest.fn().mockResolvedValue(data),
+      text: jest.fn().mockResolvedValue(JSON.stringify(data)),
+      clone: jest.fn(),
+      ok: (init?.status || 200) >= 200 && (init?.status || 200) < 300,
+    })),
+    redirect: jest.fn().mockImplementation((url, init) => ({
+      status: init?.status || 302,
+      headers: new Headers({ 'Location': url }),
+      url,
+    })),
   },
 }))
 
@@ -162,18 +183,47 @@ global.testHelpers = {
 
   // Create mock request
   createMockRequest: (overrides = {}) => ({
-    headers: new Headers({
-      'content-type': 'application/json',
-      'user-agent': 'test-agent',
-      ...overrides.headers,
-    }),
+    headers: {
+      get: (name) => {
+        const headers = {
+          'content-type': 'application/json',
+          'user-agent': 'test-agent',
+          ...overrides.headers,
+        };
+        return headers[name.toLowerCase()] || null;
+      },
+      has: (name) => {
+        const headers = {
+          'content-type': 'application/json',
+          'user-agent': 'test-agent',
+          ...overrides.headers,
+        };
+        return name.toLowerCase() in headers;
+      },
+    },
     method: 'GET',
     url: 'http://localhost:3000/test',
     formData: jest.fn(),
-    json: jest.fn(),
+    json: jest.fn().mockResolvedValue(overrides.body || {}),
     ...overrides,
   }),
 }
+
+// Additional global mocks for API route dependencies
+// These work alongside the test-specific mocks
+
+// Mock helper functions that are used in API routes
+jest.mock('@/lib/video/streaming', () => {
+  const originalModule = jest.requireActual('@/lib/video/streaming')
+
+  return {
+    ...originalModule,
+    // Override specific functions for testing
+    verifyVideoExists: jest.fn().mockResolvedValue(true),
+    verifyUserVideoAccess: jest.fn().mockResolvedValue(true),
+    trackStreamingAnalytics: jest.fn()
+  }
+}, { virtual: true })
 
 // Clean up after each test
 afterEach(() => {
